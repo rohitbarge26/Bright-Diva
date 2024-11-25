@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
             });
           case ROUT_DASHBOARD:
             return MaterialPageRoute(builder: (BuildContext context) {
-              return const SafeArea(top: false, child: DashboardScreen());
+              return const SafeArea(top: true, child: DashboardScreen());
             });
         }
         return null;
