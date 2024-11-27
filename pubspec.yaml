@@ -24,3 +24,37 @@ flutter:
   assets:
     - assets/icons/
     - assets/images/
+
+  fonts:
+    - family: DMSans
+      fonts:
+        - asset: fonts/DMSans-Black.ttf
+        - asset: fonts/DMSans-BlackItalic.ttf
+        - asset: fonts/DMSans-Bold.ttf
+        - asset: fonts/DMSans-BoldItalic.ttf
+        - asset: fonts/DMSans-ExtraBold.ttf
+        - asset: fonts/DMSans-ExtraBoldItalic.ttf
+        - asset: fonts/DMSans-ExtraLight.ttf
+        - asset: fonts/DMSans-ExtraLightItalic.ttf
+        - asset: fonts/DMSans-Italic.ttf
+        - asset: fonts/DMSans-Light.ttf
+        - asset: fonts/DMSans-LightItalic.ttf
+        - asset: fonts/DMSans-Medium.ttf
+        - asset: fonts/DMSans-MediumItalic.ttf
+        - asset: fonts/DMSans-Regular.ttf
+        - asset: fonts/DMSans-SemiBold.ttf
+        - asset: fonts/DMSans-SemiBoldItalic.ttf
+        - asset: fonts/DMSans-Thin.ttf
+        - asset: fonts/DMSans-ThinItalic.ttf
+
+    - family: Inter
+      fonts:
+        - asset: fonts/Inter-Black.ttf
+        - asset: fonts/Inter-Bold.ttf
+        - asset: fonts/Inter-ExtraBold.ttf
+        - asset: fonts/Inter-ExtraLight.ttf
+        - asset: fonts/Inter-Light.ttf
+        - asset: fonts/Inter-Medium.ttf
+        - asset: fonts/Inter-Regular.ttf
+        - asset: fonts/Inter-SemiBold.ttf
+        - asset: fonts/Inter-Thin.ttf
