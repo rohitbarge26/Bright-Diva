@@ -16,7 +16,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     "Change Password",
     "Biometric",
     "Face Recognition",
-    "API Module",
     "Push notification",
     "Social Media Integration",
     "Map Integration",
