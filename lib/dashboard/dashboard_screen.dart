@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frequent_flow/utils/route.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -32,9 +33,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             title: Text(features[index]),
             leading: const Icon(Icons.label),
             onTap: () {
-              ScaffoldMessenger.of(context).clearSnackBars();
-              ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Tapped on ${features[index]}")));
+              switch (features[index]) {
+                case "Map Integration":
+                  Navigator.of(context).pushNamed(ROUT_MAP_INTEGRATION);
+              }
             },
           );
         },

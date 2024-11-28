@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frequent_flow/modules/map_integration.dart';
 import 'package:frequent_flow/utils/route.dart';
 
 import 'SplashScreen.dart';
@@ -36,6 +37,10 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(builder: (BuildContext context) {
               return const SafeArea(top: true, child: DashboardScreen());
             });
+          case ROUT_MAP_INTEGRATION:
+            return MaterialPageRoute(builder: (context) {
+              return const SafeArea(child: MapSampleScreen());
+            },);
         }
         return null;
       },
