@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:frequent_flow/utils/prefs.dart';
 import 'package:frequent_flow/utils/route.dart';
 
 import 'SplashScreen.dart';
+import 'authentication/screens/login_email_screen.dart';
 import 'dashboard/dashboard_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Prefs.init();
   runApp(const MyApp());
 }
 
@@ -31,6 +35,10 @@ class MyApp extends StatelessWidget {
           case ROUT_SPLASH:
             return MaterialPageRoute(builder: (BuildContext context) {
               return const SafeArea(top: false, child: SplashScreen());
+            });
+          case ROUT_LOGIN_EMAIL:
+            return MaterialPageRoute(builder: (BuildContext context) {
+              return const SafeArea(top: false, child: LoginEmailScreen());
             });
           case ROUT_DASHBOARD:
             return MaterialPageRoute(builder: (BuildContext context) {
