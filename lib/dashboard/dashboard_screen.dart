@@ -9,10 +9,6 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final List<String> features = [
-    "Login",
-    "Registration",
-    "Forgot Password",
-    "Change Password",
     "Biometric",
     "Face Recognition",
     "Push notification",
