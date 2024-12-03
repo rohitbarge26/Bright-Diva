@@ -9,9 +9,18 @@ dependencies:
   flutter:
     sdk: flutter
 
+  flutter_google_maps:
+    path: ../flutter_google_maps
+
+  multi_auth:
+    path: ../multi_auth
+
   cupertino_icons: ^1.0.6
   flutter_svg: ^2.0.7
-  shared_preferences: ^2.2.0
+  geolocator: ^13.0.2
+#  google_sign_in: ^6.2.2
+  shared_preferences: ^2.3.3
+  google_maps_flutter: ^2.10.0
 
 dev_dependencies:
   flutter_test:
