@@ -35,6 +35,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               switch (features[index]) {
                 case "Map Integration":
                   Navigator.of(context).pushNamed(ROUT_MAP_INTEGRATION);
+                case "Social Media Integration":
+                  Navigator.of(context).pushNamed(ROUT_SOCIAL_MEDIA_INTEGRATION);
               }
             },
           );

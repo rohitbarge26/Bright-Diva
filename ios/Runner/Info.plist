@@ -47,5 +47,28 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
     <string>This app needs access to your location.</string>
+    <key>GIDClientID</key>
+    <string>103061525276-rq0ll50s081b6nh8da4i79rr9ufq9sjv.apps.googleusercontent.com</string>
+    <key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>com.googleusercontent.apps.103061525276-rq0ll50s081b6nh8da4i79rr9ufq9sjv</string>
+          <string>fb1269047231078302</string>
+        </array>
+      </dict>
+    </array>
+    <key>FacebookAppID</key>
+    <string>1269047231078302</string>
+    <key>FacebookClientToken</key>
+    <string>fab22a117d635471959663f6c110b123</string>
+    <key>FacebookDisplayName</key>
+    <string>Frequent Flow</string>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>fbapi</string>
+      <string>fb-messenger-share-api</string>
+    </array>
 </dict>
 </plist>

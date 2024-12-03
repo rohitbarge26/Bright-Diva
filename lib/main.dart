@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frequent_flow/modules/map_integration.dart';
+import 'package:frequent_flow/social_auth/social_login_screen.dart';
 import 'package:frequent_flow/utils/route.dart';
 
 import 'SplashScreen.dart';
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         progressIndicatorTheme:
-        const ProgressIndicatorThemeData(color: Color(0xfff68585)),
+            const ProgressIndicatorThemeData(color: Color(0xfff68585)),
         primaryColor: const Color(0xfff68585),
         dialogTheme: const DialogTheme(
           backgroundColor: Colors.white,
@@ -38,13 +39,20 @@ class MyApp extends StatelessWidget {
               return const SafeArea(top: true, child: DashboardScreen());
             });
           case ROUT_MAP_INTEGRATION:
-            return MaterialPageRoute(builder: (context) {
-              return const SafeArea(child: MapSampleScreen());
-            },);
+            return MaterialPageRoute(
+              builder: (context) {
+                return const SafeArea(child: MapSampleScreen());
+              },
+            );
+          case ROUT_SOCIAL_MEDIA_INTEGRATION:
+            return MaterialPageRoute(
+              builder: (context) {
+                return const SafeArea(child: SocialLogin());
+              },
+            );
         }
         return null;
       },
     );
   }
 }
-
