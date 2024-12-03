@@ -1,6 +1,7 @@
 const String ROUT_SPLASH = "rout_splesh";
 const String ROUT_DASHBOARD = "rout_dashboard";
-const String ROUT_LOGIN = "rout_login";
+const String ROUT_LOGIN_EMAIL = "rout_login_email";
+const String ROUT_LOGIN_MOBILE = "rout_login_mobile";
 const String ROUT_FORGOT_PASSWORD = "rout_forgot_password";
 const String ROUT_REGISTRATION = "rout_registration";
 const String ROUT_REG_DETAILS = "rout_reg_details";

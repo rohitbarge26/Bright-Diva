@@ -95,6 +95,20 @@
 			path = RunnerTests;
 			sourceTree = "<group>";
 		};
+		685FF55F96D136690C9FD4CF /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				32599946408522CBD662848C /* Pods-Runner.debug.xcconfig */,
+				9AB257C07C2F93519CCB1B0B /* Pods-Runner.release.xcconfig */,
+				618BC9ACCEFE510C889C92D9 /* Pods-Runner.profile.xcconfig */,
+				3643A08CAE5D586FDA8912D7 /* Pods-RunnerTests.debug.xcconfig */,
+				CEA44ED8CF733999BF06C1D1 /* Pods-RunnerTests.release.xcconfig */,
+				A451A794E83992091587601F /* Pods-RunnerTests.profile.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		5459CE2322686ED0AB51D733 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
