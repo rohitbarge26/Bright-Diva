@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_signin_package/auth_service.dart';
+import 'package:multi_auth/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SocialLogin extends StatefulWidget {

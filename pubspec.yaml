@@ -12,8 +12,8 @@ dependencies:
   flutter_google_maps:
     path: ../flutter_google_maps
 
-  google_signin_package:
-    path: ../google_signin_package
+  multi_auth:
+    path: ../multi_auth
 
   cupertino_icons: ^1.0.6
   flutter_svg: ^2.0.7
