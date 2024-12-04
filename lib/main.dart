@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frequent_flow/modules/map_integration.dart';
+import 'package:frequent_flow/permissions/permissions_screen.dart';
 import 'package:frequent_flow/social_auth/social_login_screen.dart';
 import 'package:frequent_flow/utils/prefs.dart';
 import 'package:frequent_flow/utils/route.dart';
@@ -56,6 +57,12 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(
               builder: (context) {
                 return const SafeArea(child: SocialLogin());
+              },
+            );
+          case ROUT_PERMISSION:
+            return MaterialPageRoute(
+              builder: (context) {
+                return const SafeArea(child: PermissionsScreen());
               },
             );
         }
