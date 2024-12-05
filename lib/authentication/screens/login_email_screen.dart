@@ -18,10 +18,9 @@ class LoginEmailScreen extends StatefulWidget {
 class _LoginEmailScreenState extends State<LoginEmailScreen> {
 
   bool _obscureText = true;
-  bool _rememberMe = false;
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  final _formEmailKey = GlobalKey<FormState>();
   Color buttonColor = const Color(0xFF88c2f7); // Initialize the button color
   String passwordErrorText = '';
   String emailErrorText = '';
@@ -47,20 +46,20 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
           child: Container(
             height: 180,
             padding: const EdgeInsets.all(16),
-            child: Column(
+            child: const Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const CircularProgressIndicator(
+                CircularProgressIndicator(
                     strokeWidth: 10.0,
                     color: Color(0xFF2986cc),
                     strokeCap: StrokeCap.round),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 Text(
                   'Please Wait...',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Color(0xFF171717),
                     fontSize: 20,
                     fontFamily: 'Inter',
@@ -123,7 +122,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFFFFFFF),
+      backgroundColor: const Color(0xFFFFFFFF),
       body: SizedBox(
         height: MediaQuery.of(context).size.height,
         child: Stack(children: [
@@ -131,7 +130,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Form(
-                key: _formKey,
+                key: _formEmailKey,
                 child: Container(
                     width: double.infinity,
                     height: null,
@@ -141,15 +140,15 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                     ),
                     child: Column(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 48),
+                        const Padding(
+                          padding: EdgeInsets.only(top: 48),
                           child: CustomText(
                               text: 'Login',
                               fontSize: 24,
                               desiredLineHeight: 29.05,
                               fontFamily: 'Inter',
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF262626)),
+                              color: Color(0xFF262626)),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(
@@ -194,10 +193,10 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                       height: 1.25,
                                       fontSize: 16,
                                     ),
-                                    decoration: InputDecoration(
+                                    decoration: const InputDecoration(
                                       labelText:
                                       'Email',
-                                      labelStyle: const TextStyle(
+                                      labelStyle: TextStyle(
                                         color: Color(0xFF737373),
                                       ),
                                       border: InputBorder.none,
@@ -285,11 +284,11 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                         height: 1.25,
                                         fontSize: 16,
                                       ),
-                                      decoration: InputDecoration(
+                                      decoration: const InputDecoration(
                                         labelText:
                                         'Password',
                                         labelStyle:
-                                        const TextStyle(
+                                        TextStyle(
                                           color:
                                           Color(0xFF737373),
                                         ),
@@ -380,13 +379,13 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                   onPressed: isButtonEnabled
                                       ? _onButtonPressed
                                       : null,
-                                  child: CustomText(
+                                  child: const CustomText(
                                       text: 'Login',
                                       fontSize: 16,
                                       desiredLineHeight: 24,
                                       fontFamily: 'Inter',
                                       fontWeight: FontWeight.w600,
-                                      color: const Color(
+                                      color: Color(
                                           0xFFFFFFFF)),
                                 ),
                               ),
@@ -400,13 +399,13 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                     Navigator.pushNamed(context,
                                         ROUT_FORGOT_PASSWORD);
                                   },
-                                  child: CustomText(
+                                  child: const CustomText(
                                       text: 'Forgot Password?',
                                       fontSize: 12,
                                       desiredLineHeight: 14.52,
                                       fontFamily: 'Inter',
                                       fontWeight: FontWeight.w400,
-                                      color: const Color(
+                                      color: Color(
                                           0xFF737373)),
                                 ),
                               ),

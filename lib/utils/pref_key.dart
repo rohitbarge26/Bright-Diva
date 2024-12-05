@@ -27,6 +27,7 @@ String ALLOWED_JOB = "allowed_job";
 String HEADER_LANGUAGE = "header_language";
 String LOCAL_LANGUAGE = "local_language";
 String SAVED_EMAIL = "saved_email";
+String SAVED_MOBILE = "save_mobile";
 String JOBS_INITIAL_TAB = "jobs_initial_tab";
 String BIO_METRIC_AUTH = "biometric_auth";
 String SELECTED_LANGUAGE = "selected_language";
