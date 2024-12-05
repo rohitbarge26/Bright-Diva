@@ -7,6 +7,9 @@ import 'package:frequent_flow/utils/route.dart';
 import 'SplashScreen.dart';
 import 'authentication/screens/login_email_screen.dart';
 import 'dashboard/dashboard_screen.dart';
+import 'onboarding/screens/registration.dart';
+
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +48,10 @@ class MyApp extends StatelessWidget {
           case ROUT_DASHBOARD:
             return MaterialPageRoute(builder: (BuildContext context) {
               return const SafeArea(top: true, child: DashboardScreen());
+            });
+          case ROUT_REGISTRATION:
+            return MaterialPageRoute(builder: (BuildContext context) {
+              return const SafeArea(top: true, child: Registration());
             });
           case ROUT_MAP_INTEGRATION:
             return MaterialPageRoute(

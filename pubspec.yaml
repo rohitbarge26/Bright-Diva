@@ -17,9 +17,12 @@ dependencies:
 
   cupertino_icons: ^1.0.6
   flutter_svg: ^2.0.7
+  shared_preferences: ^2.2.0
+  flutter_timezone: ^1.0.8
+  country_picker: ^2.0.20
+  country_code_picker: ^3.0.0
   geolocator: ^13.0.2
 #  google_sign_in: ^6.2.2
-  shared_preferences: ^2.3.3
   google_maps_flutter: ^2.10.0
 
 dev_dependencies:
