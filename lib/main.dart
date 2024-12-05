@@ -2,8 +2,12 @@ import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:frequent_flow/authentication/screens/login_mobile_screen.dart';
 import 'package:frequent_flow/modules/map_integration.dart';
+import 'package:frequent_flow/onboarding/registration_bloc/registration_bloc.dart';
+import 'package:frequent_flow/onboarding/repository/registration_repository.dart';
 import 'package:frequent_flow/permissions/permissions_screen.dart';
 import 'package:frequent_flow/push_notifications/push_notifications_screen.dart';
 import 'package:frequent_flow/social_auth/social_login_screen.dart';
@@ -39,7 +43,11 @@ Future<void> main() async {
       Platform.isAndroid ? await FirebaseMessaging.instance.getToken() : "";
   print("FCMToken $fcmToken");
   await Prefs.init();
-  runApp(const MyApp());
+  runApp(MultiBlocProvider(providers: [
+    BlocProvider<RegistrationBloc>(
+      create: (context) => RegistrationBloc(RegistrationRepository()),
+    )
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -51,6 +59,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Frequent Flow',
       debugShowCheckedModeBanner: false,
+      navigatorKey: rootNavigatorKey,
       theme: ThemeData(
         progressIndicatorTheme:
             const ProgressIndicatorThemeData(color: Color(0xfff68585)),
