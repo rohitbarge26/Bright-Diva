@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:frequent_flow/utils/route.dart';
 
@@ -31,10 +33,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
               switch (features[index]) {
                 case "Map Integration":
                   Navigator.of(context).pushNamed(ROUT_MAP_INTEGRATION);
+                  break;
                 case "Social Media Integration":
-                  Navigator.of(context).pushNamed(ROUT_SOCIAL_MEDIA_INTEGRATION);
+                  Navigator.of(context)
+                      .pushNamed(ROUT_SOCIAL_MEDIA_INTEGRATION);
+                  break;
                 case "Permissions":
                   Navigator.of(context).pushNamed(ROUT_PERMISSION);
+                  break;
+                case "Push notification":
+                  if (Platform.isAndroid) {
+                    Navigator.of(context).pushNamed(ROUT_PUSH_NOTIFICATION);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "This feature works on Android only",
+                        ),
+                      ),
+                    );
+                  }
+
+                  break;
               }
             },
           );
