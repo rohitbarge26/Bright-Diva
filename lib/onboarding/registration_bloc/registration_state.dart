@@ -15,12 +15,12 @@ final class RegistrationLoading extends RegistrationState {
 }
 
 final class RegistrationSuccess extends RegistrationState {
-  final String message;
+  final RegisterUserResponse registerUserResponse;
 
-  const RegistrationSuccess(this.message);
+  const RegistrationSuccess(this.registerUserResponse);
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [registerUserResponse];
 }
 
 final class RegistrationError extends RegistrationState {

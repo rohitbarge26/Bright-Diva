@@ -39,6 +39,27 @@ class _RegistrationState extends State<Registration> {
   bool isSubmitting = false;
   Country? _selectedCountry;
 
+  void showSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dismissal using the back button
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Registration Successful'),
+          content: Text('Your account has been created successfully.'),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pushReplacementNamed(ROUT_LOGIN_EMAIL);
+              },
+              child: Text('Go to Login'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _updateButtonColor() {
     setState(() {
       bool isFirstNameValid =
@@ -99,6 +120,8 @@ class _RegistrationState extends State<Registration> {
           body: BlocConsumer<RegistrationBloc, RegistrationState>(
             listener: (context, state) {
               if (state is RegistrationSuccess) {
+                print("Registration successful");
+                showSuccessDialog(context);
                 setState(() {
                   isSubmitting = false;
                 });
@@ -745,13 +768,23 @@ class _RegistrationState extends State<Registration> {
                                         : (isButtonEnabled
                                             ? () => _onButtonPressed(context)
                                             : null),
-                                    child: const CustomText(
-                                        text: 'Submit',
-                                        fontSize: 16,
-                                        desiredLineHeight: 24,
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFFFFFFFF)),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const CustomText(
+                                            text: 'Submit',
+                                            fontSize: 16,
+                                            desiredLineHeight: 24,
+                                            fontFamily: 'Inter',
+                                            fontWeight: FontWeight.w600,
+                                            color: Color(0xFFFFFFFF)),
+                                        if (isSubmitting)
+                                          CircularProgressIndicator(
+                                            color: Colors.white,
+                                          )
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ]),

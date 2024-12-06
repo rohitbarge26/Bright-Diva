@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:frequent_flow/onboarding/models/register_user_response.dart';
 import 'package:frequent_flow/onboarding/models/user_model.dart';
 
 class RegistrationRepository {
@@ -6,31 +7,29 @@ class RegistrationRepository {
 
   RegistrationRepository();
 
-  Future<String> registerUser(UserModel user) async {
+  Future<RegisterUserResponse?> registerUser(UserModel user) async {
     try {
-      final response = await _dio.post(
-        'http://192.168.1.2:9000/api/v1/user',
-        data: user.toJson(),
-        options: Options(
-          headers: {
+      final response = await _dio.post('http://192.168.1.2:9000/api/v1/user',
+          data: user.toJson(),
+          options: Options(headers: {
             "Content-Type": "application/json",
-          }
-        )
-      );
+          }));
+      final data = response.data;
+      print("Success $data");
       print("Success ${response.data['message']}");
 
       if (response.statusCode == 200) {
-        return response.data['message'];
-      } else {
-        throw Exception("Failed to register user");
+        RegisterUserResponse registerUserResponse =
+            RegisterUserResponse.fromJson(data['data']);
+        print(registerUserResponse.message);
+        return registerUserResponse;
       }
     } on DioException catch (error) {
-      print(error.toString());
-      throw Exception(
-          error.response?.data['error'] ?? "Unknown error occurred");
-    } catch (error) {
-      print(error.toString());
-      throw Exception("Unknown error occurred");
+      RegisterUserResponse registerUserResponse =
+          RegisterUserResponse.fromJson(error.response?.data);
+      return registerUserResponse;
     }
+
+    return null;
   }
 }

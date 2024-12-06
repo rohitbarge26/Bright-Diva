@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:frequent_flow/onboarding/models/register_user_response.dart';
 import 'package:frequent_flow/onboarding/repository/registration_repository.dart';
 
 import '../models/user_model.dart';
@@ -12,9 +13,6 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
   final RegistrationRepository registrationRepository;
 
   RegistrationBloc(this.registrationRepository) : super(RegistrationInitial()) {
-    // on<RegistrationEvent>((event, emit) {
-    //   // TODO: implement event handler
-    // });
     on<RegisterUserEvent>(_handleRegisterUserEvent);
   }
 
@@ -22,9 +20,11 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
       RegisterUserEvent event, Emitter<RegistrationState> emit) async {
     emit(RegistrationLoading());
     try {
-      final message = await registrationRepository.registerUser(event.user);
-      print("Message $message");
-      emit(RegistrationSuccess(message));
+      final registerUserResponse =
+          await registrationRepository.registerUser(event.user);
+      if (registerUserResponse != null) {
+        emit(RegistrationSuccess(registerUserResponse));
+      }
     } catch (error) {
       emit(RegistrationError(error.toString()));
     }
