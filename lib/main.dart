@@ -30,8 +30,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         progressIndicatorTheme:
-            const ProgressIndicatorThemeData(color: Color(0xfff68585)),
-        primaryColor: const Color(0xfff68585),
+            const ProgressIndicatorThemeData(color: Color(0xFF2986CC)),
+        primaryColor: const Color(0xFF2986CC),
         dialogTheme: const DialogTheme(
           backgroundColor: Colors.white,
         ),

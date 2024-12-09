@@ -49,7 +49,7 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
               children: [
                 CircularProgressIndicator(
                     strokeWidth: 10.0,
-                    color: Color(0xFF2986cc),
+                    color: Color(0xFF2986CC),
                     strokeCap: StrokeCap.round),
                 SizedBox(height: 24),
                 Text(
