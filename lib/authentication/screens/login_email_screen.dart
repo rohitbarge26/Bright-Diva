@@ -21,7 +21,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final _formEmailKey = GlobalKey<FormState>();
-  Color buttonColor = const Color(0xFF88c2f7); // Initialize the button color
+  Color buttonColor = const Color(0xFF88C2F7); // Initialize the button color
   String passwordErrorText = '';
   String emailErrorText = '';
   bool isButtonEnabled = false;
@@ -53,7 +53,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
               children: [
                 CircularProgressIndicator(
                     strokeWidth: 10.0,
-                    color: Color(0xFF2986cc),
+                    color: Color(0xFF2986CC),
                     strokeCap: StrokeCap.round),
                 SizedBox(height: 24),
                 Text(
@@ -98,7 +98,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
       Validator.emptyFieldValidate(passwordController.text);
       isButtonEnabled = isEmailValid && isPasswordValid;
       buttonColor =
-      isButtonEnabled ? const Color(0xFFF85A5A) : const Color(0xFFFDBABA);
+      isButtonEnabled ? const Color(0xFF2986CC) : const Color(0xFF88C2F7);
     });
   }
 
