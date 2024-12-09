@@ -4,7 +4,12 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:frequent_flow/authentication/login_bloc/login_bloc.dart';
+import 'package:frequent_flow/authentication/repository/login_repository.dart';
 import 'package:frequent_flow/authentication/screens/login_mobile_screen.dart';
+import 'package:frequent_flow/change_password/bloc/change_password_bloc.dart';
+import 'package:frequent_flow/change_password/change_password_screen.dart';
+import 'package:frequent_flow/change_password/repository/change_password_repository.dart';
 import 'package:frequent_flow/modules/map_integration.dart';
 import 'package:frequent_flow/onboarding/registration_bloc/registration_bloc.dart';
 import 'package:frequent_flow/onboarding/repository/registration_repository.dart';
@@ -46,7 +51,14 @@ Future<void> main() async {
   runApp(MultiBlocProvider(providers: [
     BlocProvider<RegistrationBloc>(
       create: (context) => RegistrationBloc(RegistrationRepository()),
-    )
+    ),
+    BlocProvider<LoginBloc>(
+      create: (context) => LoginBloc(loginRepository: LoginRepository()),
+    ),
+    BlocProvider<ChangePasswordBloc>(
+      create: (context) => ChangePasswordBloc(
+          changePasswordRepository: ChangePasswordRepository()),
+    ),
   ], child: const MyApp()));
 }
 
@@ -109,6 +121,12 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(
               builder: (context) {
                 return const SafeArea(child: PushNotificationsScreen());
+              },
+            );
+          case ROUT_CHANGE_PASSWORD:
+            return MaterialPageRoute(
+              builder: (context) {
+                return const SafeArea(child: ChangePasswordScreen());
               },
             );
         }

@@ -17,7 +17,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     "Push notification",
     "Social Media Integration",
     "Map Integration",
-    "Permissions"
+    "Permissions",
+    "Change Password"
   ];
 
   @override
@@ -31,16 +32,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             leading: const Icon(Icons.label),
             onTap: () {
               switch (features[index]) {
-                case "Map Integration":
-                  Navigator.of(context).pushNamed(ROUT_MAP_INTEGRATION);
-                  break;
-                case "Social Media Integration":
-                  Navigator.of(context)
-                      .pushNamed(ROUT_SOCIAL_MEDIA_INTEGRATION);
-                  break;
-                case "Permissions":
-                  Navigator.of(context).pushNamed(ROUT_PERMISSION);
-                  break;
                 case "Push notification":
                   if (Platform.isAndroid) {
                     Navigator.of(context).pushNamed(ROUT_PUSH_NOTIFICATION);
@@ -53,7 +44,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     );
                   }
-
+                  break;
+                case "Social Media Integration":
+                  Navigator.of(context)
+                      .pushNamed(ROUT_SOCIAL_MEDIA_INTEGRATION);
+                  break;
+                case "Map Integration":
+                  Navigator.of(context).pushNamed(ROUT_MAP_INTEGRATION);
+                  break;
+                case "Permissions":
+                  Navigator.of(context).pushNamed(ROUT_PERMISSION);
+                  break;
+                case "Change Password":
+                  Navigator.of(context).pushNamed(ROUT_CHANGE_PASSWORD);
                   break;
               }
             },
