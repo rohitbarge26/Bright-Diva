@@ -16,7 +16,6 @@ class LoginEmailScreen extends StatefulWidget {
 }
 
 class _LoginEmailScreenState extends State<LoginEmailScreen> {
-
   bool _obscureText = true;
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
@@ -47,28 +46,27 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
             height: 180,
             padding: const EdgeInsets.all(16),
             child: const Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(
-                    strokeWidth: 10.0,
-                    color: Color(0xFF2986CC),
-                    strokeCap: StrokeCap.round),
-                SizedBox(height: 24),
-                Text(
-                  'Please Wait...',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Color(0xFF171717),
-                    fontSize: 20,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.40,
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                      strokeWidth: 10.0,
+                      color: Color(0xFF2986CC),
+                      strokeCap: StrokeCap.round),
+                  SizedBox(height: 24),
+                  Text(
+                    'Please Wait...',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF171717),
+                      fontSize: 20,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.40,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ]),
           ),
         );
       },
@@ -95,10 +93,10 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
     setState(() {
       bool isEmailValid = Validator.emailValidate(emailController.text);
       bool isPasswordValid =
-      Validator.emptyFieldValidate(passwordController.text);
+          Validator.emptyFieldValidate(passwordController.text);
       isButtonEnabled = isEmailValid && isPasswordValid;
       buttonColor =
-      isButtonEnabled ? const Color(0xFF2986CC) : const Color(0xFF88C2F7);
+          isButtonEnabled ? const Color(0xFF2986CC) : const Color(0xFF88C2F7);
     });
   }
 
@@ -152,35 +150,25 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                         ),
                         Padding(
                           padding: const EdgeInsets.only(
-                              left: 16.0,
-                              right: 16.0,
-                              top: 32.0,
-                              bottom: 32.0),
+                              left: 16.0, right: 16.0, top: 32.0, bottom: 32.0),
                           child: Column(
-                            mainAxisAlignment:
-                            MainAxisAlignment.start,
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
                                 decoration: BoxDecoration(
                                   border: Border.all(
-                                      color:
-                                      const Color(0xFFE5E5E5),
-                                      width: 1),
-                                  borderRadius:
-                                  BorderRadius.circular(8),
+                                      color: const Color(0xFFE5E5E5), width: 1),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 8.0),
+                                  padding: const EdgeInsets.only(left: 8.0),
                                   child: TextFormField(
                                     controller: emailController,
                                     onChanged: (value) {
                                       setState(() {
                                         emailErrorText = Validator
-                                            .emailValidate(
-                                            value)
+                                                .emailValidate(value)
                                             ? ''
                                             : 'Please enter a valid email address';
                                       });
@@ -194,8 +182,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                       fontSize: 16,
                                     ),
                                     decoration: const InputDecoration(
-                                      labelText:
-                                      'Email',
+                                      labelText: 'Email',
                                       labelStyle: TextStyle(
                                         color: Color(0xFF737373),
                                       ),
@@ -205,15 +192,13 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                 ),
                               ),
                               Visibility(
-                                visible:
-                                emailErrorText.isNotEmpty,
+                                visible: emailErrorText.isNotEmpty,
                                 child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 4, top: 12.0),
+                                  padding:
+                                      const EdgeInsets.only(left: 4, top: 12.0),
                                   child: Row(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment
-                                          .start,
+                                          CrossAxisAlignment.start,
                                       children: [
                                         SizedBox(
                                           width: 16,
@@ -222,8 +207,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                             'assets/icon/error_icon.svg',
                                             height: 12.67,
                                             width: 12.67,
-                                            alignment:
-                                            Alignment.center,
+                                            alignment: Alignment.center,
                                           ),
                                         ),
                                         const SizedBox(
@@ -235,10 +219,8 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                             fontSize: 12,
                                             desiredLineHeight: 16,
                                             fontFamily: 'Inter',
-                                            fontWeight:
-                                            FontWeight.w500,
-                                            color: const Color(
-                                                0xFFF85A5A),
+                                            fontWeight: FontWeight.w500,
+                                            color: const Color(0xFFF85A5A),
                                           ),
                                         ),
                                       ]),
@@ -250,54 +232,43 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                               Container(
                                 decoration: BoxDecoration(
                                   border: Border.all(
-                                      color:
-                                      const Color(0xFFE5E5E5),
-                                      width: 1),
-                                  borderRadius:
-                                  BorderRadius.circular(8),
+                                      color: const Color(0xFFE5E5E5), width: 1),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Stack(children: <Widget>[
                                   Padding(
-                                    padding:
-                                    const EdgeInsets.only(
+                                    padding: const EdgeInsets.only(
                                         left: 8.0, right: 46),
                                     child: TextFormField(
-                                      controller:
-                                      passwordController,
+                                      controller: passwordController,
                                       obscureText: _obscureText,
                                       onChanged: (value) {
                                         setState(() {
                                           passwordErrorText =
-                                          Validator
-                                              .emptyFieldValidate(
-                                              value)
-                                              ? ''
-                                              : '';
+                                              Validator.emptyFieldValidate(
+                                                      value)
+                                                  ? ''
+                                                  : '';
                                         });
                                         _updateButtonColor();
                                       },
                                       style: const TextStyle(
                                         fontFamily: 'Inter',
                                         color: Color(0xFF171717),
-                                        fontWeight:
-                                        FontWeight.w400,
+                                        fontWeight: FontWeight.w400,
                                         height: 1.25,
                                         fontSize: 16,
                                       ),
                                       decoration: const InputDecoration(
-                                        labelText:
-                                        'Password',
-                                        labelStyle:
-                                        TextStyle(
-                                          color:
-                                          Color(0xFF737373),
+                                        labelText: 'Password',
+                                        labelStyle: TextStyle(
+                                          color: Color(0xFF737373),
                                         ),
                                         border: InputBorder.none,
                                       ),
-                                      keyboardType: TextInputType
-                                          .visiblePassword,
-                                      textInputAction:
-                                      TextInputAction.done,
+                                      keyboardType:
+                                          TextInputType.visiblePassword,
+                                      textInputAction: TextInputAction.done,
                                     ),
                                   ),
                                   Positioned(
@@ -307,16 +278,14 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                     child: GestureDetector(
                                       onTap: () {
                                         setState(() {
-                                          _obscureText =
-                                          !_obscureText;
+                                          _obscureText = !_obscureText;
                                         });
                                       },
                                       child: Icon(
                                         _obscureText
                                             ? Icons.visibility_off
                                             : Icons.visibility,
-                                        color: const Color(
-                                            0xffa3a3a3),
+                                        color: const Color(0xffa3a3a3),
                                         size: 24,
                                       ),
                                     ),
@@ -324,15 +293,13 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                 ]),
                               ),
                               Visibility(
-                                visible:
-                                passwordErrorText.isNotEmpty,
+                                visible: passwordErrorText.isNotEmpty,
                                 child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 4, top: 12.0),
+                                  padding:
+                                      const EdgeInsets.only(left: 4, top: 12.0),
                                   child: Row(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment
-                                          .start,
+                                          CrossAxisAlignment.start,
                                       children: [
                                         SizedBox(
                                           width: 16,
@@ -341,8 +308,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                             'assets/icon/error_icon.svg',
                                             height: 12.67,
                                             width: 12.67,
-                                            alignment:
-                                            Alignment.center,
+                                            alignment: Alignment.center,
                                           ),
                                         ),
                                         const SizedBox(
@@ -350,15 +316,12 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                         ),
                                         Expanded(
                                           child: CustomText(
-                                            text:
-                                            passwordErrorText,
+                                            text: passwordErrorText,
                                             fontSize: 12,
                                             desiredLineHeight: 16,
                                             fontFamily: 'Inter',
-                                            fontWeight:
-                                            FontWeight.w500,
-                                            color: const Color(
-                                                0xFFF85A5A),
+                                            fontWeight: FontWeight.w500,
+                                            color: const Color(0xFFF85A5A),
                                           ),
                                         ),
                                       ]),
@@ -371,22 +334,19 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                 width: double.infinity,
                                 height: 50,
                                 decoration: BoxDecoration(
-                                  borderRadius:
-                                  BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(8),
                                   color: buttonColor,
                                 ),
                                 child: TextButton(
-                                  onPressed: isButtonEnabled
-                                      ? _onButtonPressed
-                                      : null,
+                                  onPressed:
+                                      isButtonEnabled ? _onButtonPressed : null,
                                   child: const CustomText(
                                       text: 'Login',
                                       fontSize: 16,
                                       desiredLineHeight: 24,
                                       fontFamily: 'Inter',
                                       fontWeight: FontWeight.w600,
-                                      color: Color(
-                                          0xFFFFFFFF)),
+                                      color: Color(0xFFFFFFFF)),
                                 ),
                               ),
                               const SizedBox(
@@ -396,8 +356,8 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                 alignment: Alignment.centerLeft,
                                 child: InkWell(
                                   onTap: () {
-                                    Navigator.pushNamed(context,
-                                        ROUT_FORGOT_PASSWORD);
+                                    Navigator.pushNamed(
+                                        context, ROUT_FORGOT_PASSWORD);
                                   },
                                   child: const CustomText(
                                       text: 'Forgot Password?',
@@ -405,8 +365,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                       desiredLineHeight: 14.52,
                                       fontFamily: 'Inter',
                                       fontWeight: FontWeight.w400,
-                                      color: Color(
-                                          0xFF737373)),
+                                      color: Color(0xFF737373)),
                                 ),
                               ),
                             ],
@@ -437,13 +396,11 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                 fontSize: 13,
                                 fontFamily: 'Inter',
                                 fontWeight: FontWeight.w600,
-                                decoration:
-                                TextDecoration.underline,
+                                decoration: TextDecoration.underline,
                                 height: 16.94 / 13.0),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () async {
-                                Navigator.pushNamed(
-                                    context, ROUT_REGISTRATION);
+                                Navigator.pushNamed(context, ROUT_REGISTRATION);
                               },
                           ),
                         ]),
