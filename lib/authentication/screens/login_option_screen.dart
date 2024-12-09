@@ -23,50 +23,53 @@ class _LoginOptionScreenState extends State<LoginOptionScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: double.infinity,
-              height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: const Color(0xFF2986CC),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: double.infinity,
+                height: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: const Color(0xFF2986CC),
+                ),
+                child: TextButton(
+                  onPressed: _onLoginEmailButton,
+                  child: const CustomText(
+                      text: 'Login with Email and Password',
+                      fontSize: 16,
+                      desiredLineHeight: 24,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFFFFFFFF)),
+                ),
               ),
-              child: TextButton(
-                onPressed: _onLoginEmailButton,
-                child: const CustomText(
-                    text: 'Login with Email and Password',
-                    fontSize: 16,
-                    desiredLineHeight: 24,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFFFFFFFF)),
+              const SizedBox(
+                height: 20,
               ),
-            ),
-            const SizedBox(
-              height: 12,
-            ),
-            Container(
-              width: double.infinity,
-              height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: const Color(0xFF2986CC),
+              Container(
+                width: double.infinity,
+                height: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: const Color(0xFF2986CC),
+                ),
+                child: TextButton(
+                  onPressed: _onLoginMobileButton,
+                  child: const CustomText(
+                      text: 'Login with Mobile Number',
+                      fontSize: 16,
+                      desiredLineHeight: 24,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFFFFFFFF)),
+                ),
               ),
-              child: TextButton(
-                onPressed: _onLoginMobileButton,
-                child: const CustomText(
-                    text: 'Login with Mobile Number',
-                    fontSize: 16,
-                    desiredLineHeight: 24,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFFFFFFFF)),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
