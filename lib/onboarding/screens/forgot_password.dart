@@ -38,10 +38,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   bool _obscureConfirmPasswordText = true;
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
-  Color buttonColor = const Color(0xFFFDBABA);
-  Color buttonEmailColor = const Color(0xFFFDBABA);
-  Color buttonOTPColor = const Color(0xFFFDBABA);
-  Color buttonSetPasswordColor = const Color(0xFFFDBABA);
+  Color buttonColor = const Color(0xFF88C2F7);
+  Color buttonEmailColor = const Color(0xFF88C2F7);
+  Color buttonOTPColor = const Color(0xFF88C2F7);
+  Color buttonSetPasswordColor = const Color(0xFF88C2F7);
 
   String passwordErrorText = '';
   String confirmPasswordText = '';
@@ -96,7 +96,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       bool isOTPFieldValid = validateOTP();
       isButtonEnabled = isOTPFieldValid;
       buttonOTPColor =
-          isOTPFieldValid ? const Color(0xFFF85A5A) : const Color(0xFFFDBABA);
+          isOTPFieldValid ? const Color(0xFF2986CC) : const Color(0xFF88C2F7);
     });
   }
 
@@ -108,7 +108,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           passwordController.text, confirmPasswordController.text);
       isButtonEnabled = isConfirmPassword && isPasswordValid;
       buttonSetPasswordColor =
-          isButtonEnabled ? const Color(0xFFF85A5A) : const Color(0xFFFDBABA);
+          isButtonEnabled ? const Color(0xFF2986CC) : const Color(0xFF88C2F7);
     });
   }
 
