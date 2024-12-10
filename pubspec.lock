@@ -241,8 +241,8 @@ packages:
   flutter_google_maps:
     dependency: "direct main"
     description:
-      path: "../flutter_google_maps"
-      relative: true
+      path: "/Users/rohitbarge/Documents/New Topics/frequent flow modules"
+      relative: false
     source: path
     version: "0.0.1"
   flutter_lints:
@@ -538,10 +538,10 @@ packages:
     dependency: transitive
     description:
       name: js
-      sha256: c1b2e9b5ea78c45e1a0788d29606ba27dc5f71f019f32ca5140f61ef071838cf
+      sha256: f2c445dce49627136094980615a031419f7f3eb393237e4ecd97ac15dea343f3
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.1"
+    version: "0.6.7"
   leak_tracker:
     dependency: transitive
     description:
@@ -625,8 +625,8 @@ packages:
   multi_auth:
     dependency: "direct main"
     description:
-      path: "../multi_auth"
-      relative: true
+      path: "/Users/rohitbarge/Documents/New Topics/frequent_flow_multi_auth"
+      relative: false
     source: path
     version: "0.0.1"
   path:
@@ -749,6 +749,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.2"
+  pinput:
+    dependency: "direct main"
+    description:
+      name: pinput
+      sha256: "6d571e38a484f7515a52e89024ef416f11fa6171ac6f32303701374ab9890efa"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0"
   platform:
     dependency: transitive
     description:
@@ -834,6 +842,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
+  smart_auth:
+    dependency: transitive
+    description:
+      name: smart_auth
+      sha256: "88aa8fe66e951c78a307f26d1c29672dce2e9eb3da2e12e853864d0e615a73ad"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   source_span:
     dependency: transitive
     description:
@@ -922,6 +938,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.2"
+  universal_platform:
+    dependency: transitive
+    description:
+      name: universal_platform
+      sha256: "64e16458a0ea9b99260ceb5467a214c1f298d647c659af1bff6d3bf82536b1ec"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   uuid:
     dependency: transitive
     description:

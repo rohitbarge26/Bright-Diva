@@ -49,7 +49,7 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
               children: [
                 CircularProgressIndicator(
                     strokeWidth: 10.0,
-                    color: Color(0xFF2986cc),
+                    color: Color(0xFF2986CC),
                     strokeCap: StrokeCap.round),
                 SizedBox(height: 24),
                 Text(
@@ -179,7 +179,7 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
                                             .phoneNumberValidate(
                                             value)
                                             ? ''
-                                            : 'Please enter a valid email address';
+                                            : 'Please enter a valid Mobile Number';
                                       });
                                       _updateButtonColor();
                                     },
@@ -192,7 +192,7 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
                                     ),
                                     decoration: const InputDecoration(
                                       labelText:
-                                      'Email',
+                                      'Mobile Number',
                                       labelStyle: TextStyle(
                                         color: Color(0xFF737373),
                                       ),
@@ -281,7 +281,7 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
                                     ),
                                     decoration: const InputDecoration(
                                       labelText:
-                                      'Password',
+                                      'OTP',
                                       labelStyle:
                                       TextStyle(
                                         color:

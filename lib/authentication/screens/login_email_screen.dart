@@ -23,7 +23,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final _formEmailKey = GlobalKey<FormState>();
-  Color buttonColor = const Color(0xFF88c2f7); // Initialize the button color
+  Color buttonColor = const Color(0xFF88C2F7); // Initialize the button color
   String passwordErrorText = '';
   String emailErrorText = '';
   bool isButtonEnabled = false;
@@ -49,28 +49,27 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
             height: 180,
             padding: const EdgeInsets.all(16),
             child: const Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(
-                    strokeWidth: 10.0,
-                    color: Color(0xFF2986cc),
-                    strokeCap: StrokeCap.round),
-                SizedBox(height: 24),
-                Text(
-                  'Please Wait...',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Color(0xFF171717),
-                    fontSize: 20,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.40,
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                      strokeWidth: 10.0,
+                      color: Color(0xFF2986CC),
+                      strokeCap: StrokeCap.round),
+                  SizedBox(height: 24),
+                  Text(
+                    'Please Wait...',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF171717),
+                      fontSize: 20,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.40,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ]),
           ),
         );
       },

@@ -46,14 +46,14 @@ PODS:
     - GoogleUtilities/UserDefaults (~> 8.0)
     - nanopb (~> 3.30910.0)
   - Flutter (1.0.0)
-  - flutter_timezone (0.0.1):
-    - Flutter
   - flutter_facebook_auth (7.1.1):
     - FBSDKLoginKit (~> 17.1.0)
     - Flutter
   - flutter_local_notifications (0.0.1):
     - Flutter
   - flutter_secure_storage (6.0.0):
+    - Flutter
+  - flutter_timezone (0.0.1):
     - Flutter
   - geolocator_apple (1.2.0):
     - Flutter
@@ -134,10 +134,10 @@ DEPENDENCIES:
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
-  - flutter_timezone (from `.symlinks/plugins/flutter_timezone/ios`)
   - flutter_facebook_auth (from `.symlinks/plugins/flutter_facebook_auth/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
+  - flutter_timezone (from `.symlinks/plugins/flutter_timezone/ios`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
   - google_maps_flutter_ios (from `.symlinks/plugins/google_maps_flutter_ios/ios`)
   - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/darwin`)
@@ -175,14 +175,14 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_messaging/ios"
   Flutter:
     :path: Flutter
-  flutter_timezone:
-    :path: ".symlinks/plugins/flutter_timezone/ios"
   flutter_facebook_auth:
     :path: ".symlinks/plugins/flutter_facebook_auth/ios"
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
+  flutter_timezone:
+    :path: ".symlinks/plugins/flutter_timezone/ios"
   geolocator_apple:
     :path: ".symlinks/plugins/geolocator_apple/ios"
   google_maps_flutter_ios:
@@ -212,10 +212,10 @@ SPEC CHECKSUMS:
   FirebaseInstallations: 6ef4a1c7eb2a61ee1f74727d7f6ce2e72acf1414
   FirebaseMessaging: f8a160d99c2c2e5babbbcc90c4a3e15db036aee2
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_timezone: ffb07bdad3c6276af8dada0f11978d8a1f8a20bb
   flutter_facebook_auth: 48be46091bd1a5cc5a66055f1228a9d99a28bfaa
   flutter_local_notifications: df98d66e515e1ca797af436137b4459b160ad8c9
   flutter_secure_storage: d33dac7ae2ea08509be337e775f6b59f1ff45f12
+  flutter_timezone: ffb07bdad3c6276af8dada0f11978d8a1f8a20bb
   geolocator_apple: 9bcea1918ff7f0062d98345d238ae12718acfbc1
   Google-Maps-iOS-Utils: 66d6de12be1ce6d3742a54661e7a79cb317a9321
   google_maps_flutter_ios: e31555a04d1986ab130f2b9f24b6cdc861acc6d3
@@ -235,4 +235,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 48e61f9990e1f1222036ce40319c2f374720efa5
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.14.3

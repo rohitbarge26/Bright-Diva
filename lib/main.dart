@@ -19,6 +19,7 @@ import 'package:frequent_flow/social_auth/social_login_screen.dart';
 import 'package:frequent_flow/utils/prefs.dart';
 import 'package:frequent_flow/utils/route.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'authentication/screens/login_option_screen.dart';
 import 'firebase_options.dart';
 import 'SplashScreen.dart';
 import 'authentication/screens/login_email_screen.dart';
@@ -74,8 +75,8 @@ class MyApp extends StatelessWidget {
       navigatorKey: rootNavigatorKey,
       theme: ThemeData(
         progressIndicatorTheme:
-            const ProgressIndicatorThemeData(color: Color(0xfff68585)),
-        primaryColor: const Color(0xfff68585),
+            const ProgressIndicatorThemeData(color: Color(0xFF2986CC)),
+        primaryColor: const Color(0xFF2986CC),
         dialogTheme: const DialogTheme(
           backgroundColor: Colors.white,
         ),
@@ -87,9 +88,17 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(builder: (BuildContext context) {
               return const SafeArea(top: false, child: SplashScreen());
             });
+          case ROUT_LOGIN_OPTION:
+            return MaterialPageRoute(builder: (BuildContext context) {
+              return const SafeArea(top: false, child: LoginOptionScreen());
+            });
           case ROUT_LOGIN_EMAIL:
             return MaterialPageRoute(builder: (BuildContext context) {
               return const SafeArea(top: false, child: LoginEmailScreen());
+            });
+          case ROUT_LOGIN_MOBILE:
+            return MaterialPageRoute(builder: (BuildContext context) {
+              return const SafeArea(top: false, child: LoginMobileScreen());
             });
           case ROUT_DASHBOARD:
             return MaterialPageRoute(builder: (BuildContext context) {
