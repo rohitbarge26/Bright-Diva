@@ -1,11 +1,26 @@
+import 'dart:io';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:frequent_flow/authentication/login_bloc/login_bloc.dart';
+import 'package:frequent_flow/authentication/repository/login_repository.dart';
 import 'package:frequent_flow/authentication/screens/login_mobile_screen.dart';
-import 'package:frequent_flow/authentication/screens/login_option_screen.dart';
+import 'package:frequent_flow/change_password/bloc/change_password_bloc.dart';
+import 'package:frequent_flow/change_password/change_password_screen.dart';
+import 'package:frequent_flow/change_password/repository/change_password_repository.dart';
 import 'package:frequent_flow/modules/map_integration.dart';
+import 'package:frequent_flow/onboarding/registration_bloc/registration_bloc.dart';
+import 'package:frequent_flow/onboarding/repository/registration_repository.dart';
+import 'package:frequent_flow/permissions/permissions_screen.dart';
+import 'package:frequent_flow/push_notifications/push_notifications_screen.dart';
 import 'package:frequent_flow/social_auth/social_login_screen.dart';
 import 'package:frequent_flow/utils/prefs.dart';
 import 'package:frequent_flow/utils/route.dart';
-
+import 'package:firebase_core/firebase_core.dart';
+import 'authentication/screens/login_option_screen.dart';
+import 'firebase_options.dart';
 import 'SplashScreen.dart';
 import 'authentication/screens/login_email_screen.dart';
 import 'dashboard/dashboard_screen.dart';
@@ -13,10 +28,39 @@ import 'onboarding/screens/registration.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
+final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  const initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+  const initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+    iOS: DarwinInitializationSettings(),
+  );
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await FirebaseMessaging.instance.setAutoInitEnabled(true);
+  final fcmToken =
+      Platform.isAndroid ? await FirebaseMessaging.instance.getToken() : "";
+  print("FCMToken $fcmToken");
   await Prefs.init();
-  runApp(const MyApp());
+  runApp(MultiBlocProvider(providers: [
+    BlocProvider<RegistrationBloc>(
+      create: (context) => RegistrationBloc(RegistrationRepository()),
+    ),
+    BlocProvider<LoginBloc>(
+      create: (context) => LoginBloc(loginRepository: LoginRepository()),
+    ),
+    BlocProvider<ChangePasswordBloc>(
+      create: (context) => ChangePasswordBloc(
+          changePasswordRepository: ChangePasswordRepository()),
+    ),
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -28,6 +72,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Frequent Flow',
       debugShowCheckedModeBanner: false,
+      navigatorKey: rootNavigatorKey,
       theme: ThemeData(
         progressIndicatorTheme:
             const ProgressIndicatorThemeData(color: Color(0xFF2986CC)),
@@ -73,6 +118,24 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(
               builder: (context) {
                 return const SafeArea(child: SocialLogin());
+              },
+            );
+          case ROUT_PERMISSION:
+            return MaterialPageRoute(
+              builder: (context) {
+                return const SafeArea(child: PermissionsScreen());
+              },
+            );
+          case ROUT_PUSH_NOTIFICATION:
+            return MaterialPageRoute(
+              builder: (context) {
+                return const SafeArea(child: PushNotificationsScreen());
+              },
+            );
+          case ROUT_CHANGE_PASSWORD:
+            return MaterialPageRoute(
+              builder: (context) {
+                return const SafeArea(child: ChangePasswordScreen());
               },
             );
         }
