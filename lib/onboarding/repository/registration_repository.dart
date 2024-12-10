@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:frequent_flow/onboarding/models/register_user_response.dart';
 import 'package:frequent_flow/onboarding/models/user_model.dart';
+import 'package:frequent_flow/utils/api_constants.dart';
 
 class RegistrationRepository {
   final Dio _dio = Dio();
@@ -9,11 +10,13 @@ class RegistrationRepository {
 
   Future<RegisterUserResponse?> registerUser(UserModel user) async {
     try {
-      final response = await _dio.post('http://192.168.1.2:9000/api/v1/user',
-          data: user.toJson(),
-          options: Options(headers: {
-            "Content-Type": "application/json",
-          }));
+      final response = await _dio.post(
+        '$BASE_URL$REGISTER',
+        data: user.toJson(),
+        options: Options(headers: {
+          "Content-Type": "application/json",
+        }),
+      );
       final data = response.data;
       print("Success $data");
       print("Success ${response.data['message']}");
