@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:frequent_flow/authentication/models/login_details.dart';
+import 'package:frequent_flow/utils/api_constants.dart';
 
 import '../models/login_response.dart';
 
@@ -12,7 +13,7 @@ class LoginRepository {
     print(loginDetails.toJson());
     try {
       final response = await _dio.post(
-        'http://192.168.34.182:9000/api/v1/login',
+        '$BASE_URL$LOGIN',
         data: loginDetails.toJson(),
         options: Options(headers: {
           "Content-Type": "application/json",
@@ -22,7 +23,7 @@ class LoginRepository {
       var data = response.data;
 
       if (response.statusCode == 200) { // Need to check this
-        final loginResponse = LoginResponse.fromJson(data['data']);
+        final loginResponse = LoginResponse.fromJson(data);
         print("LoginResponse");
         print(loginResponse.toJson());
         return loginResponse;

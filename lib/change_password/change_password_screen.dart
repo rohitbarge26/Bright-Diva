@@ -38,11 +38,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
       // API call implementation
       // await Future.delayed(Duration(seconds: 2));
+      final changePasswordRequest = ChangePasswordRequest(
+        oldPassword: _currentPasswordController.text,
+        newPassword: _newPasswordController.text,
+        confirmPassword: _confirmPasswordController.text,
+      );
+      print(changePasswordRequest.toJson());
       context.read<ChangePasswordBloc>().add(
             ChangePassword(
-              changePasswordRequest: ChangePasswordRequest(
-                  oldPassword: _currentPasswordController.text,
-                  newPassword: _newPasswordController.text),
+              changePasswordRequest: changePasswordRequest,
             ),
           );
 
@@ -69,6 +73,29 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       //   );
       // }
     }
+  }
+
+  void _showErrorDialog(BuildContext context, String errorMessage) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Error',
+            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+          ),
+          content: Text(errorMessage),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _updateButtonColor() {
@@ -106,6 +133,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 content: Text("Password changed successfully!"),
               ),
             );
+            Navigator.of(context).pop();
+          } else if (state is ChangePasswordError) {
+            print("change password error");
+            _showErrorDialog(context, state.error);
           }
         },
         builder: (context, state) {

@@ -26,7 +26,12 @@ class ChangePasswordBloc
               .changePassword(event.changePasswordRequest);
       print("changePasswordResponse ${changePasswordResponse?.message}");
       if (changePasswordResponse != null) {
-        emit(ChangePasswordSuccess(response: changePasswordResponse));
+        if (changePasswordResponse.error == null) {
+          emit(ChangePasswordSuccess(response: changePasswordResponse));
+        } else {
+          emit(ChangePasswordError(error: changePasswordResponse.message ?? "Password change failed"));
+        }
+
       } else {
         emit(const ChangePasswordError(error: "Unexpected Error"));
       }

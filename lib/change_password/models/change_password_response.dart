@@ -1,10 +1,9 @@
-import 'dart:ffi';
 
 class ChangePasswordResponse {
-  final Int statusCode;
-  final String success;
-  final String error;
-  final String message;
+  final int? statusCode;
+  final bool? success;
+  final String? error;
+  final String? message;
 
   ChangePasswordResponse({
     required this.statusCode,
@@ -13,12 +12,12 @@ class ChangePasswordResponse {
     required this.message,
   });
 
-  factory ChangePasswordResponse.fromJson(Map<String, dynamic> json) {
+  factory ChangePasswordResponse.fromJson(Map<String, dynamic>? json) {
     return ChangePasswordResponse(
-      statusCode: json['statusCode'],
-      success: json['success'],
-      error: json['error'],
-      message: json['message'],
+      statusCode: json?['statusCode'],
+      success: json?['success'],
+      error: json?['error'],
+      message: json?['message'],
     );
   }
 
