@@ -12,7 +12,7 @@ class LoginRepository {
     print(loginDetails.toJson());
     try {
       final response = await _dio.post(
-        'http://192.168.1.2:9000/api/v1/login',
+        'http://192.168.34.182:9000/api/v1/login',
         data: loginDetails.toJson(),
         options: Options(headers: {
           "Content-Type": "application/json",
@@ -21,7 +21,7 @@ class LoginRepository {
 
       var data = response.data;
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200) { // Need to check this
         final loginResponse = LoginResponse.fromJson(data['data']);
         print("LoginResponse");
         print(loginResponse.toJson());

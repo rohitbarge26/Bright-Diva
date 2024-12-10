@@ -112,7 +112,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
     FocusScope.of(context).requestFocus(FocusNode());
     // String? fcmToken = Prefs.getString(FCM_TOKEN);
     LoginDetails loginDetails = LoginDetails(
-      email: emailController.text,
+      emailAddress: emailController.text,
       password: passwordController.text,
     );
     print("Login details");
@@ -128,6 +128,29 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
         .add(LoginUser(loginRequest: loginRequest));*/
   }
 
+  void _showErrorDialog(BuildContext context, String errorMessage) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Error',
+            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+          ),
+          content: Text(errorMessage),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<LoginBloc, LoginState>(
@@ -135,13 +158,20 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
         if (state is LoginSuccess) {
           // Set login flag to true
           print("LoginSuccess");
+          hideLoadingDialog();
+          clickLogin = false;
           print(state.loginResponse.toJson());
-          // Prefs.setBool(LOGIN_FLAG, true);
+          Prefs.setBool(LOGIN_FLAG, true);
           // Navigate to Dashboard
-          // Navigator.of(context).pushNamedAndRemoveUntil(
-          //   ROUT_DASHBOARD,
-          //   (route) => false,
-          // );
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            ROUT_DASHBOARD,
+            (route) => false,
+          );
+        } else if (state is LoginError) {
+          hideLoadingDialog();
+          clickLogin = false;
+          print("login error");
+          _showErrorDialog(context, state.error);
         }
       },
       builder: (context, state) {

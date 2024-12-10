@@ -28,11 +28,16 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       print(event.loginDetails.toJson());
       final loginResponse = await loginRepository.loginUser(event.loginDetails);
 
-      if (loginResponse != null) { // This condition is wrong
+      if (loginResponse != null) {
+        // This condition is wrong
         print(loginResponse.toJson());
-        Prefs.setString(TOKEN, loginResponse.token);
-        Prefs.setString(REFRESH_TOKEN_KEY, loginResponse.refreshToken);
-        emit(LoginSuccess(loginResponse: loginResponse));
+        if (loginResponse.error == null) {
+          Prefs.setString(TOKEN, loginResponse.data?.token);
+          Prefs.setString(REFRESH_TOKEN_KEY, loginResponse.data?.refreshToken);
+          emit(LoginSuccess(loginResponse: loginResponse));
+        } else {
+          emit(LoginError(error: loginResponse.error ?? "Unexpected error"));
+        }
       } else {
         emit(const LoginError(error: "Unexpected Error"));
       }

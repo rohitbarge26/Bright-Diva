@@ -1,22 +1,22 @@
 class LoginDetails {
-  final String email;
+  final String emailAddress;
   final String password;
 
   LoginDetails({
-    required this.email,
+    required this.emailAddress,
     required this.password,
   });
 
   factory LoginDetails.fromJson(Map<String, dynamic> json) {
     return LoginDetails(
-      email: json['email'],
+      emailAddress: json['email'],
       password: json['password'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'email': email,
+      'emailAddress': emailAddress,
       'password': password,
     };
   }
