@@ -45,14 +45,14 @@ class _RegistrationState extends State<Registration> {
       barrierDismissible: false, // Prevent dismissal using the back button
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Registration Successful'),
-          content: Text('Your account has been created successfully.'),
+          title: const Text('Registration Successful'),
+          content: const Text('Your account has been created successfully.'),
           actions: [
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pushReplacementNamed(ROUT_LOGIN_EMAIL);
               },
-              child: Text('Go to Login'),
+              child: const Text('Go to Login'),
             ),
           ],
         );
