@@ -11,8 +11,11 @@ import 'package:frequent_flow/change_password/bloc/change_password_bloc.dart';
 import 'package:frequent_flow/change_password/change_password_screen.dart';
 import 'package:frequent_flow/change_password/repository/change_password_repository.dart';
 import 'package:frequent_flow/modules/map_integration.dart';
+import 'package:frequent_flow/onboarding/bloc/forgot_password_bloc/forgot_password_bloc.dart';
 import 'package:frequent_flow/onboarding/registration_bloc/registration_bloc.dart';
+import 'package:frequent_flow/onboarding/repository/forgot_password_repository.dart';
 import 'package:frequent_flow/onboarding/repository/registration_repository.dart';
+import 'package:frequent_flow/onboarding/screens/forgot_password.dart';
 import 'package:frequent_flow/permissions/permissions_screen.dart';
 import 'package:frequent_flow/push_notifications/push_notifications_screen.dart';
 import 'package:frequent_flow/social_auth/social_login_screen.dart';
@@ -49,18 +52,27 @@ Future<void> main() async {
       Platform.isAndroid ? await FirebaseMessaging.instance.getToken() : "";
   print("FCMToken $fcmToken");
   await Prefs.init();
-  runApp(MultiBlocProvider(providers: [
-    BlocProvider<RegistrationBloc>(
-      create: (context) => RegistrationBloc(RegistrationRepository()),
+  runApp(
+    MultiBlocProvider(
+      providers: [
+        BlocProvider<RegistrationBloc>(
+          create: (context) => RegistrationBloc(RegistrationRepository()),
+        ),
+        BlocProvider<LoginBloc>(
+          create: (context) => LoginBloc(loginRepository: LoginRepository()),
+        ),
+        BlocProvider<ChangePasswordBloc>(
+          create: (context) => ChangePasswordBloc(
+              changePasswordRepository: ChangePasswordRepository()),
+        ),
+        BlocProvider<ForgotPasswordBloc>(
+          create: (context) => ForgotPasswordBloc(
+              forgotPasswordRepository: ForgotPasswordRepository()),
+        ),
+      ],
+      child: const MyApp(),
     ),
-    BlocProvider<LoginBloc>(
-      create: (context) => LoginBloc(loginRepository: LoginRepository()),
-    ),
-    BlocProvider<ChangePasswordBloc>(
-      create: (context) => ChangePasswordBloc(
-          changePasswordRepository: ChangePasswordRepository()),
-    ),
-  ], child: const MyApp()));
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -136,6 +148,12 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(
               builder: (context) {
                 return const SafeArea(child: ChangePasswordScreen());
+              },
+            );
+          case ROUT_FORGOT_PASSWORD:
+            return MaterialPageRoute(
+              builder: (context) {
+                return const SafeArea(child: ForgotPasswordScreen());
               },
             );
         }

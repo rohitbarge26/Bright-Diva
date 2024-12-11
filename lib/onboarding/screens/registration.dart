@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frequent_flow/onboarding/models/user_model.dart';
+import 'package:frequent_flow/widgets/custom_alert.dart';
 
 import '../../utils/app_functions.dart';
 import '../../utils/route.dart';
@@ -79,7 +80,7 @@ class _RegistrationState extends State<Registration> {
           isPasswordValid &&
           isConfirmPassword;
       buttonColor =
-          isButtonEnabled ? const Color(0xFFF85A5A) : const Color(0xFFFDBABA);
+          isButtonEnabled ? const Color(0xFF2986CC) : const Color(0xFF88C2F7);
     });
   }
 
@@ -95,6 +96,7 @@ class _RegistrationState extends State<Registration> {
         phoneNumber: phoneNo,
         emailAddress: emailController.text,
         password: passwordController.text);
+    print(user.toJson());
     print("Submitted");
     context.read<RegistrationBloc>().add(RegisterUserEvent(user));
     FocusScope.of(context).requestFocus(FocusNode());
@@ -129,6 +131,15 @@ class _RegistrationState extends State<Registration> {
                 setState(() {
                   isSubmitting = false;
                 });
+                showDialog(
+                  context: context,
+                  builder: (context) => CustomAlert(
+                    title: "Error",
+                    message: state.error,
+                    buttonText: "Okay",
+                    onButtonTap: () => Navigator.of(context).pop(),
+                  ),
+                );
               } else {
                 setState(() {
                   isSubmitting = false;
