@@ -99,7 +99,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
           Validator.emptyFieldValidate(passwordController.text);
       isButtonEnabled = isEmailValid && isPasswordValid;
       buttonColor =
-          isButtonEnabled ? const Color(0xFFF85A5A) : const Color(0xFFFDBABA);
+          isButtonEnabled ? const Color(0xFF2986CC) : const Color(0xFF88C2F7);
     });
   }
 

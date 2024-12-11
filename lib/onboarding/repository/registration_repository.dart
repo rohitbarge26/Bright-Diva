@@ -23,8 +23,8 @@ class RegistrationRepository {
 
       if (response.statusCode == 200) {
         RegisterUserResponse registerUserResponse =
-            RegisterUserResponse.fromJson(data['data']);
-        print(registerUserResponse.message);
+            RegisterUserResponse.fromJson(data);
+        print(registerUserResponse.data?.message);
         return registerUserResponse;
       }
     } on DioException catch (error) {

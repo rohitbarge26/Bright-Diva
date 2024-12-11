@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:frequent_flow/utils/prefs.dart';
 import 'package:frequent_flow/utils/route.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -21,47 +22,75 @@ class _DashboardScreenState extends State<DashboardScreen> {
     "Change Password"
   ];
 
+  void _onLogOut() {
+    Prefs.clear();
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      ROUT_LOGIN_EMAIL,
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.builder(
-        itemCount: features.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(features[index]),
-            leading: const Icon(Icons.label),
-            onTap: () {
-              switch (features[index]) {
-                case "Push notification":
-                  if (Platform.isAndroid) {
-                    Navigator.of(context).pushNamed(ROUT_PUSH_NOTIFICATION);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          "This feature works on Android only",
-                        ),
-                      ),
-                    );
-                  }
-                  break;
-                case "Social Media Integration":
-                  Navigator.of(context)
-                      .pushNamed(ROUT_SOCIAL_MEDIA_INTEGRATION);
-                  break;
-                case "Map Integration":
-                  Navigator.of(context).pushNamed(ROUT_MAP_INTEGRATION);
-                  break;
-                case "Permissions":
-                  Navigator.of(context).pushNamed(ROUT_PERMISSION);
-                  break;
-                case "Change Password":
-                  Navigator.of(context).pushNamed(ROUT_CHANGE_PASSWORD);
-                  break;
-              }
-            },
-          );
-        },
+      body: Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: features.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(features[index]),
+                  leading: const Icon(Icons.label),
+                  onTap: () {
+                    switch (features[index]) {
+                      case "Push notification":
+                        if (Platform.isAndroid) {
+                          Navigator.of(context)
+                              .pushNamed(ROUT_PUSH_NOTIFICATION);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "This feature works on Android only",
+                              ),
+                            ),
+                          );
+                        }
+                        break;
+                      case "Social Media Integration":
+                        Navigator.of(context)
+                            .pushNamed(ROUT_SOCIAL_MEDIA_INTEGRATION);
+                        break;
+                      case "Map Integration":
+                        Navigator.of(context).pushNamed(ROUT_MAP_INTEGRATION);
+                        break;
+                      case "Permissions":
+                        Navigator.of(context).pushNamed(ROUT_PERMISSION);
+                        break;
+                      case "Change Password":
+                        Navigator.of(context).pushNamed(ROUT_CHANGE_PASSWORD);
+                        break;
+                    }
+                  },
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: ElevatedButton(
+              onPressed: () {
+                _onLogOut();
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(double.infinity, 50),
+              ),
+              child: Text("LogOut"),
+            ),
+          ),
+        ],
       ),
     );
   }

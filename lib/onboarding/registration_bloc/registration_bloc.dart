@@ -23,7 +23,13 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
       final registerUserResponse =
           await registrationRepository.registerUser(event.user);
       if (registerUserResponse != null) {
-        emit(RegistrationSuccess(registerUserResponse));
+        print(registerUserResponse.toJson());
+        if (registerUserResponse.details?.error == null) {
+          emit(RegistrationSuccess(registerUserResponse));
+        } else {
+          emit(RegistrationError(
+              registerUserResponse.details?.message ?? "Error registering user"));
+        }
       }
     } catch (error) {
       emit(RegistrationError(error.toString()));
