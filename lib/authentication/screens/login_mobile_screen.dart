@@ -1,12 +1,16 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:frequent_flow/authentication/login_mobile_bloc/login_mobile_bloc.dart';
+import 'package:frequent_flow/authentication/models/mobile/login_mobile_get_otp_request.dart';
 
 import '../../utils/pref_key.dart';
 import '../../utils/prefs.dart';
 import '../../utils/route.dart';
 import '../../utils/validation.dart';
 import '../../widgets/custom_text.dart';
+import '../login_mobile_bloc/login_mobile_event.dart';
 
 class LoginMobileScreen extends StatefulWidget {
   const LoginMobileScreen({super.key});
@@ -22,6 +26,7 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
   String mobileErrorText = '';
   String otpErrorText = '';
   bool isButtonEnabled = false;
+  bool isOtpVisible = false;
   bool clickLogin = false;
   Color buttonColor = const Color(0xFF88c2f7);
 
@@ -79,30 +84,39 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
 
   void _updateButtonColor() {
     setState(() {
-      bool isMobileValid = Validator.mobileNumberValidate(mobileController.text);
-      bool isOTPValid =
-      Validator.emptyFieldValidate(otpController.text);
+      bool isMobileValid =
+          Validator.mobileNumberValidate(mobileController.text);
+      bool isOTPValid = Validator.emptyFieldValidate(otpController.text);
       isButtonEnabled = isMobileValid && isOTPValid;
       buttonColor =
-      isButtonEnabled ? const Color(0xFFF85A5A) : const Color(0xFFFDBABA);
+          isButtonEnabled ? const Color(0xFFF85A5A) : const Color(0xFFFDBABA);
     });
   }
 
   void _onButtonPressed() async {
     showLoadingDialog(context);
-    setState(() {
-      clickLogin = true;
-    });
-    FocusScope.of(context).requestFocus(FocusNode());
-    String? fcmToken = Prefs.getString(FCM_TOKEN);
-    Navigator.pushReplacementNamed(context, ROUT_DASHBOARD);
-    /*LoginRequest loginRequest = LoginRequest(
+    if (isOtpVisible) {
+      //API call To Verify OTP
+      setState(() {
+        clickLogin = true;
+      });
+      FocusScope.of(context).requestFocus(FocusNode());
+      String? fcmToken = Prefs.getString(FCM_TOKEN);
+      Navigator.pushReplacementNamed(context, ROUT_DASHBOARD);
+      /*LoginRequest loginRequest = LoginRequest(
       email: emailController.text,
       password: passwordController.text,
       pushNotificationToken: fcmToken,
     );
     BlocProvider.of<AuthenticationBloc>(context)
         .add(LoginUser(loginRequest: loginRequest));*/
+    } else {
+      // API to get OTP
+      LoginMobileGetOTPRequest loginMobileGetOTPRequest =
+          LoginMobileGetOTPRequest(phoneNumber: mobileController.text);
+      BlocProvider.of<LoginMobileBloc>(context).add(LoginMobileUserOTP(
+          loginMobileGetOTPRequest: loginMobileGetOTPRequest));
+    }
   }
 
   @override
@@ -115,10 +129,9 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
     super.initState();
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       backgroundColor: const Color(0xFFFFFFFF),
       body: SizedBox(
         height: MediaQuery.of(context).size.height,
@@ -149,35 +162,25 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
                         ),
                         Padding(
                           padding: const EdgeInsets.only(
-                              left: 16.0,
-                              right: 16.0,
-                              top: 32.0,
-                              bottom: 32.0),
+                              left: 16.0, right: 16.0, top: 32.0, bottom: 32.0),
                           child: Column(
-                            mainAxisAlignment:
-                            MainAxisAlignment.start,
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
                                 decoration: BoxDecoration(
                                   border: Border.all(
-                                      color:
-                                      const Color(0xFFE5E5E5),
-                                      width: 1),
-                                  borderRadius:
-                                  BorderRadius.circular(8),
+                                      color: const Color(0xFFE5E5E5), width: 1),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 8.0),
+                                  padding: const EdgeInsets.only(left: 8.0),
                                   child: TextFormField(
                                     controller: mobileController,
                                     onChanged: (value) {
                                       setState(() {
                                         mobileErrorText = Validator
-                                            .mobileNumberValidate(
-                                            value)
+                                                .mobileNumberValidate(value)
                                             ? ''
                                             : 'Please enter a valid Mobile Number';
                                       });
@@ -191,8 +194,7 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
                                       fontSize: 16,
                                     ),
                                     decoration: const InputDecoration(
-                                      labelText:
-                                      'Mobile Number',
+                                      labelText: 'Mobile Number',
                                       labelStyle: TextStyle(
                                         color: Color(0xFF737373),
                                       ),
@@ -202,15 +204,13 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
                                 ),
                               ),
                               Visibility(
-                                visible:
-                                mobileErrorText.isNotEmpty,
+                                visible: mobileErrorText.isNotEmpty,
                                 child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 4, top: 12.0),
+                                  padding:
+                                      const EdgeInsets.only(left: 4, top: 12.0),
                                   child: Row(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment
-                                          .start,
+                                          CrossAxisAlignment.start,
                                       children: [
                                         SizedBox(
                                           width: 16,
@@ -219,8 +219,7 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
                                             'assets/icon/error_icon.svg',
                                             height: 12.67,
                                             width: 12.67,
-                                            alignment:
-                                            Alignment.center,
+                                            alignment: Alignment.center,
                                           ),
                                         ),
                                         const SizedBox(
@@ -232,10 +231,8 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
                                             fontSize: 12,
                                             desiredLineHeight: 16,
                                             fontFamily: 'Inter',
-                                            fontWeight:
-                                            FontWeight.w500,
-                                            color: const Color(
-                                                0xFFF85A5A),
+                                            fontWeight: FontWeight.w500,
+                                            color: const Color(0xFFF85A5A),
                                           ),
                                         ),
                                       ]),
@@ -244,68 +241,59 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
                               const SizedBox(
                                 height: 12,
                               ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color:
-                                      const Color(0xFFE5E5E5),
-                                      width: 1),
-                                  borderRadius:
-                                  BorderRadius.circular(8),
-                                ),
-                                child: Padding(
-                                  padding:
-                                  const EdgeInsets.only(
-                                      left: 8.0, right: 46),
-                                  child: TextFormField(
-                                    controller:
-                                    otpController,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        otpErrorText =
-                                        Validator
-                                            .emptyFieldValidate(
-                                            value)
-                                            ? ''
-                                            : '';
-                                      });
-                                      _updateButtonColor();
-                                    },
-                                    style: const TextStyle(
-                                      fontFamily: 'Inter',
-                                      color: Color(0xFF171717),
-                                      fontWeight:
-                                      FontWeight.w400,
-                                      height: 1.25,
-                                      fontSize: 16,
-                                    ),
-                                    decoration: const InputDecoration(
-                                      labelText:
-                                      'OTP',
-                                      labelStyle:
-                                      TextStyle(
-                                        color:
-                                        Color(0xFF737373),
+                              Visibility(
+                                visible: isOtpVisible,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: const Color(0xFFE5E5E5),
+                                        width: 1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 8.0, right: 46),
+                                    child: TextFormField(
+                                      controller: otpController,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          otpErrorText =
+                                              Validator.emptyFieldValidate(
+                                                      value)
+                                                  ? ''
+                                                  : '';
+                                        });
+                                        _updateButtonColor();
+                                      },
+                                      style: const TextStyle(
+                                        fontFamily: 'Inter',
+                                        color: Color(0xFF171717),
+                                        fontWeight: FontWeight.w400,
+                                        height: 1.25,
+                                        fontSize: 16,
                                       ),
-                                      border: InputBorder.none,
+                                      decoration: const InputDecoration(
+                                        labelText: 'OTP',
+                                        labelStyle: TextStyle(
+                                          color: Color(0xFF737373),
+                                        ),
+                                        border: InputBorder.none,
+                                      ),
+                                      keyboardType:
+                                          TextInputType.visiblePassword,
+                                      textInputAction: TextInputAction.done,
                                     ),
-                                    keyboardType: TextInputType
-                                        .visiblePassword,
-                                    textInputAction:
-                                    TextInputAction.done,
                                   ),
                                 ),
                               ),
                               Visibility(
-                                visible:
-                                otpErrorText.isNotEmpty,
+                                visible: otpErrorText.isNotEmpty,
                                 child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 4, top: 12.0),
+                                  padding:
+                                      const EdgeInsets.only(left: 4, top: 12.0),
                                   child: Row(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment
-                                          .start,
+                                          CrossAxisAlignment.start,
                                       children: [
                                         SizedBox(
                                           width: 16,
@@ -314,8 +302,7 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
                                             'assets/icon/error_icon.svg',
                                             height: 12.67,
                                             width: 12.67,
-                                            alignment:
-                                            Alignment.center,
+                                            alignment: Alignment.center,
                                           ),
                                         ),
                                         const SizedBox(
@@ -323,15 +310,12 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
                                         ),
                                         Expanded(
                                           child: CustomText(
-                                            text:
-                                            otpErrorText,
+                                            text: otpErrorText,
                                             fontSize: 12,
                                             desiredLineHeight: 16,
                                             fontFamily: 'Inter',
-                                            fontWeight:
-                                            FontWeight.w500,
-                                            color: const Color(
-                                                0xFFF85A5A),
+                                            fontWeight: FontWeight.w500,
+                                            color: const Color(0xFFF85A5A),
                                           ),
                                         ),
                                       ]),
@@ -344,22 +328,19 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
                                 width: double.infinity,
                                 height: 50,
                                 decoration: BoxDecoration(
-                                  borderRadius:
-                                  BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(8),
                                   color: buttonColor,
                                 ),
                                 child: TextButton(
-                                  onPressed: isButtonEnabled
-                                      ? _onButtonPressed
-                                      : null,
+                                  onPressed:
+                                      isButtonEnabled ? _onButtonPressed : null,
                                   child: const CustomText(
-                                      text: 'Login',
+                                      text: 'Verify',
                                       fontSize: 16,
                                       desiredLineHeight: 24,
                                       fontFamily: 'Inter',
                                       fontWeight: FontWeight.w600,
-                                      color: Color(
-                                          0xFFFFFFFF)),
+                                      color: Color(0xFFFFFFFF)),
                                 ),
                               ),
                               const SizedBox(
@@ -393,13 +374,11 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
                                 fontSize: 13,
                                 fontFamily: 'Inter',
                                 fontWeight: FontWeight.w600,
-                                decoration:
-                                TextDecoration.underline,
+                                decoration: TextDecoration.underline,
                                 height: 16.94 / 13.0),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () async {
-                                Navigator.pushNamed(
-                                    context, ROUT_REGISTRATION);
+                                Navigator.pushNamed(context, ROUT_REGISTRATION);
                               },
                           ),
                         ]),

@@ -1,7 +1,7 @@
 class LoginMobileGetOTPRequest {
   String? phoneNumber;
 
-  LoginMobileGetOTPRequest({this.phoneNumber});
+  LoginMobileGetOTPRequest({required this.phoneNumber});
 
   LoginMobileGetOTPRequest.fromJson(Map<String, dynamic> json) {
     phoneNumber = json['phoneNumber'];

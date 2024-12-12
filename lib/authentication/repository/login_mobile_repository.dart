@@ -9,7 +9,7 @@ class LoginMobileRepository{
 
   LoginMobileRepository();
 
-  Future<LoginMobileGetOTPResponse?> getMobileOTP(
+  Future<LoginMobileGetOTPResponse> getMobileOTP(
       LoginMobileGetOTPRequest loginMobileGetOTPRequest) async {
     try {
       final response = await _dio.post(
@@ -24,19 +24,21 @@ class LoginMobileRepository{
       print("Success ${response.data['data']}");
 
       if (response.statusCode == 200) {
-        LoginMobileGetOTPResponse forgotPasswordGetOTPResponse =
+        LoginMobileGetOTPResponse loginMobileOTP =
         LoginMobileGetOTPResponse.fromJson(data);
-        print(forgotPasswordGetOTPResponse.details?.message);
-        return forgotPasswordGetOTPResponse;
+        print(loginMobileOTP.details?.message);
+        return loginMobileOTP;
       }
     } on DioException catch (error) {
       print(error.response?.data);
-      LoginMobileGetOTPResponse forgotPasswordGetOTPResponse =
+      LoginMobileGetOTPResponse loginMobileOTP =
       LoginMobileGetOTPResponse.fromJson(error.response?.data);
-      return forgotPasswordGetOTPResponse;
+      return loginMobileOTP;
     }
-
-    return null;
+    LoginMobileGetOTPResponse loginMobileOTP = LoginMobileGetOTPResponse(
+      error: "Unknown error occurred.",
+    );
+    return loginMobileOTP;
   }
 }
 
