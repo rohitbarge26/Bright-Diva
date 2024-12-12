@@ -2,14 +2,14 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:frequent_flow/authentication/models/login_details.dart';
+import 'package:frequent_flow/authentication/login_email_bloc/login_bloc.dart';
+import 'package:frequent_flow/authentication/models/email/login_details.dart';
 
 import '../../utils/pref_key.dart';
 import '../../utils/prefs.dart';
 import '../../utils/route.dart';
 import '../../utils/validation.dart';
 import '../../widgets/custom_text.dart';
-import '../login_bloc/login_bloc.dart';
 
 class LoginEmailScreen extends StatefulWidget {
   const LoginEmailScreen({super.key});
@@ -116,7 +116,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
     );
     print("Login details");
     print(loginDetails.toJson());
-    context.read<LoginBloc>().add(LoginUser(loginDetails: loginDetails));
+    context.read<LoginEmailBloc>().add(LoginUser(loginDetails: loginDetails));
     // Navigator.pushReplacementNamed(context, ROUT_DASHBOARD);
     /*LoginRequest loginRequest = LoginRequest(
       email: emailController.text,
@@ -152,7 +152,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<LoginBloc, LoginState>(
+    return BlocConsumer<LoginEmailBloc, LoginState>(
       listener: (context, state) {
         if (state is LoginSuccess) {
           // Set login flag to true

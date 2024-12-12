@@ -79,7 +79,7 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
 
   void _updateButtonColor() {
     setState(() {
-      bool isMobileValid = Validator.phoneNumberValidate(mobileController.text);
+      bool isMobileValid = Validator.mobileNumberValidate(mobileController.text);
       bool isOTPValid =
       Validator.emptyFieldValidate(otpController.text);
       isButtonEnabled = isMobileValid && isOTPValid;
@@ -176,7 +176,7 @@ class _LoginMobileScreenState extends State<LoginMobileScreen> {
                                     onChanged: (value) {
                                       setState(() {
                                         mobileErrorText = Validator
-                                            .phoneNumberValidate(
+                                            .mobileNumberValidate(
                                             value)
                                             ? ''
                                             : 'Please enter a valid Mobile Number';
