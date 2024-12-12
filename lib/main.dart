@@ -4,7 +4,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:frequent_flow/authentication/login_bloc/login_bloc.dart';
+import 'package:frequent_flow/authentication/login_email_bloc/login_bloc.dart';
+import 'package:frequent_flow/authentication/login_mobile_bloc/login_mobile_bloc.dart';
+import 'package:frequent_flow/authentication/repository/login_mobile_repository.dart';
 import 'package:frequent_flow/authentication/repository/login_repository.dart';
 import 'package:frequent_flow/authentication/screens/login_mobile_screen.dart';
 import 'package:frequent_flow/change_password/bloc/change_password_bloc.dart';
@@ -58,8 +60,9 @@ Future<void> main() async {
         BlocProvider<RegistrationBloc>(
           create: (context) => RegistrationBloc(RegistrationRepository()),
         ),
-        BlocProvider<LoginBloc>(
-          create: (context) => LoginBloc(loginRepository: LoginRepository()),
+        BlocProvider<LoginEmailBloc>(
+          create: (context) =>
+              LoginEmailBloc(loginRepository: LoginRepository()),
         ),
         BlocProvider<ChangePasswordBloc>(
           create: (context) => ChangePasswordBloc(
@@ -68,6 +71,10 @@ Future<void> main() async {
         BlocProvider<ForgotPasswordBloc>(
           create: (context) => ForgotPasswordBloc(
               forgotPasswordRepository: ForgotPasswordRepository()),
+        ),
+        BlocProvider<LoginMobileBloc>(
+          create: (context) =>
+              LoginMobileBloc(loginMobileRepository: LoginMobileRepository()),
         ),
       ],
       child: const MyApp(),

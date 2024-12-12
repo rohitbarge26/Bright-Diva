@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:frequent_flow/authentication/models/login_details.dart';
-import 'package:frequent_flow/authentication/models/login_response.dart';
+import 'package:frequent_flow/authentication/models/email/login_details.dart';
+import 'package:frequent_flow/authentication/models/email/login_response.dart';
 import 'package:frequent_flow/authentication/repository/login_repository.dart';
 import 'package:frequent_flow/utils/prefs.dart';
 
@@ -13,10 +13,10 @@ part 'login_event.dart';
 
 part 'login_state.dart';
 
-class LoginBloc extends Bloc<LoginEvent, LoginState> {
+class LoginEmailBloc extends Bloc<LoginEvent, LoginState> {
   LoginRepository loginRepository;
 
-  LoginBloc({required this.loginRepository}) : super(LoginInitial()) {
+  LoginEmailBloc({required this.loginRepository}) : super(LoginInitial()) {
     // on<LoginEvent>((event, e_loginUser //   // TODO: implement event handler
     // });
     on<LoginUser>(_loginUser);

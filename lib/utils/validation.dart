@@ -73,6 +73,14 @@ class Validator {
     return true;
   }
 
+  static bool mobileNumberValidate(String phoneNumber) {
+    // Remove non-digit characters
+    final digitsOnly = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
+
+    // Check if the number has exactly 10 digits
+    return digitsOnly.length == 10;
+  }
+
   static bool emptyFieldValidate(String text) {
     return text.isNotEmpty;
   }

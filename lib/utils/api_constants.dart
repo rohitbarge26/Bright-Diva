@@ -7,3 +7,4 @@ const String REGISTER = "v1/user";
 const String FORGOT_PASSWORD_OTP = "v1/user/forget-password";
 const String VERIFY_OTP = "v1/user/verify-otp";
 const String SET_NEW_PASSWORD = "v1/user/set-new-password";
+const String MOBILE_OTP = "v1/login/login-mobile";

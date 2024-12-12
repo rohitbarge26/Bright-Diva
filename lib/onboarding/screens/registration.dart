@@ -66,7 +66,7 @@ class _RegistrationState extends State<Registration> {
       bool isFirstNameValid =
           Validator.stringValidate(firstNameController.text);
       bool isLastNameValid = Validator.stringValidate(lastNameController.text);
-      bool isPhoneValid = Validator.phoneNumberValidate(phoneController.text);
+      bool isPhoneValid = Validator.mobileNumberValidate(phoneController.text);
       bool isPasswordValid =
           Validator.passwordValidate(passwordController.text);
       bool isConfirmPassword = Validator.confirmPasswordMatch(
@@ -495,7 +495,7 @@ class _RegistrationState extends State<Registration> {
                                           onChanged: (value) {
                                             setState(() {
                                               errorPhone = Validator
-                                                      .phoneNumberValidate(
+                                                      .mobileNumberValidate(
                                                           value)
                                                   ? ''
                                                   : 'Please enter a valid phone number.';
