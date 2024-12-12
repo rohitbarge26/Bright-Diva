@@ -2,7 +2,7 @@ class LoginMobileDetails {
   String? phoneNumber;
   String? otp;
 
-  LoginMobileDetails({this.phoneNumber, this.otp});
+  LoginMobileDetails({required this.phoneNumber, required this.otp});
 
   LoginMobileDetails.fromJson(Map<String, dynamic> json) {
     phoneNumber = json['phoneNumber'];

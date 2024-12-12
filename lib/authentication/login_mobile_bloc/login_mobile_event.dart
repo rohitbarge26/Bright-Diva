@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:frequent_flow/authentication/models/mobile/login_mobile_details.dart';
 
 import '../models/mobile/login_mobile_get_otp_request.dart';
 
@@ -15,4 +16,15 @@ final class LoginMobileUserOTP extends LoginMobileEvent {
 
   @override
   List<Object?> get props => [loginMobileGetOTPRequest];
+}
+
+final class LoginMobileUser extends LoginMobileEvent {
+  final LoginMobileDetails loginMobileDetails;
+
+  const LoginMobileUser({
+    required this.loginMobileDetails,
+  });
+
+  @override
+  List<Object?> get props => [loginMobileDetails];
 }

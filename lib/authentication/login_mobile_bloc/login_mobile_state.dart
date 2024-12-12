@@ -46,18 +46,18 @@ final class LoginMobileLoading extends LoginMobileState {
 }
 
 final class LoginMobileSuccess extends LoginMobileState {
-  final LoginMobileResponse loginResponse;
+  final LoginMobileResponse loginMobileResponse;
 
-  const LoginMobileSuccess({required this.loginResponse});
+  const LoginMobileSuccess({required this.loginMobileResponse});
 
   @override
-  List<Object?> get props => [loginResponse];
+  List<Object?> get props => [loginMobileResponse];
 }
 
-final class LoginError extends LoginMobileState {
+final class LoginMobileError extends LoginMobileState {
   final String error;
 
-  const LoginError({required this.error});
+  const LoginMobileError({required this.error});
 
   @override
   List<Object?> get props => [error];
