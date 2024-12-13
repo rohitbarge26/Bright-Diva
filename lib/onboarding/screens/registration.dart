@@ -46,14 +46,14 @@ class _RegistrationState extends State<Registration> {
       barrierDismissible: false, // Prevent dismissal using the back button
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Registration Successful'),
-          content: Text('Your account has been created successfully.'),
+          title: const Text('Registration Successful'),
+          content: const Text('Your account has been created successfully.'),
           actions: [
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pushReplacementNamed(ROUT_LOGIN_EMAIL);
               },
-              child: Text('Go to Login'),
+              child: const Text('Go to Login'),
             ),
           ],
         );
@@ -66,7 +66,7 @@ class _RegistrationState extends State<Registration> {
       bool isFirstNameValid =
           Validator.stringValidate(firstNameController.text);
       bool isLastNameValid = Validator.stringValidate(lastNameController.text);
-      bool isPhoneValid = Validator.phoneNumberValidate(phoneController.text);
+      bool isPhoneValid = Validator.mobileNumberValidate(phoneController.text);
       bool isPasswordValid =
           Validator.passwordValidate(passwordController.text);
       bool isConfirmPassword = Validator.confirmPasswordMatch(
@@ -495,7 +495,7 @@ class _RegistrationState extends State<Registration> {
                                           onChanged: (value) {
                                             setState(() {
                                               errorPhone = Validator
-                                                      .phoneNumberValidate(
+                                                      .mobileNumberValidate(
                                                           value)
                                                   ? ''
                                                   : 'Please enter a valid phone number.';

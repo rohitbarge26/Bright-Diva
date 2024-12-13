@@ -16,7 +16,7 @@ dependencies:
     path: /Users/rohitbarge/Documents/New Topics/frequent_flow_multi_auth
 
   flutter_permissions:
-    path: ../flutter_permissions
+    path: /Users/rohitbarge/Documents/New Topics/flutter-permissions
 
   cupertino_icons: ^1.0.6
   flutter_svg: ^2.0.7

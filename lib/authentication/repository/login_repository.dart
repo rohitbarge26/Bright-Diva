@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:frequent_flow/authentication/models/login_details.dart';
+import 'package:frequent_flow/authentication/models/email/login_details.dart';
 import 'package:frequent_flow/utils/api_constants.dart';
 
-import '../models/login_response.dart';
+import '../models/email/login_response.dart';
 
 class LoginRepository {
   final _dio = Dio();
