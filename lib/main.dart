@@ -9,6 +9,7 @@ import 'package:frequent_flow/authentication/login_mobile_bloc/login_mobile_bloc
 import 'package:frequent_flow/authentication/repository/login_mobile_repository.dart';
 import 'package:frequent_flow/authentication/repository/login_repository.dart';
 import 'package:frequent_flow/authentication/screens/login_mobile_screen.dart';
+import 'package:frequent_flow/biometrics/screens/biometric_auth_screen.dart';
 import 'package:frequent_flow/change_password/bloc/change_password_bloc.dart';
 import 'package:frequent_flow/change_password/change_password_screen.dart';
 import 'package:frequent_flow/change_password/repository/change_password_repository.dart';
@@ -161,6 +162,12 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(
               builder: (context) {
                 return const SafeArea(child: ForgotPasswordScreen());
+              },
+            );
+          case ROUT_BIOMETRIC:
+            return MaterialPageRoute(
+              builder: (context) {
+                return const SafeArea(child: BiometricAuthScreen());
               },
             );
         }
