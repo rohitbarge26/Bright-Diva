@@ -45,6 +45,8 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSFaceIDUsageDescription</key>
+    <string>App requires FaceID for Authentication</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
     <string>This app needs access to your location.</string>
     <key>NSCameraUsageDescription</key>

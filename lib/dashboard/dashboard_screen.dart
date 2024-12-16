@@ -72,6 +72,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       case "Change Password":
                         Navigator.of(context).pushNamed(ROUT_CHANGE_PASSWORD);
                         break;
+                      case "Biometric":
+                        Navigator.of(context).pushNamed(ROUT_BIOMETRIC);
+                        break;
                     }
                   },
                 );
