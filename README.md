@@ -146,3 +146,6 @@ end
 
 ### Push notifications
 1. Setup Firebase Cloud Messaging by following the instructions in  https://firebase.google.com/docs/cloud-messaging/flutter/client
+
+### Biometrics screen
+Follow setup instructions for ```local_auth``` package using  https://pub.dev/packages/local_auth
