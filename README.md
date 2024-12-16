@@ -8,12 +8,13 @@ A Flutter-based mobile application designed to streamline access to frequently u
 1. Install dependencies by running ```flutter pub get``` in the root folder of this project using the terminal.
 2. The features included in this app are listed below:
     1. Login, Registration and Forgot Password flows
-    2. Biometric
-    3. Push Notifications
-    4. Social Login
-    5. Maps integration
-    6. Permissions
-    7. Change Password
+    2. Login Options - Email and Password / Mobile Number OTP
+    3. Biometric
+    4. Push Notifications
+    5. Social Login
+    6. Maps integration
+    7. Permissions
+    8. Change Password
 
 ### Maps integration setup
 The Maps integration feature uses the custom ```flutter_google_maps``` package, the ```google_maps_flutter``` and ```geolocator``` packages.
