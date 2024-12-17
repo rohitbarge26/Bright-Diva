@@ -462,7 +462,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                   focusedPinTheme: defaultPinTheme.copyWith(
                                       decoration: BoxDecoration(
                                     border: Border.all(
-                                      color: const Color(0xFFF85A5A),
+                                      color: const Color(0xFF2986CC),
                                       width: 1,
                                     ),
                                     borderRadius: BorderRadius.circular(9),
