@@ -51,7 +51,11 @@ class _PushNotificationsScreenState extends State<PushNotificationsScreen> {
   @override
   void initState() {
     super.initState();
-    _firebaseMessaging.requestPermission();
+    _firebaseMessaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
     FirebaseMessaging.onMessage.listen(
       (RemoteMessage event) {
@@ -64,6 +68,8 @@ class _PushNotificationsScreenState extends State<PushNotificationsScreen> {
   }
 
   Future<void> _showNotification(RemoteNotification notification) async {
+    const DarwinNotificationDetails iOSNotificationDetails =
+        DarwinNotificationDetails();
     const androidNotificationDetails = AndroidNotificationDetails(
       'high_importance_channel',
       'High Importance Notifications',
@@ -74,6 +80,7 @@ class _PushNotificationsScreenState extends State<PushNotificationsScreen> {
     );
     const notificationDetails = NotificationDetails(
       android: androidNotificationDetails,
+      iOS: iOSNotificationDetails,
     );
 
     await flutterLocalNotificationsPlugin.show(
