@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:frequent_flow/utils/prefs.dart';
 import 'package:frequent_flow/utils/route.dart';
 
+import '../widgets/custom_text.dart';
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -42,7 +44,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               itemBuilder: (context, index) {
                 return ListTile(
                   title: Text(features[index]),
-                  leading: const Icon(Icons.label),
+                  leading: const Icon(
+                    Icons.label,
+                    color: Color(0xFF2986CC),
+                  ),
                   onTap: () {
                     switch (features[index]) {
                       case "Push notification":
@@ -82,15 +87,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(16),
-            child: ElevatedButton(
-              onPressed: () {
-                _onLogOut();
-              },
-              style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, 50),
+            padding: const EdgeInsets.all(16),
+            child: Container(
+              width: double.infinity,
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: const Color(0xFF2986CC),
               ),
-              child: Text("LogOut"),
+              child: TextButton(
+                onPressed: _onLogOut,
+                child: const CustomText(
+                    text: 'Logout',
+                    fontSize: 16,
+                    desiredLineHeight: 24,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFFFFFFFF)),
+              ),
             ),
           ),
         ],
