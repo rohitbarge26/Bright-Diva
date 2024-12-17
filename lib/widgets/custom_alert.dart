@@ -40,13 +40,13 @@ class CustomAlert extends StatelessWidget {
               ),
               child: TextButton(
                 onPressed: onButtonTap,
-                child: const CustomText(
-                    text: 'Login',
+                child: CustomText(
+                    text: buttonText,
                     fontSize: 16,
                     desiredLineHeight: 24,
                     fontFamily: 'Inter',
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFFFFFFFF)),
+                    color: const Color(0xFFFFFFFF)),
               ),
             ),
           ),
