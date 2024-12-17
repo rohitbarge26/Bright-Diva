@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frequent_flow/authentication/login_email_bloc/login_bloc.dart';
 import 'package:frequent_flow/authentication/models/email/login_details.dart';
+import 'package:frequent_flow/widgets/custom_alert.dart';
 
 import '../../utils/pref_key.dart';
 import '../../utils/prefs.dart';
@@ -131,20 +132,11 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'Error',
-            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-          ),
-          content: Text(errorMessage),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('OK'),
-            ),
-          ],
+        return CustomAlert(
+          title: "Error",
+          message: errorMessage,
+          buttonText: "OK",
+          onButtonTap: () => Navigator.of(context).pop(),
         );
       },
     );
