@@ -72,11 +72,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   );
 
   void _startTimer() {
+    timer?.cancel();
     setState(() {
       timerStartedOnce = true;
     });
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      this.timer = timer;
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (timeLeft > 0) {
         setState(() {
           timeLeft--;
@@ -208,6 +208,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 clickEmailSubmit = false;
                 clickOTPSubmit = true;
                 clickResetPassword = false;
+                timeLeft = 60;
+                _startTimer();
               });
             } else if (state is ForgotPasswordGetOTPError) {
               // show error dialog
@@ -473,18 +475,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 const SizedBox(
                                   height: 10,
                                 ),
-                                // Visibility(
-                                //   visible: otpErrorText.isNotEmpty,
-                                //   child: CustomText(
-                                //     text: otpErrorText,
-                                //     fontSize: 12,
-                                //     desiredLineHeight: 16,
-                                //     fontFamily: 'Inter',
-                                //     fontWeight: FontWeight.w500,
-                                //     color: const Color(0xFFF85A5A),
-                                //     textAlign: TextAlign.left,
-                                //   ),
-                                // ),
+                                Visibility(
+                                  visible: otpErrorText.isNotEmpty,
+                                  child: CustomText(
+                                    text: otpErrorText,
+                                    fontSize: 12,
+                                    desiredLineHeight: 16,
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.w500,
+                                    color: const Color(0xFFF85A5A),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ),
                                 const SizedBox(
                                   height: 32,
                                 ),
@@ -496,21 +498,20 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                         setState(() {
                                           isResendCode = true;
                                           //   set timeLeft to 60 and start timer once the code is sent successfully
+                                          timeLeft = 60;
+                                          _startTimer();
                                         });
-                                        /*BlocProvider.of<
-                                        RegistrationBloc>(
-                                        context)
-                                        .add(
-                                      SendOTP(
-                                        sendOTPRequest: SendOTPRequest(
-                                            type: 'Email',
-                                            address:
-                                            emailController
-                                                .text,
-                                            source:
-                                            'FORGOT_PASSWORD'),
-                                      ),
-                                    );*/
+                                        final forgotPasswordGetOTPRequest =
+                                            ForgotPasswordGetOTPRequest(
+                                                emailAddress:
+                                                    emailController.text);
+                                        BlocProvider.of<ForgotPasswordBloc>(
+                                                context)
+                                            .add(
+                                          ForgotPasswordGetOTPEvent(
+                                              forgotPasswordGetOTPRequest:
+                                                  forgotPasswordGetOTPRequest),
+                                        );
                                       }
                                     },
                                     child: CustomText(
