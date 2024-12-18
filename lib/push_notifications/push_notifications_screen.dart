@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:frequent_flow/main.dart';
 
+import '../widgets/custom_text.dart';
+
 class PushNotificationsScreen extends StatefulWidget {
   const PushNotificationsScreen({super.key});
 
@@ -14,7 +16,7 @@ class PushNotificationsScreen extends StatefulWidget {
 
 class _PushNotificationsScreenState extends State<PushNotificationsScreen> {
   final _firebaseMessaging = FirebaseMessaging.instance;
-  final String serverUrl = "http://192.168.1.2:3000/send-notification";
+  final String serverUrl = "http://192.168.1.3:3000/send-notification";
   String? _fcmToken;
 
   Future<void> sendNotification(String fcmToken) async {
@@ -51,7 +53,11 @@ class _PushNotificationsScreenState extends State<PushNotificationsScreen> {
   @override
   void initState() {
     super.initState();
-    _firebaseMessaging.requestPermission();
+    _firebaseMessaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
     FirebaseMessaging.onMessage.listen(
       (RemoteMessage event) {
@@ -64,6 +70,8 @@ class _PushNotificationsScreenState extends State<PushNotificationsScreen> {
   }
 
   Future<void> _showNotification(RemoteNotification notification) async {
+    const DarwinNotificationDetails iOSNotificationDetails =
+        DarwinNotificationDetails();
     const androidNotificationDetails = AndroidNotificationDetails(
       'high_importance_channel',
       'High Importance Notifications',
@@ -74,6 +82,7 @@ class _PushNotificationsScreenState extends State<PushNotificationsScreen> {
     );
     const notificationDetails = NotificationDetails(
       android: androidNotificationDetails,
+      iOS: iOSNotificationDetails,
     );
 
     await flutterLocalNotificationsPlugin.show(
@@ -100,13 +109,30 @@ class _PushNotificationsScreenState extends State<PushNotificationsScreen> {
         title: const Text("Push notifications"),
       ),
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            if (_fcmToken != null) {
-              sendNotification(_fcmToken!);
-            }
-          },
-          child: const Text('Send Push Notification'),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Container(
+            width: double.infinity,
+            height: 50,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: const Color(0xFF2986CC),
+            ),
+            child: TextButton(
+              onPressed: () {
+                if (_fcmToken != null) {
+                  sendNotification(_fcmToken!);
+                }
+              },
+              child: const CustomText(
+                  text: 'Send push notification',
+                  fontSize: 16,
+                  desiredLineHeight: 24,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFFFFFFFF)),
+            ),
+          ),
         ),
       ),
     );

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:multi_auth/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../widgets/custom_text.dart';
+
 class SocialLogin extends StatefulWidget {
   const SocialLogin({super.key});
 
@@ -36,7 +38,8 @@ class _SocialLoginState extends State<SocialLogin> {
 
   Future<void> _clearUserInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await prefs.remove('userName');
+    await prefs.remove('userProvider');
   }
 
   Future<void> _handleSignIn(String provider) async {
@@ -93,15 +96,49 @@ class _SocialLoginState extends State<SocialLogin> {
               ),
             const SizedBox(height: 20),
             if (userName == "Anonymous")
-              ElevatedButton(
-                onPressed: () => _handleSignIn('Google'),
-                child: const Text('Sign In with Google'),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Container(
+                  width: double.infinity,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: const Color(0xFF2986CC),
+                  ),
+                  child: TextButton(
+                    onPressed: () => _handleSignIn("Google"),
+                    child: const CustomText(
+                        text: 'Sign In with Google',
+                        fontSize: 16,
+                        desiredLineHeight: 24,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFFFFFFF)),
+                  ),
+                ),
               ),
             const SizedBox(height: 10),
             if (userName == "Anonymous")
-              ElevatedButton(
-                onPressed: () => _handleSignIn('Facebook'),
-                child: const Text('Sign In with Facebook'),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Container(
+                  width: double.infinity,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: const Color(0xFF2986CC),
+                  ),
+                  child: TextButton(
+                    onPressed: () => _handleSignIn("Facebook"),
+                    child: const CustomText(
+                        text: 'Sign In with Facebook',
+                        fontSize: 16,
+                        desiredLineHeight: 24,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFFFFFFF)),
+                  ),
+                ),
               ),
             const SizedBox(height: 20),
             ElevatedButton(

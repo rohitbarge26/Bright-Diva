@@ -13,7 +13,6 @@ import 'package:frequent_flow/biometrics/screens/biometric_auth_screen.dart';
 import 'package:frequent_flow/change_password/bloc/change_password_bloc.dart';
 import 'package:frequent_flow/change_password/change_password_screen.dart';
 import 'package:frequent_flow/change_password/repository/change_password_repository.dart';
-import 'package:frequent_flow/modules/map_integration.dart';
 import 'package:frequent_flow/onboarding/bloc/forgot_password_bloc/forgot_password_bloc.dart';
 import 'package:frequent_flow/onboarding/registration_bloc/registration_bloc.dart';
 import 'package:frequent_flow/onboarding/repository/forgot_password_repository.dart';
@@ -30,6 +29,7 @@ import 'firebase_options.dart';
 import 'SplashScreen.dart';
 import 'authentication/screens/login_email_screen.dart';
 import 'dashboard/dashboard_screen.dart';
+import 'map/map_integration.dart';
 import 'onboarding/screens/registration.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -41,9 +41,11 @@ Future<void> main() async {
 
   const initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
+  const DarwinInitializationSettings initializationSettingsIOS =
+      DarwinInitializationSettings();
   const initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
-    iOS: DarwinInitializationSettings(),
+    iOS: initializationSettingsIOS,
   );
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 

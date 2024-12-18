@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frequent_flow/widgets/custom_alert.dart';
 import 'package:local_auth/local_auth.dart';
+
+import '../../widgets/custom_text.dart';
 
 class BiometricAuthScreen extends StatefulWidget {
   const BiometricAuthScreen({super.key});
@@ -54,17 +57,11 @@ class _BiometricAuthScreenState extends State<BiometricAuthScreen> {
   void _showAlert(String title, String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text("OK"),
-          ),
-        ],
+      builder: (context) => CustomAlert(
+        title: title,
+        message: message,
+        buttonText: "OK",
+        onButtonTap: () => Navigator.of(context).pop(),
       ),
     );
   }
@@ -76,9 +73,26 @@ class _BiometricAuthScreenState extends State<BiometricAuthScreen> {
         title: const Text("Biometric Authentication"),
       ),
       body: Center(
-        child: ElevatedButton(
-          onPressed: _authenticate,
-          child: const Text("Authenticate with Biometrics"),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Container(
+            width: double.infinity,
+            height: 50,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: const Color(0xFF2986CC),
+            ),
+            child: TextButton(
+              onPressed: _authenticate,
+              child: const CustomText(
+                  text: 'Authenticate with Biometrics',
+                  fontSize: 16,
+                  desiredLineHeight: 24,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFFFFFFFF)),
+            ),
+          ),
         ),
       ),
     );

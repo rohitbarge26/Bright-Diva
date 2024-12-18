@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'custom_text.dart';
+
 class CustomAlert extends StatelessWidget {
   final String title;
   final String message;
@@ -29,9 +31,23 @@ class CustomAlert extends StatelessWidget {
           Text(message, textAlign: TextAlign.center),
           const SizedBox(height: 24),
           Center(
-            child: ElevatedButton(
-              onPressed: onButtonTap,
-              child: Text(buttonText),
+            child: Container(
+              width: double.infinity,
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: const Color(0xFF2986CC),
+              ),
+              child: TextButton(
+                onPressed: onButtonTap,
+                child: CustomText(
+                    text: buttonText,
+                    fontSize: 16,
+                    desiredLineHeight: 24,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFFFFFFFF)),
+              ),
             ),
           ),
         ],
