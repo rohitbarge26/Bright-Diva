@@ -36,3 +36,4 @@ String UPDATE_FLAG = 'updateFlag';
 String BIOMETRIC_FLAG = 'biometric';
 String NOTIFICATION_FLAG = 'notification';
 String FCM_TOKEN = 'fcm_token';
+String USER_ROLE = "user_role";

@@ -3,12 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frequent_flow/change_password/bloc/change_password_bloc.dart';
 import 'package:frequent_flow/change_password/models/change_password_request.dart';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../utils/validation.dart';
 import '../widgets/custom_text.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
-  const ChangePasswordScreen({super.key});
+  const ChangePasswordScreen({super.key, required this.onBackTap});
+
+  final void Function() onBackTap;
+
 
   @override
   State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
@@ -41,7 +44,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       final changePasswordRequest = ChangePasswordRequest(
         oldPassword: _currentPasswordController.text,
         newPassword: _newPasswordController.text,
-        confirmPassword: _confirmPasswordController.text,
       );
       print(changePasswordRequest.toJson());
       context.read<ChangePasswordBloc>().add(
@@ -49,29 +51,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               changePasswordRequest: changePasswordRequest,
             ),
           );
-
-      // setState(() {
-      //   _isLoading = false;
-      // });
-
-      // Response handling
-      // final isSuccess = true;
-      // if (isSuccess) {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(
-      //       content: Text("Password changed successfully!"),
-      //     ),
-      //   );
-      //   _currentPasswordController.clear();
-      //   _newPasswordController.clear();
-      //   _confirmPasswordController.clear();
-      // } else {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(
-      //       content: Text("Failed to change password. Try again."),
-      //     ),
-      //   );
-      // }
     }
   }
 
@@ -123,19 +102,18 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Change Password"),
+        title:  Text(AppLocalizations.of(context)!.prChangePassword),
       ),
       body: BlocConsumer<ChangePasswordBloc, ChangePasswordState>(
         listener: (context, state) {
           if (state is ChangePasswordSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text("Password changed successfully!"),
+                content: Text(AppLocalizations.of(context)!.prPassSuccessMessage),
               ),
             );
             Navigator.of(context).pop();
           } else if (state is ChangePasswordError) {
-            print("change password error");
             _showErrorDialog(context, state.error);
           }
         },
@@ -145,41 +123,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.start,
-                //   crossAxisAlignment: CrossAxisAlignment.center,
-                //   children: [
-                //     Container(
-                //       height: 50,
-                //       alignment: Alignment.centerLeft,
-                //       child: InkWell(
-                //         onTap: () {
-                //           // widget.onBackArrowTap();
-                //         },
-                //         child: SvgPicture.asset(
-                //           'assets/icon/back_arrow_icon.svg',
-                //           width: 40,
-                //           height: 40,
-                //         ),
-                //       ),
-                //     ),
-                //     const SizedBox(width: 12),
-                //     Container(
-                //       height: 50,
-                //       alignment: Alignment.centerLeft,
-                //       child: const CustomText(
-                //         text: "Change Password",
-                //         fontSize: 20,
-                //         desiredLineHeight: 28,
-                //         fontFamily: 'Inter',
-                //         fontWeight: FontWeight.w600,
-                //         letterSpacing: 0.02,
-                //         color: Color(0xFF171717),
-                //         textAlign: TextAlign.center,
-                //       ),
-                //     ),
-                //   ],
-                // ),
                 Expanded(
                   child: Container(
                     width: MediaQuery.of(context).size.width,
@@ -221,14 +164,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                                   Validator.emptyFieldValidate(
                                                           value)
                                                       ? ''
-                                                      : "Enter current password";
+                                                      : AppLocalizations.of(context)!.prEnterCurrentPassword;
                                             });
                                             _updateButtonColor();
                                           },
                                           validator: (value) {
                                             if (value == null ||
                                                 value.isEmpty) {
-                                              return "Please enter password";
+                                              return AppLocalizations.of(context)!.prPleaseEnterPassword;
                                             }
                                             return null;
                                           },
@@ -237,9 +180,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                             color: Color(0xFF737373),
                                             fontSize: 16,
                                           ),
-                                          decoration: const InputDecoration(
-                                            labelText: "Current password",
-                                            labelStyle: TextStyle(
+                                          decoration: InputDecoration(
+                                            labelText: AppLocalizations.of(context)!.prCurrentPass,
+                                            labelStyle: const TextStyle(
                                               color: Color(0xFF737373),
                                             ),
                                             border: InputBorder.none,
@@ -324,15 +267,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                                                   .text,
                                                               value)
                                                           ? ''
-                                                          : "Current password and new password should not be same"
-                                                  : "Password do not meet requirements:\n\n\u2022 Must contain at least 8 characters\n\u2022 Must contain one special symbol (#, &, % etc)\n\u2022 Must contain one number (0-9)";
+                                                          : AppLocalizations.of(context)!.prOldPassSameMsg
+                                                  : AppLocalizations.of(context)!.passwordPolicy;
                                             });
                                             _updateButtonColor();
                                           },
                                           validator: (value) {
                                             if (value == null ||
                                                 value.isEmpty) {
-                                              return "Please enter Password";
+                                              return AppLocalizations.of(context)!.prPleaseEnterPassword;
                                             }
                                             return null;
                                           },
@@ -342,8 +285,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                             fontSize: 16,
                                             // Other text style properties like fontWeight, fontFamily, etc. can also be added here.
                                           ),
-                                          decoration: const InputDecoration(
-                                            labelText: "New Password",
+                                          decoration:  InputDecoration(
+                                            labelText: AppLocalizations.of(context)!.prNewPass,
                                             labelStyle: TextStyle(
                                               color: Color(0xFF737373),
                                             ),
@@ -429,7 +372,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                                               .text,
                                                           value)
                                                       ? ''
-                                                      : "Passwords do not match";
+                                                      : AppLocalizations.of(context)!.prPasswordsDoNotMatch;
                                             });
                                             _updateButtonColor();
                                           },
@@ -439,9 +382,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                             fontSize: 16,
                                             // Other text style properties like fontWeight, fontFamily, etc. can also be added here.
                                           ),
-                                          decoration: const InputDecoration(
-                                            labelText: "Re-type New Password",
-                                            labelStyle: TextStyle(
+                                          decoration: InputDecoration(
+                                            labelText: AppLocalizations.of(context)!.prReTypeNewPass,
+                                            labelStyle: const TextStyle(
                                               color: Color(0xFF737373),
                                             ),
                                             border: InputBorder.none,
@@ -518,8 +461,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                     _onButtonPressed(context);
                                   }
                                 : null,
-                            child: const CustomText(
-                                text: "Save Changes",
+                            child:  CustomText(
+                                text: AppLocalizations.of(context)!.submit,
                                 fontSize: 16,
                                 desiredLineHeight: 24,
                                 fontFamily: 'Inter',

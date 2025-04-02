@@ -16,13 +16,15 @@ class Validator {
     bool hasSpecialChar = specialCharRegex.hasMatch(password);
     bool hasDigit = digitRegex.hasMatch(password);
     bool hasSpace = password.contains(' ');
-    bool hasAlphabet = alphabetRegex.hasMatch(password); // Check for alphabet
+    bool hasAlphabet = alphabetRegex.hasMatch(password);
+    bool hasAlphanumeric = alphanumericValidate(password); // Check for alphabet
 
     if (!hasMinimumLength ||
         !hasSpecialChar ||
         !hasDigit ||
         hasSpace ||
-        !hasAlphabet) {
+        !hasAlphabet ||
+        hasAlphanumeric) {
       if (!hasMinimumLength) {
         return false;
       }
@@ -35,12 +37,26 @@ class Validator {
       if (hasSpace) {
         return false;
       }
-      if(!hasAlphabet){
+      if (!hasAlphabet) {
+        return false;
+      }
+      if (!hasAlphanumeric) {
         return false;
       }
       return false;
     }
     return true;
+  }
+
+  static bool alphanumericValidate(String input) {
+    final RegExp alphabetRegex = RegExp(r'[a-zA-Z]'); // Check for alphabets
+    final RegExp digitRegex = RegExp(r'[0-9]'); // Check for digits
+
+    bool hasAlphabet =
+        alphabetRegex.hasMatch(input); // Contains at least one letter
+    bool hasDigit = digitRegex.hasMatch(input); // Contains at least one digit
+
+    return hasAlphabet && hasDigit; // Must contain both letters and digits
   }
 
   static bool stringValidate(String name) {
@@ -93,5 +109,16 @@ class Validator {
     return dateTime.year == now.year &&
         dateTime.month == now.month &&
         dateTime.day == now.day;
+  }
+
+  static bool amountValidate(String amount) {
+    // Check if the amount is a valid number and not empty
+    if (amount.isEmpty) {
+      return false;
+    }
+
+    // Check if the amount is a valid number with optional decimal places
+    final RegExp amountRegex = RegExp(r'^\d+(\.\d{1,2})?$');
+    return amountRegex.hasMatch(amount);
   }
 }

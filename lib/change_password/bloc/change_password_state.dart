@@ -15,7 +15,7 @@ final class ChangePasswordLoading extends ChangePasswordState {
 }
 
 final class ChangePasswordSuccess extends ChangePasswordState {
-  final ChangePasswordResponse response;
+  final ChangePasswordResponse? response;
 
   const ChangePasswordSuccess({required this.response});
 

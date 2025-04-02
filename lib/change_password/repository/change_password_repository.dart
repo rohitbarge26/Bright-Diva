@@ -5,44 +5,41 @@ import 'package:frequent_flow/utils/api_constants.dart';
 import 'package:frequent_flow/utils/pref_key.dart';
 import 'package:frequent_flow/utils/prefs.dart';
 
-class ChangePasswordRepository {
-  final _dio = Dio();
+import '../../utils/header_api_option.dart';
+import '../../utils/response_status.dart';
 
-  ChangePasswordRepository();
+class ChangePasswordRepository {
+  Dio _dio = Dio();
+
+  void setDio(Dio dio) {
+    _dio = dio;
+  }
+
 
   Future<ChangePasswordResponse?> changePassword(
       ChangePasswordRequest changePasswordRequest) async {
-    print("Change Password request initiated");
+    String url = "$BASE_URL$CHANGE_PASSWORD";
+    print('URL:$url');
+    print('Request :${changePasswordRequest.toJson()}');
     try {
-      print(Prefs.getString(TOKEN));
-      final response = await _dio.patch(
-        '$BASE_URL$CHANGE_PASSWORD',
+      final Response response = await _dio.post(
+        url,
         data: changePasswordRequest.toJson(),
-        options: Options(headers: {
-          "Authorization": 'Bearer ${Prefs.getString(TOKEN)}',
-          "Content-Type": "application/json",
-        }),
+        options: await HeaderApiConfig.getOptionsWithJWToken(),
       );
-
       var data = response.data;
-
-      if (response.statusCode == 200) {
-        final changePasswordResponse =
-            ChangePasswordResponse.fromJson(data['data'] ?? data['details']);
-        print(changePasswordResponse.toJson());
-        return changePasswordResponse;
+      print('Response :$data');
+      if (response.statusCode == SUCCESS) {
+        ChangePasswordResponse addCustomerResponse =
+        ChangePasswordResponse.fromJson(data);
+        return addCustomerResponse;
       }
     } on DioException catch (e) {
-      print(e.response!.data);
-      ChangePasswordResponse changePasswordResponse =
-          ChangePasswordResponse.fromJson(e.response!.data['details']);
-      print('Error ${changePasswordResponse.toJson()}');
-      return changePasswordResponse;
-    } catch (e) {
-      print(e.toString());
-      return null;
+      print("Response Error: ${e.response?.data}");
+      ChangePasswordResponse addCustomerResponse =
+      ChangePasswordResponse.fromJson(e.response?.data);
+      return addCustomerResponse;
     }
-
     return null;
   }
 }

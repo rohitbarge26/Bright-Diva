@@ -1,5 +1,9 @@
 
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../authentication/models/email/login_response.dart';
 
 class Prefs {
   static late SharedPreferences _prefs;
@@ -39,6 +43,23 @@ class Prefs {
 
   static Future<bool> setBiometricValue(String key, bool? value) async =>
       await _prefs.setBool(key, value ?? false);
+
+  // Save User object
+  static Future<bool> setUser(String key, User user) async {
+    final userJson = user.toJson(); // Convert User object to JSON
+    final userString = jsonEncode(userJson); // Convert JSON to string
+    return await _prefs.setString(key, userString);
+  }
+
+  // Retrieve User object
+  static User? getUser(String key) {
+    final userString = _prefs.getString(key);
+    if (userString != null) {
+      final userJson = jsonDecode(userString); // Convert string to JSON
+      return User.fromJson(userJson); // Convert JSON to User object
+    }
+    return null;
+  }
 
 //gets
   static bool getBool(String key) => _prefs.getBool(key) ?? false;

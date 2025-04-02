@@ -5,12 +5,18 @@ import 'package:flutter_svg/svg.dart';
 import 'package:frequent_flow/authentication/login_email_bloc/login_bloc.dart';
 import 'package:frequent_flow/authentication/models/email/login_details.dart';
 import 'package:frequent_flow/widgets/custom_alert.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../multi_language/model/language_list_response.dart';
 import '../../utils/pref_key.dart';
 import '../../utils/prefs.dart';
 import '../../utils/route.dart';
 import '../../utils/validation.dart';
 import '../../widgets/custom_text.dart';
+
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../../widgets/language_selection_dialog.dart';
 
 class LoginEmailScreen extends StatefulWidget {
   const LoginEmailScreen({super.key});
@@ -31,7 +37,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
   bool clickLogin = false;
   int loginAttemptCount = 2;
   bool isBiometricDialogVisible = false;
-
+  List<LanguageListData>? languageList;
   GlobalKey<State> loadingDialogKey = GlobalKey();
 
   void showLoadingDialog(BuildContext context) {
@@ -116,16 +122,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
       password: passwordController.text,
     );
     print("Login details");
-    print(loginDetails.toJson());
     context.read<LoginEmailBloc>().add(LoginUser(loginDetails: loginDetails));
-    // Navigator.pushReplacementNamed(context, ROUT_DASHBOARD);
-    /*LoginRequest loginRequest = LoginRequest(
-      email: emailController.text,
-      password: passwordController.text,
-      pushNotificationToken: fcmToken,
-    );
-    BlocProvider.of<AuthenticationBloc>(context)
-        .add(LoginUser(loginRequest: loginRequest));*/
   }
 
   void _showErrorDialog(BuildContext context, String errorMessage) {
@@ -155,7 +152,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
           Prefs.setBool(LOGIN_FLAG, true);
           // Navigate to Dashboard
           Navigator.of(context).pushNamedAndRemoveUntil(
-            ROUT_DASHBOARD,
+            ROUT_HOME,
             (route) => false,
           );
         } else if (state is LoginError) {
@@ -167,7 +164,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: const Color(0xFFFFFFFF),
+          backgroundColor: const Color(0xFFFFC6C6).withOpacity(0.2),
           body: SizedBox(
             height: MediaQuery.of(context).size.height,
             child: Stack(children: [
@@ -177,23 +174,41 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                   Form(
                     key: _formEmailKey,
                     child: Container(
+                        margin: const EdgeInsets.all(5),
                         width: double.infinity,
                         height: null,
+                        // You can set a specific height if needed
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(19),
-                          color: const Color(0xFFFFFFFF),
+                          color: Colors.white, // White background
+                          border: Border.all(
+                            color: Colors.black, // Black border
+                            width: 1.0, // Border width
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              // Grey shadow
+                              spreadRadius: 2,
+                              // Spread radius
+                              blurRadius: 5,
+                              // Blur radius
+                              offset: const Offset(0, 3), // Shadow position
+                            ),
+                          ],
                         ),
                         child: Column(
                           children: [
-                            const Padding(
-                              padding: EdgeInsets.only(top: 48),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 48),
                               child: CustomText(
-                                  text: 'Login',
+                                  text:
+                                      AppLocalizations.of(context)!.labelLogin,
                                   fontSize: 24,
                                   desiredLineHeight: 29.05,
                                   fontFamily: 'Inter',
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xFF262626)),
+                                  color: const Color(0xFF262626)),
                             ),
                             Padding(
                               padding: const EdgeInsets.only(
@@ -232,8 +247,10 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                           height: 1.25,
                                           fontSize: 16,
                                         ),
-                                        decoration: const InputDecoration(
-                                          labelText: 'Email',
+                                        decoration: InputDecoration(
+                                          labelText:
+                                              AppLocalizations.of(context)!
+                                                  .email,
                                           labelStyle: TextStyle(
                                             color: Color(0xFF737373),
                                           ),
@@ -311,8 +328,10 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                             height: 1.25,
                                             fontSize: 16,
                                           ),
-                                          decoration: const InputDecoration(
-                                            labelText: 'Password',
+                                          decoration: InputDecoration(
+                                            labelText:
+                                                AppLocalizations.of(context)!
+                                                    .password,
                                             labelStyle: TextStyle(
                                               color: Color(0xFF737373),
                                             ),
@@ -393,8 +412,9 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                       onPressed: isButtonEnabled
                                           ? _onButtonPressed
                                           : null,
-                                      child: const CustomText(
-                                          text: 'Login',
+                                      child: CustomText(
+                                          text: AppLocalizations.of(context)!
+                                              .labelLogin,
                                           fontSize: 16,
                                           desiredLineHeight: 24,
                                           fontFamily: 'Inter',
@@ -405,63 +425,150 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                   const SizedBox(
                                     height: 12,
                                   ),
-                                  Container(
-                                    alignment: Alignment.centerLeft,
-                                    child: InkWell(
-                                      onTap: () {
-                                        Navigator.pushNamed(
-                                            context, ROUT_FORGOT_PASSWORD);
-                                      },
-                                      child: const CustomText(
-                                          text: 'Forgot Password?',
-                                          fontSize: 12,
-                                          desiredLineHeight: 14.52,
-                                          fontFamily: 'Inter',
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xFF737373)),
-                                    ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Container(
+                                        alignment: Alignment.centerLeft,
+                                        child: InkWell(
+                                          onTap: () {
+                                            Navigator.pushNamed(
+                                                context, ROUT_FORGOT_PASSWORD);
+                                          },
+                                          child: CustomText(
+                                              text:
+                                                  AppLocalizations.of(context)!
+                                                      .forgotPassword,
+                                              fontSize: 16,
+                                              desiredLineHeight: 14.52,
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.w600,
+                                              color: Color(0xFF737373)),
+                                        ),
+                                      ),
+                                      InkWell(
+                                        onTap: () {
+                                          languageList = LanguageListResponse
+                                                  .getStaticLanguages()
+                                              .data;
+                                          showDialog(
+                                              barrierDismissible: false,
+                                              context: context,
+                                              builder: (context) =>
+                                                  LanguageSelectionDialog(
+                                                    onChangeLanguageTap: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                      hideLoadingDialog();
+                                                    },
+                                                    data: languageList,
+                                                  ));
+                                        },
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            SvgPicture.asset(
+                                              'assets/icons/language_icon.svg',
+                                              height: 20,
+                                              width: 20,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            CustomText(
+                                                text: AppLocalizations.of(
+                                                        context)!
+                                                    .labelLanguage,
+                                                fontSize: 16,
+                                                desiredLineHeight: 16.94,
+                                                fontFamily: 'Inter',
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.w500),
+                                            const SizedBox(width: 4),
+                                            Center(
+                                              child: SvgPicture.asset(
+                                                'assets/icons/expand_more.svg',
+                                                height: 20,
+                                                width: 20,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
+                                  const SizedBox(height: 20),
                                 ],
                               ),
                             ),
                           ],
-                        )),
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: Center(
-                      child: RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                            text: 'New User? ',
-                            style: const TextStyle(
-                              color: Color(0xFF737373),
-                              fontSize: 14,
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w400,
-                              height: 16.94 / 14.0,
-                            ),
-                            children: <TextSpan>[
-                              TextSpan(
-                                text: 'Register here',
-                                style: const TextStyle(
-                                    color: Color(0xFF737373),
-                                    fontSize: 13,
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.w600,
-                                    decoration: TextDecoration.underline,
-                                    height: 16.94 / 13.0),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () async {
-                                    Navigator.pushNamed(
-                                        context, ROUT_REGISTRATION);
-                                  },
-                              ),
-                            ]),
-                      ),
-                    ),
+                        )), /*Container(
+                        width: double.infinity,
+                        height: null,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(19),
+                          color: const Color(0xFFE5E5E5),
+                        ),
+                        child: ),*/
                   ),
                 ],
+              ),
+              Positioned(
+                bottom: 20, // Adjust the position as needed
+                left: 5,
+                right: 5,
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      CustomText(
+                          text: 'Copyright 2025 @ BrightDiva',
+                          color: Colors.white,
+                          fontSize: 14,
+                          desiredLineHeight: 20,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w300),
+                      CustomText(
+                          text: '|',
+                          color: Colors.white,
+                          fontSize: 14,
+                          desiredLineHeight: 20,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w300),
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            const TextSpan(
+                              text: 'Powered By - ',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            TextSpan(
+                              text: 'eDigiTech',
+                              style: const TextStyle(
+                                color: Colors.blue,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  // Open the link in a browser
+                                  launchUrl(
+                                      Uri.parse('https://www.edigitech.in'));
+                                },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               Center(
                 child: Visibility(

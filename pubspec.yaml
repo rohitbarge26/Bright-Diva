@@ -9,32 +9,41 @@ dependencies:
   flutter:
     sdk: flutter
 
-  flutter_google_maps:
-    path: /Users/rohitbarge/Documents/New Topics/frequent flow modules
-
-  multi_auth:
-    path: /Users/rohitbarge/Documents/New Topics/frequent_flow_multi_auth
+  flutter_localizations:
+    sdk: flutter
 
   flutter_permissions:
     path: /Users/rohitbarge/Documents/New Topics/flutter-permissions
 
+  intl: ^0.19.0
+  fl_chart: ^0.63.0 # Replace with the latest version
+  timezone: ^0.9.0
+  flutter_localization: ^0.1.14
+  provider: ^6.1.1
+  flutter_typeahead: ^5.2.0
   cupertino_icons: ^1.0.6
   flutter_svg: ^2.0.7
   shared_preferences: ^2.2.0
   flutter_timezone: ^1.0.8
   country_picker: ^2.0.20
   country_code_picker: ^3.0.0
-  geolocator: ^13.0.2
-#  google_sign_in: ^6.2.2
-  google_maps_flutter: ^2.10.0
-  firebase_core: ^3.8.0
-  firebase_messaging: ^15.1.5
   dio: ^5.7.0
   flutter_local_notifications: ^18.0.1
   flutter_bloc: ^8.1.6
   equatable: ^2.0.7
   pinput: ^4.0.0
   local_auth: ^2.3.0
+  dropdown_search: ^5.0.6
+  table_calendar: ^3.0.8
+  pdf: ^3.10.4
+  path_provider: ^2.1.2
+  flutter_file_dialog: ^2.0.0
+  permission_handler: ^11.3.1
+  open_file: ^3.3.1
+  url_launcher: ^6.1.11
+
+
+
 
 dev_dependencies:
   flutter_test:
@@ -42,9 +51,15 @@ dev_dependencies:
 
   flutter_lints: ^3.0.0
 
-flutter:
 
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/brand_logo.png"
+
+flutter:
   uses-material-design: true
+  generate: true
   assets:
     - assets/icons/
     - assets/images/

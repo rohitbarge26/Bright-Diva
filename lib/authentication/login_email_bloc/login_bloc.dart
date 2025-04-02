@@ -25,15 +25,16 @@ class LoginEmailBloc extends Bloc<LoginEvent, LoginState> {
   FutureOr<void> _loginUser(LoginUser event, Emitter<LoginState> emit) async {
     emit(LoginLoading());
     try {
-      print(event.loginDetails.toJson());
       final loginResponse = await loginRepository.loginUser(event.loginDetails);
 
       if (loginResponse != null) {
         // This condition is wrong
         print(loginResponse.toJson());
         if (loginResponse.error == null) {
-          Prefs.setString(TOKEN, loginResponse.data?.token);
-          Prefs.setString(REFRESH_TOKEN_KEY, loginResponse.data?.refreshToken);
+          Prefs.setString(TOKEN, loginResponse.token);
+          Prefs.setString(USER_ROLE,loginResponse.user!.role!);
+          print('User Role: ${Prefs.getString(USER_ROLE)}');
+          await Prefs.setUser('user', loginResponse.user!);
           emit(LoginSuccess(loginResponse: loginResponse));
         } else {
           emit(LoginError(error: loginResponse.error ?? "Unexpected error"));
