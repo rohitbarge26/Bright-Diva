@@ -1,7 +1,7 @@
 name: frequent_flow
 description: "A Flutter-based mobile application designed to streamline access to frequently used modules and functionalities. FrequentFlow offers a user-friendly interface, modular design, and essential tools to enhance productivity and user experience. Ideal for users looking for quick, reliable, and efficient access to everyday functionalities."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: '>=3.3.4 <4.0.0'
@@ -12,9 +12,6 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  flutter_permissions:
-    path: /Users/rohitbarge/Documents/New Topics/flutter-permissions
-
   intl: ^0.19.0
   fl_chart: ^0.63.0 # Replace with the latest version
   timezone: ^0.9.0
@@ -24,7 +21,6 @@ dependencies:
   cupertino_icons: ^1.0.6
   flutter_svg: ^2.0.7
   shared_preferences: ^2.2.0
-  flutter_timezone: ^1.0.8
   country_picker: ^2.0.20
   country_code_picker: ^3.0.0
   dio: ^5.7.0
@@ -37,7 +33,6 @@ dependencies:
   table_calendar: ^3.0.8
   pdf: ^3.10.4
   path_provider: ^2.1.2
-  flutter_file_dialog: ^2.0.0
   permission_handler: ^11.3.1
   open_file: ^3.3.1
   url_launcher: ^6.1.11

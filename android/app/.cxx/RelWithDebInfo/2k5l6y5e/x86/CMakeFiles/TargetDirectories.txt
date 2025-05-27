@@ -1,0 +1,2 @@
+/Users/rohitbarge/flutter_cash_management/android/app/.cxx/RelWithDebInfo/2k5l6y5e/x86/CMakeFiles/rebuild_cache.dir
+/Users/rohitbarge/flutter_cash_management/android/app/.cxx/RelWithDebInfo/2k5l6y5e/x86/CMakeFiles/edit_cache.dir

@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:intl/intl.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
@@ -44,11 +43,6 @@ Future<void> showExitConfirmationDialog(BuildContext context, String alertMsg,
       ],
     ),
   );
-}
-
-Future<String> getCurrentTimezoneName() async {
-  final String currentTimezone = await FlutterTimezone.getLocalTimezone();
-  return currentTimezone;
 }
 
 String getCurrentTimeStamp() {
