@@ -299,13 +299,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_permissions:
-    dependency: "direct main"
-    description:
-      path: "/Users/rohitbarge/Documents/New Topics/flutter-permissions"
-      relative: false
-    source: path
-    version: "0.0.1"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:

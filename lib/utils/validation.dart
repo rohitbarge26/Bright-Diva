@@ -24,7 +24,7 @@ class Validator {
         !hasDigit ||
         hasSpace ||
         !hasAlphabet ||
-        hasAlphanumeric) {
+        !hasAlphanumeric) {
       if (!hasMinimumLength) {
         return false;
       }
