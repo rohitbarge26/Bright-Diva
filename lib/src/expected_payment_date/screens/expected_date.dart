@@ -35,6 +35,7 @@ class _ExpectedDateState extends State<ExpectedDate> {
   String? _selectedInvoiceNumber;
   String? _invoiceId;
   String? _selectedCustomerId;
+  String? _selectedExpectedDate;
   late DateTime selectedExpectedDate = DateTime.now();
 
   void _fetchCustomerName(String invoiceNumber, List<Invoices> invoices) {
@@ -49,6 +50,21 @@ class _ExpectedDateState extends State<ExpectedDate> {
           'Unknown Customer';
       _selectedCustomerId = selectedInvoice.customerId;
       _invoiceId = selectedInvoice.id;
+      // --- This is the key change ---
+      if (selectedInvoice.expectedPaymentDate != null &&
+          selectedInvoice.expectedPaymentDate!.isNotEmpty) {
+        try {
+          DateTime parsedExpectedDate = DateTime.parse(selectedInvoice.expectedPaymentDate!);
+          setState(() {
+            selectedExpectedDate = parsedExpectedDate;
+          });
+          print('Fetched and Parsed Expected Date: $selectedExpectedDate');
+        } catch (e) {
+          print('Error parsing expectedPaymentDate: $e');
+        }
+      } else {
+        print('No expected payment date found for this invoice.');
+      }
     } else {
       _customerNameController.text = 'Unknown Customer';
     }

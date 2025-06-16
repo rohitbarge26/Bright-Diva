@@ -82,36 +82,25 @@ class _AddCustomerState extends State<AddCustomer> {
       // Clear the form
       String timeStamp = getCurrentTimeStamp();
       FocusScope.of(context).requestFocus(FocusNode());
+      final addCustomerRequest = CustomerAddRequest(
+        customerName: _contactPersonController.text, // Assuming this is now required
+        address: _address1Controller.text, // Required
+        contactPersonName: _contactPersonController.text, // Required
+        mobileNumber: _contactNumberController.text, // Required
+        emailId: _emailController.text.isNotEmpty // Check if email is filled
+            ? _emailController.text // Use user's input
+            : "${_contactPersonController.text.isNotEmpty ? _contactPersonController.text.replaceAll(' ', '').toLowerCase() : "user"}.$timeStamp@example.com", // Your default logic
+        businessRegistrationNumber: _brnController.text, // Required
+        city: _cityController.text, // Required
+        country: _countryController.text, // Required
+        companyName: _companyNameController.text, // Required
+      );
       BlocProvider.of<CustomerBloc>(context).add(AddNewCustomer(
-          addCustomerRequest: CustomerAddRequest(
-        customerName: _contactPersonController.text.isNotEmpty
-            ? _contactPersonController.text
-            : "Sample Customer Name",
-        address: _address1Controller.text.isNotEmpty
-            ? _address1Controller.text
-            : "Sample Address, 123 Street",
-        contactPersonName: _contactPersonController.text.isNotEmpty
-            ? _contactPersonController.text
-            : "Sample Contact Person",
-        mobileNumber: _contactNumberController.text.isNotEmpty
-            ? _contactNumberController.text
-            : "1234567890",
-        emailId: _contactNumberController.text.isNotEmpty
-            ? "${_contactNumberController.text}.$timeStamp@gmail.com"
-            : "sample$timeStamp@gmail.com",
-        businessRegistrationNumber:
-            _brnController.text.isNotEmpty ? _brnController.text : "BRN123456",
-        city: _cityController.text.isNotEmpty
-            ? _cityController.text
-            : "Sample City",
-        country: _countryController.text.isNotEmpty
-            ? _countryController.text
-            : "Sample Country",
-        companyName: _companyNameController.text.isNotEmpty
-            ? _companyNameController.text
-            : "Sample Company Name",
-      )));
+        addCustomerRequest: addCustomerRequest,
+      ));
       _clearForm();
+    }else{
+      print('Form validation failed');
     }
   }
 
@@ -562,7 +551,7 @@ class _AddCustomerState extends State<AddCustomer> {
           child: ListTile(
             title: Text(customer.companyName ?? 'No Name'),
             subtitle: Text(
-                '${customer.emailId ?? 'No Email'} | ${customer.mobileNumber ?? 'No Number'}'),
+                customer.mobileNumber ?? 'No Number'),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [

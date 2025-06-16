@@ -1,5 +1,5 @@
-const String BASE_URL = "http://8.218.174.70:3000/api/"; //localhost
-//const String BASE_URL = "http://192.168.34.182:9000/api/";
+const String BASE_URL = "http://8.218.174.70:3000/api/"; //main server
+//const String BASE_URL = "http://192.168.34.182:9000/api/";//localhost
 
 const String LOGIN = "v1/admin/login";
 const String CHANGE_PASSWORD = "v1/admin/change-password";

@@ -107,13 +107,13 @@ class _EditCashReceiptDialogState extends State<EditCashReceiptDialog> {
               ],
             ),
 
-            TextFormField(
+            /*TextFormField(
               controller: widget.amountEditController,
               decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.deliveredUnits),
-            ),
+            ),*/
             TextFormField(
-              controller: widget.pickByEditController,
+              controller: widget.amountEditController,
               decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.deliveredValue),
             ),

@@ -30,6 +30,7 @@ class GetInvoiceResponse {
 class Invoices {
   String? id;
   String? invoiceNumber;
+  String? expectedPaymentDate;
   String? customerId;
   String? amount;
   int? totalUnits;
@@ -46,6 +47,7 @@ class Invoices {
   Invoices(
       {this.id,
         this.invoiceNumber,
+        this.expectedPaymentDate,
         this.customerId,
         this.amount,
         this.totalUnits,
@@ -62,6 +64,7 @@ class Invoices {
   Invoices.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     invoiceNumber = json['invoiceNumber'];
+    expectedPaymentDate = json['expectedPaymentDate'];
     customerId = json['customerId'];
     amount = json['amount'];
     totalUnits = json['totalUnits'];
@@ -82,6 +85,7 @@ class Invoices {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['invoiceNumber'] = this.invoiceNumber;
+    data['expectedPaymentDate'] = this.expectedPaymentDate;
     data['customerId'] = this.customerId;
     data['amount'] = this.amount;
     data['totalUnits'] = this.totalUnits;

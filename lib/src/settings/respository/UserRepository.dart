@@ -25,7 +25,7 @@ class UserRepository {
       );
       var data = response.data;
       print('Response :$data');
-      if (response.statusCode == SUCCESS) {
+      if (response.statusCode == SUCCESS_CREATE) {
         CreateUserResponse adduserResponse = CreateUserResponse.fromJson(data);
         return adduserResponse;
       }

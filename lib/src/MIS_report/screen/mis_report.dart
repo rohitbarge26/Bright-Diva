@@ -370,7 +370,6 @@ class _MisReportState extends State<MisReport> {
                                       int code = state.getCustomerListResponse
                                               ?.statusCode ??
                                           0;
-                                      print('Code : $code');
                                       customerList = state
                                           .getCustomerListResponse?.customers;
                                       int? totalCustomer =

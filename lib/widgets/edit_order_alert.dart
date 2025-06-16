@@ -107,11 +107,11 @@ class _EditOrderDialogState extends State<EditOrderDialog> {
               ],
             ),
 
-            TextFormField(
+            /*TextFormField(
               controller: widget.deliveredUnitsController,
               decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.deliveredUnits),
-            ),
+            ),*/
             TextFormField(
               controller: widget.deliveredValueController,
               decoration: InputDecoration(

@@ -38,6 +38,7 @@ class _CreateUserState extends State<CreateUser> {
       _formCreateUserKey.currentState!.save();
       setState(() => isSubmitting = true);
       FocusScope.of(context).requestFocus(FocusNode());
+      _username = '${_name.replaceAll(' ', '').toLowerCase()}$_phoneNo';
       context.read<CreateUserBloc>().add(AddNewUser(
           addUserRequest: CreateUserRequest(
               name: _name,
