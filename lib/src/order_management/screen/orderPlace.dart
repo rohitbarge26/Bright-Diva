@@ -57,6 +57,8 @@ class _OrderPlaceState extends State<OrderPlace> {
   bool isOrderList = false;
   String? _selectedCustomerId;
   int? _selectedInvoiceUnit;
+  int? _selectedRemainingAmount;
+  String errorAmount = '';
   OrderGetResponse? ordersListResponse;
   String? userRole;
 
@@ -78,11 +80,11 @@ class _OrderPlaceState extends State<OrderPlace> {
     } else {
       _customerNameController.text = 'Unknown Customer';
     }
-
     if (selectedInvoice.amountInHkd != null) {
       try {
-        double amountInHkd = double.parse(selectedInvoice.amountInHkd!);
-        _deliveredValueController.text = amountInHkd.toStringAsFixed(0);
+        //double amountInHkd = double.parse(selectedInvoice.amountInHkd!);
+        _deliveredValueController.text = selectedInvoice.remainingAmount.toString();//amountInHkd.toStringAsFixed(0);
+        _selectedRemainingAmount = selectedInvoice.remainingAmount;
       } catch (e) {
         _deliveredValueController.text = '0';
         print('Error parsing amountInHkd: $e');
@@ -91,9 +93,42 @@ class _OrderPlaceState extends State<OrderPlace> {
       _deliveredValueController.text = '0'; // Handle null case
     }
   }
+// Function to validate the amount
+  bool _validateAmount() {
+    if (_selectedRemainingAmount == 0) {
+      setState(() {
+        errorAmount = 'Order already generated'; // Set error message
+      });
+      return false; // Validation failed
+    }
+    // Get the entered amount from controller and parse to double
+    final enteredAmount = double.tryParse(_deliveredValueController.text) ?? 0;
+    // Validate against selected amount
+    if (enteredAmount <= 0) {
+      setState(() {
+        errorAmount = 'Please enter a valid amount';
+      });
+      return false;
+    }
+
+    if (enteredAmount > _selectedRemainingAmount!) {
+      setState(() {
+        errorAmount = 'Amount cannot exceed $_selectedRemainingAmount';
+      });
+      return false;
+    }
+    setState(() {
+      errorAmount = ''; // Clear error message if validation passes
+    });
+    return true; // Validation passed
+  }
 
   // Submit form
   void _submitForm() {
+    if (!_validateAmount()) {
+      return; // Stop submission if validation fails
+    }
+
     if (_formOrderKey.currentState!.validate()) {
       print('Form submitted successfully');
       // Add the new customer to the list

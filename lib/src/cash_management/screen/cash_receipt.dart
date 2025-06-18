@@ -110,6 +110,22 @@ class _CashReceiptState extends State<CashReceipt> {
       });
       return false; // Validation failed
     }
+    // Get the entered amount from controller and parse to double
+    final enteredAmount = double.tryParse(amountController.text) ?? 0;
+    // Validate against selected amount
+    if (enteredAmount <= 0) {
+      setState(() {
+        errorAmount = 'Please enter a valid amount';
+      });
+      return false;
+    }
+
+    if (enteredAmount > _selectedRemainingAmount!) {
+      setState(() {
+        errorAmount = 'Amount cannot exceed $_selectedRemainingAmount';
+      });
+      return false;
+    }
     setState(() {
       errorAmount = ''; // Clear error message if validation passes
     });
