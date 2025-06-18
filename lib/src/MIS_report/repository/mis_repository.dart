@@ -21,7 +21,7 @@ class MisRepository {
       url = "$BASE_URL$MISREPORT?type=$type&fromDate=$fromDate&toDate=$toDate";
     } else {
       url =
-      "$BASE_URL$MISREPORT?type=$type&fromDate=$fromDate&toDate=$toDate&customerId=$customerId'";
+      "$BASE_URL$MISREPORT?type=$type&fromDate=$fromDate&toDate=$toDate&customerId=$customerId";
     }
     print('URL:$url');
     try {
