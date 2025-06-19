@@ -9,6 +9,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:frequent_flow/src/MIS_report/bloc/mis_bloc.dart';
 import 'package:frequent_flow/src/MIS_report/bloc/mis_state.dart';
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -52,25 +53,38 @@ class _MisReportState extends State<MisReport> {
   }
 
   Future<void> requestStoragePermission() async {
-    if (await Permission.manageExternalStorage.isGranted) {
-      setState(() {
-        _isPermissionGranted = true;
-      });
-    } else {
-      var status = await Permission.manageExternalStorage.request();
-      if (status.isGranted) {
+    if (Platform.isAndroid) {
+      // Android-specific storage permission handling
+      if (await Permission.manageExternalStorage.isGranted) {
         setState(() {
           _isPermissionGranted = true;
         });
       } else {
-        print("Storage permission denied");
-        if (status.isPermanentlyDenied) {
-          await openAppSettings();
+        var status = await Permission.manageExternalStorage.request();
+        if (status.isGranted) {
+          setState(() {
+            _isPermissionGranted = true;
+          });
+        } else {
+          print("Storage permission denied");
+          if (status.isPermanentlyDenied) {
+            await openAppSettings();
+          }
         }
       }
+    } else {
+      // iOS automatically grants access to app directories
+      setState(() {
+        _isPermissionGranted = true;
+      });
+
+      // Optional: Request photo library permission if you need to save to Photos
+      // var photoStatus = await Permission.photos.request();
+      // if (photoStatus.isGranted) {
+      //   print("Photos permission granted");
+      // }
     }
   }
-
   @override
   void dispose() {
     super.dispose();
@@ -91,20 +105,22 @@ class _MisReportState extends State<MisReport> {
   }
 
   Future<void> downloadAndSaveFile(String url) async {
-    // Request storage permission
-    var status = await Permission.manageExternalStorage.request();
-    if (!status.isGranted) {
-      // Handle the case when permission is not granted
-      print('Permission :: ${status.isGranted}');
-      return;
-    }
-
     try {
-      // Get the document directory path
-      Directory? directory = await getExternalStorageDirectory();
-      if (directory == null) {
-        print("Failed to get external storage directory");
-        return;
+      // For iOS, we don't need storage permission for downloads directory
+      if (Platform.isAndroid) {
+        var status = await Permission.manageExternalStorage.request();
+        if (!status.isGranted) {
+          print('Permission :: ${status.isGranted}');
+          return;
+        }
+      }
+
+      // Get the appropriate directory based on platform
+      Directory directory;
+      if (Platform.isAndroid) {
+        directory = (await getExternalStorageDirectory())!;
+      } else {
+        directory = await getApplicationDocumentsDirectory();
       }
 
       // Define the file path
@@ -115,15 +131,31 @@ class _MisReportState extends State<MisReport> {
       Dio dio = Dio();
       await dio.download(url, filePath);
 
-      String newPath =
-          "${await getDownloadPath()}MIS_Report_$_selectedData.xlsx";
+      // For iOS, we'll use the documents directory directly
+      String newPath;
+      if (Platform.isAndroid) {
+        newPath = "${await getDownloadPath()}MIS_Report_$_selectedData.xlsx";
+      } else {
+        newPath = '${directory.path}/MIS_Report_$_selectedData.xlsx';
+      }
+
       File file = File(filePath);
       await file.copy(newPath);
+
+      // Show download complete message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Download Completed: $newPath")),
       );
+
+      // On iOS, we can offer to open the document in other apps
+      if (Platform.isIOS) {
+        await OpenFile.open(newPath);
+      }
     } catch (e) {
       print("Error downloading file: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Download failed: ${e.toString()}")),
+      );
     }
   }
 

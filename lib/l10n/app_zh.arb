@@ -138,7 +138,7 @@
   "errorUserName": "请输入您的姓名",
   "userRole": "角色",
   "errorRole": "请选择一个角色",
-  "userPhoneNumber": "电话号码",
+  "userPhoneNumber": "电话号码 *",
   "passwordPolicy": "密码不符合要求:\n\n\u2022 必须包含至少 8 个字符\n\u2022 必须包含一个特殊符号 (#, &, % 等)\n\u2022 必须包含一个数字 (0-9)",
   "successMessageUser": "用户已成功创建",
   "successMessageCurrency": "汇率已成功更新",

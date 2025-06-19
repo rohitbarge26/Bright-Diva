@@ -76,5 +76,30 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
+	<key>CFBundleDocumentTypes</key>
+       <array>
+           <dict>
+               <key>CFBundleTypeName</key>
+               <string>Microsoft Excel Open XML Spreadsheet</string>
+               <key>LSHandlerRank</key>
+               <string>Alternate</string> <!-- Or Owner if your app is the primary editor -->
+               <key>LSItemContentTypes</key>
+               <array>
+                   <string>org.openxmlformats.spreadsheetml.sheet</string> <!-- .xlsx -->
+               </array>
+           </dict>
+           <dict>
+               <key>CFBundleTypeName</key>
+               <string>Microsoft Excel Document</string>
+               <key>LSHandlerRank</key>
+               <string>Alternate</string>
+               <key>LSItemContentTypes</key>
+               <array>
+                   <string>com.microsoft.excel.xls</string> <!-- .xls (older format) -->
+               </array>
+           </dict>
+       </array>
+       <key>UISupportsDocumentBrowser</key>
+       <true/> <!-- If you want to integrate with the Files app browser -->
 </dict>
 </plist>
