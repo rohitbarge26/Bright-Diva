@@ -474,9 +474,7 @@ class _AddCustomerState extends State<AddCustomer> {
                                         value.isEmpty ? '' : '';
                                   });
                                 },
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                        signed: true, decimal: true),
+                                keyboardType: TextInputType.name,
                                 textCapitalization: TextCapitalization.none,
                               ),
                               _buildTextField(

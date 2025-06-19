@@ -481,114 +481,180 @@ class _CashReceiptState extends State<CashReceipt> {
                       ? isCashReceiptList
                           ? _buildCashReceiptList()
                           : const Center(child: CircularProgressIndicator())
-                      : Form(
-                          key: _formCashKey,
-                          child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Invoice Number Field
-                                BlocBuilder<InvoiceBloc, InvoiceState>(
-                                  builder: (context, state) {
-                                    if (state is InvoiceGetInitialState) {
-                                      return const Center(child: CircularProgressIndicator());
-                                    } else if (state is InvoiceGetLoadedState) {
-                                      List<Invoices> invoices = state.getInvoiceDetailsResponse?.invoices ?? [];
+                      : SingleChildScrollView(
+                          child: Form(
+                            key: _formCashKey,
+                            child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Invoice Number Field
+                                  BlocBuilder<InvoiceBloc, InvoiceState>(
+                                    builder: (context, state) {
+                                      if (state is InvoiceGetInitialState) {
+                                        return const Center(
+                                            child: CircularProgressIndicator());
+                                      } else if (state
+                                          is InvoiceGetLoadedState) {
+                                        List<Invoices> invoices = state
+                                                .getInvoiceDetailsResponse
+                                                ?.invoices ??
+                                            [];
 
-                                      return DropdownSearch<String>(
-                                        popupProps: const PopupProps.menu(
-                                          showSearchBox: true,
-                                          searchFieldProps: TextFieldProps(
-                                            decoration: InputDecoration(
-                                              labelText: "Search Invoice",
+                                        return DropdownSearch<String>(
+                                          popupProps: const PopupProps.menu(
+                                            showSearchBox: true,
+                                            searchFieldProps: TextFieldProps(
+                                              decoration: InputDecoration(
+                                                labelText: "Search Invoice",
+                                                border: OutlineInputBorder(),
+                                              ),
+                                            ),
+                                          ),
+                                          selectedItem: _selectedInvoiceNumber,
+                                          items: invoices
+                                              .map((invoice) =>
+                                                  invoice.invoiceNumber ??
+                                                  AppLocalizations.of(context)!
+                                                      .error_invoiceRequired)
+                                              .toList(),
+                                          dropdownDecoratorProps:
+                                              DropDownDecoratorProps(
+                                            dropdownSearchDecoration:
+                                                InputDecoration(
+                                              labelText:
+                                                  AppLocalizations.of(context)!
+                                                      .orderInvoiceNumber,
                                               border: OutlineInputBorder(),
                                             ),
                                           ),
-                                        ),
-                                        selectedItem: _selectedInvoiceNumber,
-                                        items: invoices.map((invoice) => invoice.invoiceNumber ??
-                                            AppLocalizations.of(context)!.error_invoiceRequired).toList(),
-                                        dropdownDecoratorProps: DropDownDecoratorProps(
-                                          dropdownSearchDecoration: InputDecoration(
-                                            labelText: AppLocalizations.of(context)!.orderInvoiceNumber,
-                                            border: OutlineInputBorder(),
-                                          ),
-                                        ),
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _selectedInvoiceNumber = value;
+                                              _fetchCustomerName(
+                                                  value!, invoices);
+                                            });
+                                          },
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return AppLocalizations.of(
+                                                      context)!
+                                                  .errorOrderInvoiceNumber;
+                                            }
+                                            return null;
+                                          },
+                                        );
+                                      } else {
+                                        return const SizedBox.shrink();
+                                      }
+                                    },
+                                  ),
+                                  const SizedBox(height: 16),
+                                  // Customer Name (Fetched automatically)
+                                  TextFormField(
+                                    controller: _customerNameController,
+                                    decoration: InputDecoration(
+                                      labelText:
+                                          '${AppLocalizations.of(context)!.customerName} *',
+                                      border: const OutlineInputBorder(),
+                                      enabled:
+                                          false, // Disabled as it's auto-filled
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return AppLocalizations.of(context)!
+                                            .error_customerNameRequired;
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  // Partial Payment Radio Button
+                                  Row(
+                                    children: [
+                                      Text(
+                                          '${AppLocalizations.of(context)!.txtPartialPayment}:'),
+                                      Radio(
+                                        value: true,
+                                        groupValue: _isPartialPayment,
                                         onChanged: (value) {
                                           setState(() {
-                                            _selectedInvoiceNumber = value;
-                                            _fetchCustomerName(value!, invoices);
+                                            _isPartialPayment = value as bool;
                                           });
                                         },
-                                        validator: (value) {
-                                          if (value == null || value.isEmpty) {
-                                            return AppLocalizations.of(context)!.errorOrderInvoiceNumber;
-                                          }
-                                          return null;
+                                      ),
+                                      Text(AppLocalizations.of(context)!.yes),
+                                      Radio(
+                                        value: false,
+                                        groupValue: _isPartialPayment,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _isPartialPayment = value as bool;
+                                          });
                                         },
-                                      );
-                                    } else {
-                                      return const SizedBox.shrink();
-                                    }
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                // Customer Name (Fetched automatically)
-                                TextFormField(
-                                  controller: _customerNameController,
-                                  decoration: InputDecoration(
-                                    labelText:
-                                        '${AppLocalizations.of(context)!.customerName} *',
-                                    border: const OutlineInputBorder(),
-                                    enabled:
-                                        false, // Disabled as it's auto-filled
+                                      ),
+                                      Text(AppLocalizations.of(context)!.no),
+                                    ],
                                   ),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return AppLocalizations.of(context)!
-                                          .error_customerNameRequired;
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 16),
+                                  const SizedBox(height: 12),
 
-                                // Partial Payment Radio Button
-                                Row(
-                                  children: [
-                                    Text(
-                                        '${AppLocalizations.of(context)!.txtPartialPayment}:'),
-                                    Radio(
-                                      value: true,
-                                      groupValue: _isPartialPayment,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _isPartialPayment = value as bool;
-                                        });
-                                      },
-                                    ),
-                                    Text(AppLocalizations.of(context)!.yes),
-                                    Radio(
-                                      value: false,
-                                      groupValue: _isPartialPayment,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _isPartialPayment = value as bool;
-                                        });
-                                      },
-                                    ),
-                                    Text(AppLocalizations.of(context)!.no),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-
-                                // Amount Collected and Currency Dropdown
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Container(
+                                  // Amount Collected and Currency Dropdown
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: const Color(0xFFE5E5E5),
+                                                width: 1),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 8.0),
+                                            child: TextFormField(
+                                              controller: amountController,
+                                              enabled: _isPartialPayment,
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  errorAmount =
+                                                      Validator.amountValidate(
+                                                              value)
+                                                          ? ''
+                                                          : AppLocalizations.of(
+                                                                  context)!
+                                                              .enterAmount;
+                                                });
+                                                _updateButtonColor();
+                                              },
+                                              style: const TextStyle(
+                                                fontFamily: 'Inter',
+                                                color: Color(0xFF171717),
+                                                fontWeight: FontWeight.w400,
+                                                height: 1.50,
+                                                fontSize: 16,
+                                              ),
+                                              keyboardType:
+                                                  TextInputType.number,
+                                              decoration: InputDecoration(
+                                                labelText:
+                                                    '${AppLocalizations.of(context)!.amount} *',
+                                                labelStyle: const TextStyle(
+                                                    color: Color(0xFF737373)),
+                                                border: InputBorder.none,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      // Currency Dropdown
+                                      Container(
                                         decoration: BoxDecoration(
                                           border: Border.all(
                                               color: const Color(0xFFE5E5E5),
@@ -597,201 +663,156 @@ class _CashReceiptState extends State<CashReceipt> {
                                               BorderRadius.circular(8),
                                         ),
                                         child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 8.0),
-                                          child: TextFormField(
-                                            controller: amountController,
-                                            enabled: _isPartialPayment,
-                                            onChanged: (value) {
+                                          padding: const EdgeInsets.all(5.0),
+                                          child: DropdownButton<String>(
+                                            value: _selectedCurrency,
+                                            hint: Text(
+                                                AppLocalizations.of(context)!
+                                                    .select_currency),
+                                            onChanged: (String? newValue) {
                                               setState(() {
-                                                errorAmount =
-                                                    Validator.amountValidate(
-                                                            value)
-                                                        ? ''
-                                                        : AppLocalizations.of(
-                                                                context)!
-                                                            .enterAmount;
+                                                _selectedCurrency = newValue;
                                               });
-                                              _updateButtonColor();
                                             },
-                                            style: const TextStyle(
+                                            items: _currencies
+                                                .map<DropdownMenuItem<String>>(
+                                                    (String currency) {
+                                              return DropdownMenuItem<String>(
+                                                value: currency,
+                                                child: Text(currency),
+                                              );
+                                            }).toList(),
+                                            underline: const SizedBox.shrink(),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Visibility(
+                                    visible: errorAmount.isNotEmpty,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 4, top: 12.0),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          SvgPicture.asset(
+                                            'assets/icon/error_icon.svg',
+                                            height: 12.67,
+                                            width: 12.67,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: CustomText(
+                                              text: errorAmount,
+                                              fontSize: 12,
+                                              desiredLineHeight: 16,
                                               fontFamily: 'Inter',
-                                              color: Color(0xFF171717),
-                                              fontWeight: FontWeight.w400,
-                                              height: 1.50,
-                                              fontSize: 16,
-                                            ),
-                                            keyboardType: TextInputType.number,
-                                            decoration: InputDecoration(
-                                              labelText:
-                                                  '${AppLocalizations.of(context)!.amount} *',
-                                              labelStyle: const TextStyle(
-                                                  color: Color(0xFF737373)),
-                                              border: InputBorder.none,
+                                              fontWeight: FontWeight.w500,
+                                              color: const Color(0xFFF85A5A),
                                             ),
                                           ),
-                                        ),
+                                        ],
                                       ),
-                                    ),
-                                    const SizedBox(width: 5),
-                                    // Currency Dropdown
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: const Color(0xFFE5E5E5),
-                                            width: 1),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(5.0),
-                                        child: DropdownButton<String>(
-                                          value: _selectedCurrency,
-                                          hint: Text(
-                                              AppLocalizations.of(context)!
-                                                  .select_currency),
-                                          onChanged: (String? newValue) {
-                                            setState(() {
-                                              _selectedCurrency = newValue;
-                                            });
-                                          },
-                                          items: _currencies
-                                              .map<DropdownMenuItem<String>>(
-                                                  (String currency) {
-                                            return DropdownMenuItem<String>(
-                                              value: currency,
-                                              child: Text(currency),
-                                            );
-                                          }).toList(),
-                                          underline: const SizedBox.shrink(),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Visibility(
-                                  visible: errorAmount.isNotEmpty,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 4, top: 12.0),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SvgPicture.asset(
-                                          'assets/icon/error_icon.svg',
-                                          height: 12.67,
-                                          width: 12.67,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Expanded(
-                                          child: CustomText(
-                                            text: errorAmount,
-                                            fontSize: 12,
-                                            desiredLineHeight: 16,
-                                            fontFamily: 'Inter',
-                                            fontWeight: FontWeight.w500,
-                                            color: const Color(0xFFF85A5A),
-                                          ),
-                                        ),
-                                      ],
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 12),
+                                  const SizedBox(height: 12),
 
-                                // Pickup By Field
-                                Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: const Color(0xFFE5E5E5),
-                                        width: 1),
-                                    borderRadius: BorderRadius.circular(8),
+                                  // Pickup By Field
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: const Color(0xFFE5E5E5),
+                                          width: 1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      child: TextFormField(
+                                        controller: pickupByController,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            errorPickupBy =
+                                                Validator.stringValidate(value)
+                                                    ? ''
+                                                    : AppLocalizations.of(
+                                                            context)!
+                                                        .enterValidPickupBy;
+                                          });
+                                          _updateButtonColor();
+                                        },
+                                        style: const TextStyle(
+                                          fontFamily: 'Inter',
+                                          color: Color(0xFF171717),
+                                          fontWeight: FontWeight.w400,
+                                          height: 1.50,
+                                          fontSize: 16,
+                                        ),
+                                        decoration: InputDecoration(
+                                          labelText:
+                                              '${AppLocalizations.of(context)!.pickupBy} *',
+                                          labelStyle: const TextStyle(
+                                              color: Color(0xFF737373)),
+                                          border: InputBorder.none,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
-                                    child: TextFormField(
-                                      controller: pickupByController,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          errorPickupBy =
-                                              Validator.stringValidate(value)
-                                                  ? ''
-                                                  : AppLocalizations.of(
-                                                          context)!
-                                                      .enterValidPickupBy;
-                                        });
-                                        _updateButtonColor();
-                                      },
-                                      style: const TextStyle(
-                                        fontFamily: 'Inter',
-                                        color: Color(0xFF171717),
-                                        fontWeight: FontWeight.w400,
-                                        height: 1.50,
+                                  Visibility(
+                                    visible: errorPickupBy.isNotEmpty,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 4, top: 12.0),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          SvgPicture.asset(
+                                            'assets/icon/error_icon.svg',
+                                            height: 12.67,
+                                            width: 12.67,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: CustomText(
+                                              text: errorPickupBy,
+                                              fontSize: 12,
+                                              desiredLineHeight: 16,
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.w500,
+                                              color: const Color(0xFFF85A5A),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+
+                                  // Submit Button
+                                  Container(
+                                    width: double.infinity,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      color: buttonColor,
+                                    ),
+                                    child: TextButton(
+                                      onPressed: _onButtonPressed,
+                                      child: CustomText(
+                                        text: AppLocalizations.of(context)!
+                                            .submit,
                                         fontSize: 16,
-                                      ),
-                                      decoration: InputDecoration(
-                                        labelText:
-                                            '${AppLocalizations.of(context)!.pickupBy} *',
-                                        labelStyle: const TextStyle(
-                                            color: Color(0xFF737373)),
-                                        border: InputBorder.none,
+                                        desiredLineHeight: 24,
+                                        fontFamily: 'Inter',
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFFFFFFFF),
                                       ),
                                     ),
                                   ),
-                                ),
-                                Visibility(
-                                  visible: errorPickupBy.isNotEmpty,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 4, top: 12.0),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SvgPicture.asset(
-                                          'assets/icon/error_icon.svg',
-                                          height: 12.67,
-                                          width: 12.67,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Expanded(
-                                          child: CustomText(
-                                            text: errorPickupBy,
-                                            fontSize: 12,
-                                            desiredLineHeight: 16,
-                                            fontFamily: 'Inter',
-                                            fontWeight: FontWeight.w500,
-                                            color: const Color(0xFFF85A5A),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-
-                                // Submit Button
-                                Container(
-                                  width: double.infinity,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    color: buttonColor,
-                                  ),
-                                  child: TextButton(
-                                    onPressed: _onButtonPressed,
-                                    child: CustomText(
-                                      text:
-                                          AppLocalizations.of(context)!.submit,
-                                      fontSize: 16,
-                                      desiredLineHeight: 24,
-                                      fontFamily: 'Inter',
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xFFFFFFFF),
-                                    ),
-                                  ),
-                                ),
-                              ]),
+                                ]),
+                          ),
                         ),
                 ),
               ]),
