@@ -88,6 +88,7 @@
   "successMessageInvoice": "发票已成功添加",
   "successMessageOrder": "订单已成功添加",
   "successMessageCash": "现金收据已成功添加",
+  "successMessageDelete": "刪除成功",
   "oldPassword": "旧密码",
   "newPassword": "新密码",
   "confirmPassword": "确认密码",

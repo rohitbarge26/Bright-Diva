@@ -323,7 +323,35 @@ class _OrderPlaceState extends State<OrderPlace> {
                   }),
             );
           }
-        } else if (state is OrderEditLoadedState) {
+        } else if (state is OrderDeleteLoadedState) {
+          int? code = state.deleteCustomerResponse!.statusCode;
+          if (code == SUCCESS) {
+            showDialog(
+              barrierDismissible: false,
+              context: context,
+              builder: (context) => ShowAlertDialog(
+                  AppLocalizations.of(context)!.successfully,
+                  AppLocalizations.of(context)!.successMessageDelete,
+                  AppLocalizations.of(context)!.btnContinue,
+                  ROUT_HOME,
+                  false,
+                  0),
+            );
+          } else {
+            showDialog(
+                barrierDismissible: false,
+                context: context,
+                builder: (context) => ErrorAlertDialog(
+                    alertLogoPath: 'assets/icon/error_icon.svg',
+                    status: AppLocalizations.of(context)!.unableToProcess,
+                    statusInfo:
+                    AppLocalizations.of(context)!.somethingWentWrong,
+                    buttonText: AppLocalizations.of(context)!.btnOkay,
+                    onPress: () {
+                      Navigator.of(context).pop();
+                    }));
+          }
+        }else if (state is OrderEditLoadedState) {
           int? code = state.editOrderResponse!.statusCode;
           print('Code : $code');
           if (code == SUCCESS) {
@@ -617,11 +645,18 @@ class _OrderPlaceState extends State<OrderPlace> {
   }
 
   Widget _buildOrderList() {
+    final sortedList = ordersListResponse!.orders?.toList() ?? [];
+    sortedList.sort((a, b) {
+      final dateA = DateTime.parse(a.updatedAt!);
+      final dateB = DateTime.parse(b.updatedAt!);
+      return dateB.compareTo(dateA); // For newest first (descending)
+      // Use dateA.compareTo(dateB) for oldest first (ascending)
+    });
     return ListView.builder(
-      itemCount: ordersListResponse!.orders?.length,
+      itemCount: sortedList.length,
       // Assuming `order` is a list
       itemBuilder: (context, index) {
-        final order = ordersListResponse!.orders![index];
+        final order = sortedList[index];
         String dateString = order.updatedAt!;
         DateTime dateTime = DateTime.parse(dateString);
         // Extract date and time
@@ -643,12 +678,12 @@ class _OrderPlaceState extends State<OrderPlace> {
               children: [
                 if (userRole == 'Admin')
                   IconButton(
-                    icon: Icon(Icons.edit, color: Colors.orange),
+                    icon: const Icon(Icons.edit, color: Colors.orange),
                     onPressed: () => _showEditOrderDialog(context, order),
                   ),
                 if (userRole == 'Admin')
                   IconButton(
-                    icon: Icon(Icons.delete, color: Colors.red),
+                    icon: const Icon(Icons.delete, color: Colors.red),
                     onPressed: () => _deleteOrder(order.id!),
                   ),
                 IconButton(

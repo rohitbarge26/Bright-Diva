@@ -324,6 +324,7 @@ class PdfService {
                       pw.Text('Service Charge'),
                       pw.Text('1'),
                       pw.Text('${amountInHkd.round()}'),
+                      pw.Text('${amountInHkd.round()}'),
                     ],
                   ),
                 ],
@@ -334,6 +335,7 @@ class PdfService {
               pw.Text('SUB TOTAL: ${amountInHkd.round()}'),
               pw.Text('DISCOUNT: -'),
               pw.Text('Amount due HKD: ${amountInHkd.round()}'),
+              pw.Text('Pickup By: ${cashReceiptData.pickedBy ?? "N/A"}'),
             ],
           );
         },

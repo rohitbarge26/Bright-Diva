@@ -66,6 +66,7 @@
   "successMessageInvoice": "Invoice has been added Successfully",
   "successMessageOrder": "Order has been added Successfully",
   "successMessageCash": "Cash Receipt has been added Successfully",
+  "successMessageDelete": "Deleted Successfully",
   "btnContinue": "Continue",
   "enterValidPhoneDigit": "Please enter a valid phone number.",
   "messageInvalidEmail": "Please enter a valid email address",

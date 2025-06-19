@@ -349,7 +349,17 @@ class _CashReceiptState extends State<CashReceipt> {
         } else if (state is CashDeleteLoadedState) {
           int? code = state.deleteCustomerResponse!.statusCode;
           if (code == SUCCESS) {
-            Navigator.of(context).pop();
+            showDialog(
+              barrierDismissible: false,
+              context: context,
+              builder: (context) => ShowAlertDialog(
+                  AppLocalizations.of(context)!.successfully,
+                  AppLocalizations.of(context)!.successMessageDelete,
+                  AppLocalizations.of(context)!.btnContinue,
+                  ROUT_HOME,
+                  false,
+                  0),
+            );
           } else {
             showDialog(
                 barrierDismissible: false,
@@ -822,18 +832,21 @@ class _CashReceiptState extends State<CashReceipt> {
   }
 
   Widget _buildCashReceiptList() {
+    final sortedList = cashReceiptList?.toList() ?? [];
+    sortedList.sort((a, b) {
+      final dateA = DateTime.parse(a.updatedAt!);
+      final dateB = DateTime.parse(b.updatedAt!);
+      return dateB.compareTo(dateA); // For newest first (descending)
+      // Use dateA.compareTo(dateB) for oldest first (ascending)
+    });
     return ListView.builder(
       controller: _scrollController,
       padding: EdgeInsets.zero,
-      itemCount: cashReceiptList?.length ?? 0,
+      itemCount: sortedList.length ?? 0,
       // Always use the length of the customers list
       itemBuilder: (context, index) {
         // Safely access the customer at the current index
-        final cashReceipt = cashReceiptList?[index];
-        if (cashReceipt == null) {
-          return const SizedBox
-              .shrink(); // Return an empty widget if customer is null
-        }
+        final cashReceipt = sortedList[index];
         String dateString = cashReceipt.updatedAt!;
         DateTime dateTime = DateTime.parse(dateString);
         // Extract date and time
@@ -843,7 +856,7 @@ class _CashReceiptState extends State<CashReceipt> {
           child: ListTile(
             title: Text(cashReceipt.customer!.companyName ?? 'No Name'),
             subtitle: Text(
-                '${cashReceipt.customer!.emailId ?? 'No Email'} \n${cashReceipt.customer!.mobileNumber ?? 'No Number'}\n$date'),
+                '${cashReceipt.customer!.mobileNumber ?? 'No Number'}\n$date'),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [

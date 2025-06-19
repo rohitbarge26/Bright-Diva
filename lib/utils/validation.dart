@@ -60,13 +60,13 @@ class Validator {
   }
 
   static bool stringValidate(String name) {
-    final RegExp nameRegex = RegExp(r'^[a-zA-Z]+$');
+    final RegExp nameRegex = RegExp(r'^[a-zA-Z ]+$');
     return nameRegex.hasMatch(name);
   }
 
   static bool _isValidEmail(String email) {
     final RegExp emailRegex = RegExp(
-      r'^[\w\.-]+@[a-zA-Z_]+?\.[a-zA-Z]{2,}$',
+      r'^[\w.-]+@[a-zA-Z_]+?\.[a-zA-Z]{2,}$',
       caseSensitive: false,
       multiLine: false,
     );
