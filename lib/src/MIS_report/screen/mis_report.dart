@@ -180,7 +180,7 @@ class _MisReportState extends State<MisReport> {
                 barrierDismissible: false,
                 context: context,
                 builder: (context) => ErrorAlertDialog(
-                    alertLogoPath: 'assets/icon/error_icon.svg',
+                    alertLogoPath: 'assets/icons/error_icon.svg',
                     status: AppLocalizations.of(context)!.unableToProcess,
                     statusInfo:
                         AppLocalizations.of(context)!.somethingWentWrong,
@@ -523,7 +523,7 @@ class _MisReportState extends State<MisReport> {
                                     builder: (context) {
                                       return ErrorAlertDialog(
                                         alertLogoPath:
-                                            'assets/icon/error_icon.svg',
+                                            'assets/icons/error_icon.svg',
                                         status: 'Invalid last date',
                                         statusInfo:
                                             'First date cannot be a date that comes after the last date.',

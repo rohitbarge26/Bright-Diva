@@ -88,7 +88,7 @@ class _CurrencyState extends State<Currency> {
               barrierDismissible: false,
               context: context,
               builder: (context) => ErrorAlertDialog(
-                  alertLogoPath: 'assets/icon/error_icon.svg',
+                  alertLogoPath: 'assets/icons/error_icon.svg',
                   status: AppLocalizations.of(context)!.unableToProcess,
                   statusInfo: AppLocalizations.of(context)!.somethingWentWrong,
                   buttonText: AppLocalizations.of(context)!.btnOkay,

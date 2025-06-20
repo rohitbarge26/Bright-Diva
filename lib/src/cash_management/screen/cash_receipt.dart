@@ -320,7 +320,7 @@ class _CashReceiptState extends State<CashReceipt> {
                 barrierDismissible: false,
                 context: context,
                 builder: (context) => ErrorAlertDialog(
-                    alertLogoPath: 'assets/icon/error_icon.svg',
+                    alertLogoPath: 'assets/icons/error_icon.svg',
                     status: AppLocalizations.of(context)!.unableToProcess,
                     statusInfo:
                         AppLocalizations.of(context)!.somethingWentWrong,
@@ -365,7 +365,7 @@ class _CashReceiptState extends State<CashReceipt> {
                 barrierDismissible: false,
                 context: context,
                 builder: (context) => ErrorAlertDialog(
-                    alertLogoPath: 'assets/icon/error_icon.svg',
+                    alertLogoPath: 'assets/icons/error_icon.svg',
                     status: AppLocalizations.of(context)!.unableToProcess,
                     statusInfo:
                         AppLocalizations.of(context)!.somethingWentWrong,
@@ -393,7 +393,7 @@ class _CashReceiptState extends State<CashReceipt> {
               barrierDismissible: false,
               context: context,
               builder: (context) => ErrorAlertDialog(
-                  alertLogoPath: 'assets/icon/error_icon.svg',
+                  alertLogoPath: 'assets/icons/error_icon.svg',
                   status: AppLocalizations.of(context)!.unableToProcess,
                   statusInfo: AppLocalizations.of(context)!.somethingWentWrong,
                   buttonText: AppLocalizations.of(context)!.btnOkay,
@@ -708,7 +708,7 @@ class _CashReceiptState extends State<CashReceipt> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           SvgPicture.asset(
-                                            'assets/icon/error_icon.svg',
+                                            'assets/icons/error_icon.svg',
                                             height: 12.67,
                                             width: 12.67,
                                           ),
@@ -779,7 +779,7 @@ class _CashReceiptState extends State<CashReceipt> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           SvgPicture.asset(
-                                            'assets/icon/error_icon.svg',
+                                            'assets/icons/error_icon.svg',
                                             height: 12.67,
                                             width: 12.67,
                                           ),

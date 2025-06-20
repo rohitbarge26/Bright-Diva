@@ -272,7 +272,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                               width: 16,
                                               height: 16,
                                               child: SvgPicture.asset(
-                                                'assets/icon/error_icon.svg',
+                                                'assets/icons/error_icon.svg',
                                                 height: 12.67,
                                                 width: 12.67,
                                                 alignment: Alignment.center,
@@ -376,7 +376,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                               width: 16,
                                               height: 16,
                                               child: SvgPicture.asset(
-                                                'assets/icon/error_icon.svg',
+                                                'assets/icons/error_icon.svg',
                                                 height: 12.67,
                                                 width: 12.67,
                                                 alignment: Alignment.center,

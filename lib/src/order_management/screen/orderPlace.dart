@@ -259,7 +259,7 @@ class _OrderPlaceState extends State<OrderPlace> {
               barrierDismissible: false,
               context: context,
               builder: (context) => ErrorAlertDialog(
-                  alertLogoPath: 'assets/icon/error_icon.svg',
+                  alertLogoPath: 'assets/icons/error_icon.svg',
                   status: AppLocalizations.of(context)!.unableToProcess,
                   statusInfo: AppLocalizations.of(context)!.somethingWentWrong,
                   buttonText: AppLocalizations.of(context)!.btnOkay,
@@ -289,7 +289,7 @@ class _OrderPlaceState extends State<OrderPlace> {
               barrierDismissible: false,
               context: context,
               builder: (context) => ErrorAlertDialog(
-                  alertLogoPath: 'assets/icon/error_icon.svg',
+                  alertLogoPath: 'assets/icons/error_icon.svg',
                   status: AppLocalizations.of(context)!.unableToProcess,
                   statusInfo: AppLocalizations.of(context)!.somethingWentWrong,
                   buttonText: AppLocalizations.of(context)!.btnOkay,
@@ -314,7 +314,7 @@ class _OrderPlaceState extends State<OrderPlace> {
               barrierDismissible: false,
               context: context,
               builder: (context) => ErrorAlertDialog(
-                  alertLogoPath: 'assets/icon/error_icon.svg',
+                  alertLogoPath: 'assets/icons/error_icon.svg',
                   status: AppLocalizations.of(context)!.unableToProcess,
                   statusInfo: AppLocalizations.of(context)!.somethingWentWrong,
                   buttonText: AppLocalizations.of(context)!.btnOkay,
@@ -342,7 +342,7 @@ class _OrderPlaceState extends State<OrderPlace> {
                 barrierDismissible: false,
                 context: context,
                 builder: (context) => ErrorAlertDialog(
-                    alertLogoPath: 'assets/icon/error_icon.svg',
+                    alertLogoPath: 'assets/icons/error_icon.svg',
                     status: AppLocalizations.of(context)!.unableToProcess,
                     statusInfo:
                     AppLocalizations.of(context)!.somethingWentWrong,
@@ -625,6 +625,35 @@ class _OrderPlaceState extends State<OrderPlace> {
                                   ),
                                 ),
                               ],
+                            ),
+                            Visibility(
+                              visible: errorAmount.isNotEmpty,
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 4, top: 12.0),
+                                child: Row(
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                                  children: [
+                                    SvgPicture.asset(
+                                      'assets/icons/error_icon.svg',
+                                      height: 12.67,
+                                      width: 12.67,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: CustomText(
+                                        text: errorAmount,
+                                        fontSize: 12,
+                                        desiredLineHeight: 16,
+                                        fontFamily: 'Inter',
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color(0xFFF85A5A),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                             const SizedBox(height: 24),
 

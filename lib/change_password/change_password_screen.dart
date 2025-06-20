@@ -230,7 +230,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             SvgPicture.asset(
-                                              'assets/icon/error_icon.svg',
+                                              'assets/icons/error_icon.svg',
                                               height: 12.67,
                                               width: 12.67,
                                               alignment: Alignment.center,
@@ -346,7 +346,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             SvgPicture.asset(
-                                              'assets/icon/error_icon.svg',
+                                              'assets/icons/error_icon.svg',
                                               height: 12.67,
                                               width: 12.67,
                                               alignment: Alignment.center,
@@ -450,7 +450,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             SvgPicture.asset(
-                                              'assets/icon/error_icon.svg',
+                                              'assets/icons/error_icon.svg',
                                               height: 12.67,
                                               width: 12.67,
                                             ),

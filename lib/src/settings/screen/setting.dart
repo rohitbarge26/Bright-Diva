@@ -55,7 +55,7 @@ class _SettingState extends State<Setting> {
                 barrierDismissible: false,
                 context: context,
                 builder: (context) => ErrorAlertDialog(
-                    alertLogoPath: 'assets/icon/error_icon.svg',
+                    alertLogoPath: 'assets/icons/error_icon.svg',
                     status: AppLocalizations.of(context)!.unableToProcess,
                     statusInfo:
                         AppLocalizations.of(context)!.somethingWentWrong,

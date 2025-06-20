@@ -259,7 +259,7 @@ class _AddCustomerState extends State<AddCustomer> {
                   barrierDismissible: false,
                   context: context,
                   builder: (context) => ErrorAlertDialog(
-                      alertLogoPath: 'assets/icon/error_icon.svg',
+                      alertLogoPath: 'assets/icons/error_icon.svg',
                       status: AppLocalizations.of(context)!.unableToProcess,
                       statusInfo:
                           AppLocalizations.of(context)!.somethingWentWrong,
@@ -288,13 +288,23 @@ class _AddCustomerState extends State<AddCustomer> {
           } else if (state is CustomerDeleteLoadedState) {
             int? code = state.deleteCustomerResponse!.statusCode;
             if (code == SUCCESS) {
-              Navigator.of(context).pop();
+              showDialog(
+                barrierDismissible: false,
+                context: context,
+                builder: (context) => ShowAlertDialog(
+                    AppLocalizations.of(context)!.successfully,
+                    AppLocalizations.of(context)!.successMessageDelete,
+                    AppLocalizations.of(context)!.btnContinue,
+                    ROUT_HOME,
+                    false,
+                    0),
+              );
             } else {
               showDialog(
                   barrierDismissible: false,
                   context: context,
                   builder: (context) => ErrorAlertDialog(
-                      alertLogoPath: 'assets/icon/error_icon.svg',
+                      alertLogoPath: 'assets/icons/error_icon.svg',
                       status: AppLocalizations.of(context)!.unableToProcess,
                       statusInfo:
                           AppLocalizations.of(context)!.somethingWentWrong,
