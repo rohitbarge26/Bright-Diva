@@ -158,7 +158,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
         } else if (state is LoginError) {
           hideLoadingDialog();
           clickLogin = false;
-          print("login error");
+          print("login error  ${state.error}");
           _showErrorDialog(context, state.error);
         }
       },

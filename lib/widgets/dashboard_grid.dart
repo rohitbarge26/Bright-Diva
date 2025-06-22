@@ -12,16 +12,19 @@ class DashboardGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Convert response data to a Map<String, double>
-    final Map<String, double> data = {
-      AppLocalizations.of(context)!.totalOrder: response.totalOrderValue ?? 0,
+    final Map<String, String> data = {
+      AppLocalizations.of(context)!.totalOrder:
+      (response.totalOrderValue ?? 0).toStringAsFixed(0),
       AppLocalizations.of(context)!.delivered:
-          response.totalDeliveredValue ?? 0,
+      (response.totalDeliveredValue ?? 0).toStringAsFixed(0),
       AppLocalizations.of(context)!.nonDelivered:
-          response.nonDeliveredValue ?? 0,
-      AppLocalizations.of(context)!.cashPickUp: response.totalCashPickup ?? 0,
+      (response.nonDeliveredValue ?? 0).toStringAsFixed(0),
+      AppLocalizations.of(context)!.cashPickUp:
+      '${(response.totalCashPickup ?? 0).toStringAsFixed(0)} HKD',
       AppLocalizations.of(context)!.deliveredCash:
-          response.deliveredCashPickup ?? 0,
-      AppLocalizations.of(context)!.netDue: response.totalNetDue ?? 0,
+      '${(response.deliveredCashPickup ?? 0).toStringAsFixed(0)} HKD',
+      AppLocalizations.of(context)!.netDue:
+      '${(response.totalNetDue ?? 0).toStringAsFixed(0)} HKD',
     };
 
     // Image paths (Replace with actual paths)
@@ -55,7 +58,7 @@ class DashboardGrid extends StatelessWidget {
         itemCount: data.length,
         itemBuilder: (context, index) {
           String key = data.keys.elementAt(index);
-          double value = data[key] ?? 0;
+          String value = data[key] ?? '0';
 
           return Card(
             color: Colors.white,
@@ -74,14 +77,14 @@ class DashboardGrid extends StatelessWidget {
                 children: [
                   SvgPicture.asset(
                     icons[key] ?? 'assets/icons/default.svg',
-                    height: 30,
-                    width: 30,
+                    height: 25,
+                    width: 25,
                   ),
                   const SizedBox(height: 5),
                   Text(
-                    value.toStringAsFixed(2), // Ensure 2 decimal places
+                    value,
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       color: Colors.blue,
                       fontWeight: FontWeight.w600,
                     ),
@@ -90,7 +93,7 @@ class DashboardGrid extends StatelessWidget {
                   Text(
                     key,
                     style: const TextStyle(
-                      fontSize: 13,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,

@@ -14,6 +14,16 @@ class LoginResponse {
         this.statusCode,
         this.token});
 
+
+  // Factory constructor for creating a LoginResponse with an error
+  factory LoginResponse.withError(String errorMessage) {
+    return LoginResponse(
+      error: errorMessage,
+      success: false,
+      statusCode: 400, // or whatever appropriate error code
+    );
+  }
+
   LoginResponse.fromJson(Map<String, dynamic> json) {
     message = json['message'];
     error = json['error'];

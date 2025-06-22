@@ -1,47 +1,51 @@
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionRequest {
   static Future<bool> checkForPermissions() async {
-    // Request Location (GPS) When In Use permission
+    if (kIsWeb) {
+      // Web-specific permission handling
+      // Most browsers handle file access through file picker dialogs rather than permissions
+      print("Running on web - skipping direct permission requests");
+      return true; // Or implement web-specific permission checks
+    }
 
-    var status = await Permission.manageExternalStorage.request();
-    var storage = await Permission.storage.request();
+    // Mobile-specific permission handling
+    try {
+      // Request external storage permission (Android only)
+      final manageStorageStatus = await Permission.manageExternalStorage.request();
+      final storageStatus = await Permission.storage.request();
 
-    if (await Permission.photos.isGranted &&
-        await Permission.videos.isGranted &&
-        await Permission.audio.isGranted) {
-      print("Media Permissions Already Granted");
+      // Check media permissions (photos, videos, audio)
+      final mediaPermissions = await [
+        Permission.photos,
+        Permission.videos,
+        Permission.audio,
+      ].request();
+
+      // Log permission statuses
+      print('Manage External Storage: $manageStorageStatus');
+      print('Storage: $storageStatus');
+      print('Photos: ${mediaPermissions[Permission.photos]}');
+      print('Videos: ${mediaPermissions[Permission.videos]}');
+      print('Audio: ${mediaPermissions[Permission.audio]}');
+
+      // Return true if either storage permission is granted
+      return manageStorageStatus.isGranted || storageStatus.isGranted;
+    } catch (e) {
+      print('Error requesting permissions: $e');
       return false;
-    }
-
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.photos,
-      Permission.videos,
-      Permission.audio,
-    ].request();
-
-    if (statuses[Permission.photos]!.isGranted &&
-        statuses[Permission.videos]!.isGranted &&
-        statuses[Permission.audio]!.isGranted) {
-      print("Media Permissions Granted");
-    } else {
-      print("Media Permissions Denied");
-    }
-
-    // Check if all permissions have been granted
-    if (status == PermissionStatus.granted || storage == PermissionStatus.granted) {
-      return true;
-    } else {
-      return false;
-    }
-
-
-
-
-    if(status == PermissionStatus.granted){
-
     }
   }
-}
 
+  // Alternative method for web file access
+  static Future<bool> requestFileAccess() async {
+    if (kIsWeb) {
+      // Implement web-specific file access logic
+      // For example, trigger a file input dialog
+      print("Web file access would be handled through file picker");
+      return true;
+    }
+    return await checkForPermissions();
+  }
+}

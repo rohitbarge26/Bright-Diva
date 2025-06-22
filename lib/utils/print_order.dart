@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
@@ -41,7 +42,8 @@ class PdfService {
   static Future<String> _getDownloadsDirectoryPath() async {
     if (Platform.isAndroid) {
       // For Android, use the Downloads directory
-      List<Directory>? directories = await getExternalStorageDirectories(type: StorageDirectory.documents);
+      List<Directory>? directories =
+          await getExternalStorageDirectories(type: StorageDirectory.documents);
 
       if (directories != null && directories.isNotEmpty) {
         Directory documentsDir = directories.first;
@@ -75,9 +77,11 @@ class PdfService {
                   style: pw.TextStyle(
                       fontSize: 18, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 10),
-              pw.Text('Address: ${order.customer?.address ?? "N/A"}'),
+              pw.Text('Address: ${order.customer?.address ?? "N/A"}, '
+                  '${order.customer?.city ?? "N/A"}, '
+                  '${order.customer?.country ?? "N/A"}'),
               pw.Text('Phone: ${order.customer?.mobileNumber ?? "N/A"}'),
-              pw.Text('Date: ${order.createdAt ?? "N/A"}'),
+              pw.Text('Date: ${order.customer?.createdAt ?? "N/A"}'),
               pw.Text(
                   'Business Registration#: ${order.customer?.businessRegistrationNumber ?? "N/A"}'),
               pw.Text('Invoice#: ${order.invoiceNumber ?? "N/A"}'),
@@ -105,16 +109,18 @@ class PdfService {
                 children: [
                   pw.TableRow(
                     children: [
-                      pw.Text('DATE'),
+                      pw.Text('DATE & TIME'),
                       pw.Text('DESCRIPTION'),
-                      pw.Text('QTY.'),
                       pw.Text('UNIT PRICE'),
                       pw.Text('TOTAL HKD'),
                     ],
                   ),
                   pw.TableRow(
                     children: [
-                      pw.Text(order.createdAt ?? "N/A"),
+                      pw.Text(order.createdAt != null
+                          ? DateFormat('yyyy-MM-dd HH:mm:ss').format(
+                          DateTime.parse(order.createdAt!).toLocal())
+                          : "N/A"),
                       pw.Text('Service Charge'),
                       pw.Text('1'),
                       pw.Text('${amountOfDelivery.round()}'),
@@ -150,8 +156,8 @@ class PdfService {
     }
 
     // Define the file path
-    final file = File(join(
-        documentsFolder.path, 'Order_${order.customer?.companyName}.pdf'));
+    final file = File(
+        join(documentsFolder.path, 'Order_${order.customer?.companyName}.pdf'));
 
     // Write the PDF bytes to the file
     await file.writeAsBytes(await pdf.save());
@@ -177,9 +183,14 @@ class PdfService {
                   style: pw.TextStyle(
                       fontSize: 18, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 10),
-              pw.Text('Address: ${order.customer?.address ?? "N/A"}'),
+              pw.Text('Address: ${order.customer?.address ?? "N/A"}, '
+                  '${order.customer?.city ?? "N/A"}, '
+                  '${order.customer?.country ?? "N/A"}'),
               pw.Text('Phone: ${order.customer?.mobileNumber ?? "N/A"}'),
-              pw.Text('Date: ${order.createdAt ?? "N/A"}'),
+              pw.Text(
+                  'Date: ${order.customer?.createdAt != null ? DateTime.parse(order.customer?.createdAt ?? "").toLocal().toString().split(' ')[0] : "N/A"}'),
+              pw.Text(
+                  'Time: ${order.customer?.createdAt != null ? DateTime.parse(order.customer?.createdAt ?? "").toLocal().toString().split(' ')[1].split('.')[0] : "N/A"}'),
               pw.Text(
                   'Business Registration#: ${order.customer?.businessRegistrationNumber ?? "N/A"}'),
               pw.Text('Invoice#: ${order.invoiceNumber ?? "N/A"}'),
@@ -207,18 +218,20 @@ class PdfService {
                 children: [
                   pw.TableRow(
                     children: [
-                      pw.Text('DATE'),
+                      pw.Text('DATE & TIME'),
                       pw.Text('DESCRIPTION'),
-                      pw.Text('QTY.'),
                       pw.Text('UNIT PRICE'),
                       pw.Text('TOTAL HKD'),
                     ],
                   ),
                   pw.TableRow(
                     children: [
-                      pw.Text(order.createdAt ?? "N/A"),
+                      pw.Text(order.createdAt != null
+                          ? DateFormat('yyyy-MM-dd HH:mm:ss').format(
+                              DateTime.parse(order.createdAt!).toLocal())
+                          : "N/A"),
                       pw.Text('Service Charge'),
-                      pw.Text('1'),
+                      pw.Text('${amountInHkd.round()}'),
                       pw.Text('${amountInHkd.round()}'),
                     ],
                   ),
@@ -228,7 +241,6 @@ class PdfService {
               pw.Text(
                   'Unless otherwise agreed, all invoices are payable within 10 days by wire transfer to our bank account'),
               pw.Text('SUB TOTAL: ${amountInHkd.round()}'),
-              pw.Text('DISCOUNT: -'),
               pw.Text('Amount due HKD: ${amountInHkd.round()}'),
             ],
           );
@@ -280,7 +292,9 @@ class PdfService {
                   style: pw.TextStyle(
                       fontSize: 18, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 10),
-              pw.Text('Address: ${cashReceiptData.customer?.address ?? "N/A"}'),
+              pw.Text('Address: ${cashReceiptData.customer?.address ?? "N/A"}, '
+                  '${cashReceiptData.customer?.city ?? "N/A"}, '
+                  '${cashReceiptData.customer?.country ?? "N/A"}'),
               pw.Text(
                   'Phone: ${cashReceiptData.customer?.mobileNumber ?? "N/A"}'),
               pw.Text('Date: ${cashReceiptData.createdAt ?? "N/A"}'),
@@ -311,18 +325,18 @@ class PdfService {
                 children: [
                   pw.TableRow(
                     children: [
-                      pw.Text('DATE'),
+                      pw.Text('DATE & TIME'),
                       pw.Text('DESCRIPTION'),
-                      pw.Text('QTY.'),
                       pw.Text('UNIT PRICE'),
                       pw.Text('TOTAL HKD'),
                     ],
                   ),
                   pw.TableRow(
                     children: [
-                      pw.Text(cashReceiptData.createdAt ?? "N/A"),
+                      pw.Text(cashReceiptData.createdAt != null
+                          ? DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.parse(cashReceiptData.createdAt!).toLocal())
+                          : "N/A"),
                       pw.Text('Service Charge'),
-                      pw.Text('1'),
                       pw.Text('${amountInHkd.round()}'),
                       pw.Text('${amountInHkd.round()}'),
                     ],
@@ -333,7 +347,6 @@ class PdfService {
               pw.Text(
                   'Unless otherwise agreed, all invoices are payable within 10 days by wire transfer to our bank account'),
               pw.Text('SUB TOTAL: ${amountInHkd.round()}'),
-              pw.Text('DISCOUNT: -'),
               pw.Text('Amount due HKD: ${amountInHkd.round()}'),
               pw.Text('Pickup By: ${cashReceiptData.pickedBy ?? "N/A"}'),
             ],

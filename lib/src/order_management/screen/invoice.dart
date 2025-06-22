@@ -62,7 +62,6 @@ class _InvoiceState extends State<Invoice> {
   final List<String> _currencies = ['HKD', 'MOP', 'CNY'];
   String? userRole;
 
-
   void _updateButtonColor() {
     setState(() {
       bool isValidInvoice =
@@ -239,7 +238,19 @@ class _InvoiceState extends State<Invoice> {
                   false,
                   0),
             );
-          } else {
+          } else if(code == INTERNAL_SERVER_ERROR){
+            showDialog(
+              barrierDismissible: false,
+              context: context,
+              builder: (context) => ShowAlertDialog(
+                  AppLocalizations.of(context)!.unableToProcess,
+                  AppLocalizations.of(context)!.duplicateMessageInvoice,
+                  AppLocalizations.of(context)!.btnContinue,
+                  ROUT_HOME,
+                  false,
+                  0),
+            );
+          }else {
             showDialog(
               barrierDismissible: false,
               context: context,
@@ -277,6 +288,7 @@ class _InvoiceState extends State<Invoice> {
           print('Code : $code');
           if (code == SUCCESS) {
             InvoiceDetails? orders = state.getDetailsById?.invoice;
+            print('Date: ${orders?.createdAt}');
             final pdfFile = await PdfService.generateInvoicePdf(orders!);
             print('PDF saved at: ${pdfFile.path}');
             final result = await OpenFile.open(pdfFile.path);
@@ -527,10 +539,6 @@ class _InvoiceState extends State<Invoice> {
                                           child: CircularProgressIndicator());
                                     } else if (state
                                         is CustomerListLoadedState) {
-                                      int code = state.getCustomerListResponse
-                                              ?.statusCode ??
-                                          0;
-                                      print('Code : $code');
                                       customerList = state
                                           .getCustomerListResponse?.customers;
                                       int? totalCustomer =
@@ -784,14 +792,21 @@ class _InvoiceState extends State<Invoice> {
   }
 
   Widget _buildInvoiceList() {
+    final sortedList = invoiceList?.toList() ?? [];
+    sortedList.sort((a, b) {
+      final dateA = DateTime.parse(a.updatedAt!);
+      final dateB = DateTime.parse(b.updatedAt!);
+      return dateB.compareTo(dateA); // For newest first (descending)
+      // Use dateA.compareTo(dateB) for oldest first (ascending)
+    });
     return ListView.builder(
       padding: EdgeInsets.zero,
-      itemCount: invoiceList?.length ?? 0,
+      itemCount: sortedList.length ?? 0,
       // Always use the length of the customers list
       itemBuilder: (context, index) {
         // Safely access the customer at the current index
-        final invoice = invoiceList?[index];
-        String dateString = invoice!.invoiceDate!;
+        final invoice = sortedList[index];
+        String dateString = invoice.invoiceDate!;
         DateTime dateTime = DateTime.parse(dateString);
 
         // Extract date and time
