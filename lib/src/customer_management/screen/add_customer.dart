@@ -116,7 +116,30 @@ class _AddCustomerState extends State<AddCustomer> {
   }
 
   void _deleteCustomer(String id) {
-    BlocProvider.of<CustomerBloc>(context).add(DeleteCustomer(customerId: id));
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context)!.confirmDelete), // 确认删除
+          content: Text(AppLocalizations.of(context)!.areYouSureDelete), // 您确定要删除吗？
+          actions: <Widget>[
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.no), // 否
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.yes), // 是
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                BlocProvider.of<CustomerBloc>(context).add(DeleteCustomer(customerId: id));
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _editCustomer(Customers customer) {
@@ -288,16 +311,11 @@ class _AddCustomerState extends State<AddCustomer> {
           } else if (state is CustomerDeleteLoadedState) {
             int? code = state.deleteCustomerResponse!.statusCode;
             if (code == SUCCESS) {
-              showDialog(
-                barrierDismissible: false,
-                context: context,
-                builder: (context) => ShowAlertDialog(
-                    AppLocalizations.of(context)!.successfully,
-                    AppLocalizations.of(context)!.successMessageDelete,
-                    AppLocalizations.of(context)!.btnContinue,
-                    ROUT_HOME,
-                    false,
-                    0),
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content:
+                    Text(AppLocalizations.of(context)!.successMessageDelete)),
               );
             } else {
               showDialog(

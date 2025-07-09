@@ -69,6 +69,8 @@
   "unableToProcess": "无法处理",
   "somethingWentWrong": "出现错误，请稍后再试！",
   "autoGenerateInvoice": "自动生成发票",
+  "confirmDelete": "确认删除",
+  "areYouSureDelete": "您确定要删除吗？",
   "partialDelivery_yes": "是",
   "partialDelivery_no": "否",
   "orderDeleted": "订单 {orderNumber} 删除成功！",

@@ -419,7 +419,7 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                           desiredLineHeight: 24,
                                           fontFamily: 'Inter',
                                           fontWeight: FontWeight.w600,
-                                          color: Color(0xFFFFFFFF)),
+                                          color: const Color(0xFFFFFFFF)),
                                     ),
                                   ),
                                   const SizedBox(
@@ -429,22 +429,25 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Container(
-                                        alignment: Alignment.centerLeft,
-                                        child: InkWell(
-                                          onTap: () {
-                                            Navigator.pushNamed(
-                                                context, ROUT_FORGOT_PASSWORD);
-                                          },
-                                          child: CustomText(
-                                              text:
-                                                  AppLocalizations.of(context)!
-                                                      .forgotPassword,
-                                              fontSize: 16,
-                                              desiredLineHeight: 14.52,
-                                              fontFamily: 'Inter',
-                                              fontWeight: FontWeight.w600,
-                                              color: Color(0xFF737373)),
+                                      Visibility(
+                                        visible: false,
+                                        child: Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: InkWell(
+                                            onTap: () {
+                                              Navigator.pushNamed(
+                                                  context, ROUT_FORGOT_PASSWORD);
+                                            },
+                                            child: CustomText(
+                                                text:
+                                                    AppLocalizations.of(context)!
+                                                        .forgotPassword,
+                                                fontSize: 16,
+                                                desiredLineHeight: 14.52,
+                                                fontFamily: 'Inter',
+                                                fontWeight: FontWeight.w600,
+                                                color: const Color(0xFF737373)),
+                                          ),
                                         ),
                                       ),
                                       InkWell(

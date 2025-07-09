@@ -253,10 +253,32 @@ class _CashReceiptState extends State<CashReceipt> {
     );
   }
 
-  // Function to handle delete action
-  void _deleteOrder(String invoiceId) {
-    BlocProvider.of<CashBloc>(context)
-        .add(DeleteCashReceipt(cashReceiptId: invoiceId));
+  void _deleteCashReceipt(String invoiceId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context)!.confirmDelete), // 确认删除
+          content: Text(AppLocalizations.of(context)!.areYouSureDelete), // 您确定要删除吗？
+          actions: <Widget>[
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.no), // 否
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.yes), // 是
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                BlocProvider.of<CashBloc>(context)
+                    .add(DeleteCashReceipt(cashReceiptId: invoiceId));
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // Function to handle print invoice action
@@ -349,16 +371,11 @@ class _CashReceiptState extends State<CashReceipt> {
         } else if (state is CashDeleteLoadedState) {
           int? code = state.deleteCustomerResponse!.statusCode;
           if (code == SUCCESS) {
-            showDialog(
-              barrierDismissible: false,
-              context: context,
-              builder: (context) => ShowAlertDialog(
-                  AppLocalizations.of(context)!.successfully,
-                  AppLocalizations.of(context)!.successMessageDelete,
-                  AppLocalizations.of(context)!.btnContinue,
-                  ROUT_HOME,
-                  false,
-                  0),
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content:
+                  Text(AppLocalizations.of(context)!.successMessageDelete)),
             );
           } else {
             showDialog(
@@ -868,7 +885,7 @@ class _CashReceiptState extends State<CashReceipt> {
                 if (userRole == 'Admin')
                   IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => _deleteOrder(cashReceipt.id!),
+                    onPressed: () => _deleteCashReceipt(cashReceipt.id!),
                   ),
                 IconButton(
                   icon: const Icon(Icons.print, color: Colors.green),

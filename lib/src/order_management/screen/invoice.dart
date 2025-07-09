@@ -184,7 +184,7 @@ class _InvoiceState extends State<Invoice> {
                         amount: int.parse(amountController.text),
                         invoiceDate: getCurrentTimeInISO8601Format(),
                         currency: _selectedCurrency,
-                        totalUnits: int.parse(totalUnitsController.text))));
+                        totalUnits: 0)));
               },
               child: Text(AppLocalizations.of(context)!.txtSave),
             ),
@@ -195,8 +195,31 @@ class _InvoiceState extends State<Invoice> {
   }
 
   // Function to handle delete action
-  void _deleteOrder(String id) {
-    BlocProvider.of<InvoiceBloc>(context).add(DeleteInvoice(invoiceId: id));
+  void _deleteInvoice(String id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context)!.confirmDelete), // 确认删除
+          content: Text(AppLocalizations.of(context)!.areYouSureDelete), // 您确定要删除吗？
+          actions: <Widget>[
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.no), // 否
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.yes), // 是
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                BlocProvider.of<InvoiceBloc>(context).add(DeleteInvoice(invoiceId: id));
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // Function to handle print invoice action
@@ -312,16 +335,11 @@ class _InvoiceState extends State<Invoice> {
         } else if (state is InvoiceDeleteLoadedState) {
           int? code = state.deleteCustomerResponse!.statusCode;
           if (code == SUCCESS) {
-            showDialog(
-              barrierDismissible: false,
-              context: context,
-              builder: (context) => ShowAlertDialog(
-                  AppLocalizations.of(context)!.successfully,
-                  AppLocalizations.of(context)!.successMessageDelete,
-                  AppLocalizations.of(context)!.btnContinue,
-                  ROUT_HOME,
-                  false,
-                  0),
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content:
+                  Text(AppLocalizations.of(context)!.successMessageDelete)),
             );
           } else {
             showDialog(
@@ -341,12 +359,26 @@ class _InvoiceState extends State<Invoice> {
           int? code = state.editInvoiceResponse!.statusCode;
           print('Code : $code');
           if (code == SUCCESS) {
+            Navigator.of(context).pop();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                   content:
                       Text(AppLocalizations.of(context)!.msgUpdateInvoice)),
             );
-          } else {}
+          } else {
+            showDialog(
+                barrierDismissible: false,
+                context: context,
+                builder: (context) => ErrorAlertDialog(
+                    alertLogoPath: 'assets/icons/error_icon.svg',
+                    status: AppLocalizations.of(context)!.unableToProcess,
+                    statusInfo:
+                    AppLocalizations.of(context)!.somethingWentWrong,
+                    buttonText: AppLocalizations.of(context)!.btnOkay,
+                    onPress: () {
+                      Navigator.of(context).pop();
+                    }));
+          }
         }
       },
       child: Scaffold(
@@ -828,7 +860,7 @@ class _InvoiceState extends State<Invoice> {
                 if (userRole == 'Admin')
                   IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => _deleteOrder(invoice.id!),
+                    onPressed: () => _deleteInvoice(invoice.id!),
                   ),
                 IconButton(
                   icon: const Icon(Icons.print, color: Colors.green),

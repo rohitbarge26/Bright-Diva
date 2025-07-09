@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:frequent_flow/change_password/bloc/change_password_bloc.dart';
 import 'package:frequent_flow/change_password/models/change_password_request.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:frequent_flow/utils/response_status.dart';
 import '../utils/validation.dart';
 import '../widgets/custom_text.dart';
 
@@ -58,7 +59,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(
+          title: const Text(
             'Error',
             style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
           ),
@@ -68,7 +69,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
               },
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         );
@@ -106,12 +107,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       body: BlocConsumer<ChangePasswordBloc, ChangePasswordState>(
         listener: (context, state) {
           if (state is ChangePasswordSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content:
-                    Text(AppLocalizations.of(context)!.prPassSuccessMessage),
-              ),
-            );
+            int code = state.response?.statusCode ?? 0;
+            print('Code : $code');
+            if(code == SUCCESS){
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content:
+                  Text(AppLocalizations.of(context)!.prPassSuccessMessage),
+                ),
+              );
+            }
             Navigator.of(context).pop();
           } else if (state is ChangePasswordError) {
             _showErrorDialog(context, state.error);
@@ -307,7 +312,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                               labelText:
                                                   AppLocalizations.of(context)!
                                                       .prNewPass,
-                                              labelStyle: TextStyle(
+                                              labelStyle: const TextStyle(
                                                 color: Color(0xFF737373),
                                               ),
                                               border: InputBorder.none,

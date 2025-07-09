@@ -76,6 +76,8 @@
   "unableToProcess": "Unable to Process",
   "somethingWentWrong": "Something went wrong. Please try again later!",
   "autoGenerateInvoice": "Auto Generate Invoice",
+  "confirmDelete": "Confirm Delete",
+  "areYouSureDelete": "Are you sure you want to delete?",
   "partialDelivery_yes": "Yes",
   "partialDelivery_no": "No",
   "orderDeleted": "Order {orderNumber} deleted successfully!",

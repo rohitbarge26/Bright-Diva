@@ -9,8 +9,7 @@ class InvoiceEditRequest {
       {required this.customerId,
       required this.amount,
       required this.invoiceDate,
-      required this.currency,
-      required this.totalUnits});
+      required this.currency, this.totalUnits});
 
   InvoiceEditRequest.fromJson(Map<String, dynamic> json) {
     customerId = json['customerId'];

@@ -28,13 +28,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           _isSubmitting = false;
         });
 
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.successfully),
-          ),
-        );
-
         // Clear the form
         _formKey.currentState?.reset();
         _oldPasswordController.clear();
@@ -116,12 +109,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               // Submit Button
               ElevatedButton(
                 onPressed: _isSubmitting ? null : _submitForm,
-                child: _isSubmitting
-                    ? const CircularProgressIndicator()
-                    : Text(AppLocalizations.of(context)!.submit),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
+                child: _isSubmitting
+                    ? const CircularProgressIndicator()
+                    : Text(AppLocalizations.of(context)!.submit),
               ),
             ],
           ),
