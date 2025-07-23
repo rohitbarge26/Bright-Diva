@@ -57,7 +57,7 @@ class _OrderPlaceState extends State<OrderPlace> {
   bool isOrderList = false;
   String? _selectedCustomerId;
   int? _selectedInvoiceUnit;
-  int? _selectedRemainingAmount;
+  num? _selectedRemainingAmount;
   String errorAmount = '';
   OrderGetResponse? ordersListResponse;
   String? userRole;
@@ -80,19 +80,22 @@ class _OrderPlaceState extends State<OrderPlace> {
     } else {
       _customerNameController.text = 'Unknown Customer';
     }
-    if (selectedInvoice.amountInHkd != null) {
+    if (selectedInvoice.remainingAmount != null) {
       try {
-        //double amountInHkd = double.parse(selectedInvoice.amountInHkd!);
-        _deliveredValueController.text = selectedInvoice.remainingAmount.toString();//amountInHkd.toStringAsFixed(0);
+        _deliveredValueController.text =
+            selectedInvoice.remainingAmount!.toString();
         _selectedRemainingAmount = selectedInvoice.remainingAmount;
       } catch (e) {
         _deliveredValueController.text = '0';
-        print('Error parsing amountInHkd: $e');
+        _selectedRemainingAmount = 0;
+        print('Error handling remainingAmount: $e');
       }
     } else {
-      _deliveredValueController.text = '0'; // Handle null case
+      _deliveredValueController.text = '0';
+      _selectedRemainingAmount = 0;
     }
   }
+
 // Function to validate the amount
   bool _validateAmount() {
     if (_selectedRemainingAmount == 0) {
@@ -140,7 +143,7 @@ class _OrderPlaceState extends State<OrderPlace> {
       BlocProvider.of<OrderBloc>(context).add(AddOrder(
           addOrderRequest: OrderAddRequest(
               invoiceNumber: _selectedInvoiceNumber,
-              amountOfDelivery: int.parse(_deliveredValueController.text),
+              amountOfDelivery: num.tryParse(_deliveredValueController.text), // Uses num
               partialDelivery: _isPartialDelivery,
               currency: _selectedCurrency,
               deliveredUnits: 0,
@@ -214,8 +217,10 @@ class _OrderPlaceState extends State<OrderPlace> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(AppLocalizations.of(context)!.confirmDelete), // 确认删除
-          content: Text(AppLocalizations.of(context)!.areYouSureDelete), // 您确定要删除吗？
+          title: Text(AppLocalizations.of(context)!.confirmDelete),
+          // 确认删除
+          content: Text(AppLocalizations.of(context)!.areYouSureDelete),
+          // 您确定要删除吗？
           actions: <Widget>[
             TextButton(
               child: Text(AppLocalizations.of(context)!.no), // 否
@@ -227,7 +232,8 @@ class _OrderPlaceState extends State<OrderPlace> {
               child: Text(AppLocalizations.of(context)!.yes), // 是
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
-                BlocProvider.of<OrderBloc>(context).add(DeleteOrder(orderId: id));
+                BlocProvider.of<OrderBloc>(context)
+                    .add(DeleteOrder(orderId: id));
               },
             ),
           ],
@@ -352,7 +358,7 @@ class _OrderPlaceState extends State<OrderPlace> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                   content:
-                  Text(AppLocalizations.of(context)!.successMessageDelete)),
+                      Text(AppLocalizations.of(context)!.successMessageDelete)),
             );
           } else {
             showDialog(
@@ -362,13 +368,13 @@ class _OrderPlaceState extends State<OrderPlace> {
                     alertLogoPath: 'assets/icons/error_icon.svg',
                     status: AppLocalizations.of(context)!.unableToProcess,
                     statusInfo:
-                    AppLocalizations.of(context)!.somethingWentWrong,
+                        AppLocalizations.of(context)!.somethingWentWrong,
                     buttonText: AppLocalizations.of(context)!.btnOkay,
                     onPress: () {
                       Navigator.of(context).pop();
                     }));
           }
-        }else if (state is OrderEditLoadedState) {
+        } else if (state is OrderEditLoadedState) {
           int? code = state.editOrderResponse!.statusCode;
           print('Code : $code');
           if (code == SUCCESS) {
@@ -464,35 +470,48 @@ class _OrderPlaceState extends State<OrderPlace> {
                             BlocBuilder<InvoiceBloc, InvoiceState>(
                               builder: (context, state) {
                                 if (state is InvoiceGetInitialState) {
+                                  print("Search InvoiceGetInitialState List");
                                   return const Center(
                                       child: CircularProgressIndicator());
                                 } else if (state is InvoiceGetLoadedState) {
+                                  print("Search Invoice List");
                                   List<Invoices> invoices = state
                                           .getInvoiceDetailsResponse
                                           ?.invoices ??
                                       [];
 
                                   return DropdownSearch<String>(
-                                    popupProps: const PopupProps.menu(
+                                    popupProps: PopupProps.menu(
                                       showSearchBox: true,
-                                      searchFieldProps: TextFieldProps(
+                                      searchFieldProps: const TextFieldProps(
                                         decoration: InputDecoration(
                                           labelText: "Search Invoice",
                                           border: OutlineInputBorder(),
                                         ),
                                       ),
+                                      // Disable selection of fulfilled invoices
+                                      disabledItemFn: (String item) =>
+                                          item.contains("(Fulfilled)"),
                                     ),
                                     selectedItem: _selectedInvoiceNumber,
-                                    items: invoices
-                                        .map((invoice) =>
-                                            invoice.invoiceNumber ?? "")
-                                        .toList(),
+                                    items: invoices.map((invoice) {
+                                      // Append (Fulfilled) if remaining amount is 0 or negative
+                                      final isFulfilled =
+                                          (invoice.remainingAmount ?? 1) <= 0;
+                                      final invoiceNumber =
+                                          invoice.invoiceNumber ??
+                                              AppLocalizations.of(context)!
+                                                  .error_invoiceRequired;
+                                      return isFulfilled
+                                          ? "$invoiceNumber (Fulfilled)"
+                                          : invoiceNumber;
+                                    }).toList(),
                                     dropdownDecoratorProps:
                                         DropDownDecoratorProps(
                                       dropdownSearchDecoration: InputDecoration(
                                         labelText: AppLocalizations.of(context)!
                                             .orderInvoiceNumber,
-                                        border: OutlineInputBorder(),
+                                        border: const OutlineInputBorder(),
                                       ),
                                     ),
                                     onChanged: (value) {
@@ -510,6 +529,7 @@ class _OrderPlaceState extends State<OrderPlace> {
                                     },
                                   );
                                 } else {
+                                  print('Else Condition');
                                   return const SizedBox.shrink();
                                 }
                               },
@@ -646,11 +666,10 @@ class _OrderPlaceState extends State<OrderPlace> {
                             Visibility(
                               visible: errorAmount.isNotEmpty,
                               child: Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 4, top: 12.0),
+                                padding:
+                                    const EdgeInsets.only(left: 4, top: 12.0),
                                 child: Row(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     SvgPicture.asset(
                                       'assets/icons/error_icon.svg',

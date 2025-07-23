@@ -40,8 +40,8 @@ class Invoices {
   String? createdAt;
   String? updatedAt;
   String? createdBy;
-  int? totalPaidAmount;
-  int? remainingAmount;
+  num? totalPaidAmount;
+  num? remainingAmount;
   Customer? customer;
 
   Invoices(

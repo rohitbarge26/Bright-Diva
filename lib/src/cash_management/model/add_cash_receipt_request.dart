@@ -2,7 +2,7 @@ class CashReceiptRequest {
   String? invoiceNumber;
   String? receiptNumber;
   String? customerId;
-  int? amount;
+  num? amount;
   bool? partialDelivery;
   String? cashPickupDate;
   String? pickupTime;

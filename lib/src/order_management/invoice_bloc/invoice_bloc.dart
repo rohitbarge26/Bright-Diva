@@ -16,6 +16,7 @@ class InvoiceBloc extends Bloc<InvoiceEvent, InvoiceState> {
       try {
         final invoiceAddResponse =
         await invoiceRepository.addInvoice(event.addInvoiceRequest);
+        print("Print Invoice Bloc:: ${invoiceAddResponse.toString()}");
         emit(InvoiceAddLoadedState(addInvoiceResponse: invoiceAddResponse));
       } catch (e) {
         emit(InvoiceAddErrorState(error: e.toString()));
@@ -24,9 +25,10 @@ class InvoiceBloc extends Bloc<InvoiceEvent, InvoiceState> {
 
     on<GetInvoiceDetails>((event, emit) async {
       try {
-        final getInvoiceResponse =
-        await invoiceRepository.getInvoice(0);
+        final getInvoiceResponse = await invoiceRepository.getInvoice(0);
+        print("Print Invoice Bloc:: ${getInvoiceResponse.toString()}");
         emit(InvoiceGetLoadedState(getInvoiceDetailsResponse: getInvoiceResponse));
+
       } catch (e) {
         emit(InvoiceGetErrorState(error: e.toString()));
       }

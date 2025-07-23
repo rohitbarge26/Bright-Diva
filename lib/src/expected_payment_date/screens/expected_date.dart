@@ -175,18 +175,31 @@ class _ExpectedDateState extends State<ExpectedDate> {
                             List<Invoices> invoices = state.getInvoiceDetailsResponse?.invoices ?? [];
 
                             return DropdownSearch<String>(
-                              popupProps: const PopupProps.menu(
+                              popupProps: PopupProps.menu(
                                 showSearchBox: true,
-                                searchFieldProps: TextFieldProps(
+                                searchFieldProps: const TextFieldProps(
                                   decoration: InputDecoration(
                                     labelText: "Search Invoice",
                                     border: OutlineInputBorder(),
                                   ),
                                 ),
+                                // Disable selection of fulfilled invoices
+                                disabledItemFn: (String item) =>
+                                    item.contains("(Fulfilled)"),
                               ),
                               selectedItem: _selectedInvoiceNumber,
-                              items: invoices.map((invoice) => invoice.invoiceNumber ??
-                                  AppLocalizations.of(context)!.error_invoiceRequired).toList(),
+                              items: invoices.map((invoice) {
+                                // Append (Fulfilled) if remaining amount is 0 or negative
+                                final isFulfilled =
+                                    (invoice.remainingAmount ?? 1) <= 0;
+                                final invoiceNumber =
+                                    invoice.invoiceNumber ??
+                                        AppLocalizations.of(context)!
+                                            .error_invoiceRequired;
+                                return isFulfilled
+                                    ? "$invoiceNumber (Fulfilled)"
+                                    : invoiceNumber;
+                              }).toList(),
                               dropdownDecoratorProps: DropDownDecoratorProps(
                                 dropdownSearchDecoration: InputDecoration(
                                   labelText: AppLocalizations.of(context)!.orderInvoiceNumber,

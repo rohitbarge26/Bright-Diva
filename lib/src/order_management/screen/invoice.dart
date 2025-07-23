@@ -20,6 +20,9 @@ import '../../customer_management/bloc/customer_bloc.dart';
 import '../../customer_management/bloc/customer_event.dart';
 import '../../customer_management/bloc/customer_state.dart';
 import '../../customer_management/model/get_customer.dart';
+import '../../settings/bloc/currency/currency_bloc.dart';
+import '../../settings/bloc/currency/currency_event.dart';
+import '../../settings/bloc/currency/currency_state.dart';
 import '../invoice_bloc/invoice_bloc.dart';
 import '../invoice_bloc/invoice_event.dart';
 import '../invoice_bloc/invoice_state.dart';
@@ -55,12 +58,38 @@ class _InvoiceState extends State<Invoice> {
   bool _isViewInvoiceVisible = false;
   bool isInvoiceList = false;
   List<Invoices>? invoiceList;
-
+  double hkdToMop = 1.03; // Initial value for HKD to MOP
+  double hkdToCny = 0.92; // Initial value for HKD to CNY
+  String currency_id = "";
+  String _conversionText = '';
   String dropDownSelectionCustomerError = '';
 
   String? _selectedCurrency = 'HKD'; // Default value
   final List<String> _currencies = ['HKD', 'MOP', 'CNY'];
   String? userRole;
+  // Conversion rates (replace with actual rates or API calls)
+  void _calculateConversion() {
+    if (amountController.text.isEmpty ||
+        double.tryParse(amountController.text) == null) {
+      setState(() => _conversionText = '');
+      return;
+    }
+
+    final amount = double.parse(amountController.text);
+
+    if (_selectedCurrency == 'HKD') {
+      setState(() => _conversionText = ''); // Hide for HKD
+    } else {
+      final rate = _selectedCurrency == 'MOP' ? hkdToMop : hkdToCny;
+      final convertedAmount = _selectedCurrency == 'MOP'
+          ? amount / rate  // Convert MOP→HKD (500 MOP → 500/1.03 ≈ 485.44 HKD)
+          : amount / rate; // Convert CNY→HKD
+
+      setState(() {
+        _conversionText = '≈ ${convertedAmount.toStringAsFixed(2)} HKD';
+      });
+    }
+  }
 
   void _updateButtonColor() {
     setState(() {
@@ -235,6 +264,7 @@ class _InvoiceState extends State<Invoice> {
     BlocProvider.of<CustomerBloc>(context, listen: false)
         .add(const GetCustomerList());
     userRole = Prefs.getUser('user')?.role!;
+    BlocProvider.of<CurrencyBloc>(context).add(const GetCurrencyUpdate());
   }
 
   @override
@@ -381,443 +411,473 @@ class _InvoiceState extends State<Invoice> {
           }
         }
       },
-      child: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.only(top: 68, right: 16.0, left: 16),
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        height: 50,
-                        alignment: Alignment.centerLeft,
-                        child: InkWell(
-                          onTap: () {
-                            widget.onBackTap();
-                          },
-                          child: SvgPicture.asset(
-                            'assets/icons/back_arrow_icon.svg',
-                            width: 40,
-                            height: 40,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Container(
-                        height: 50,
-                        alignment: Alignment.centerLeft,
-                        child: CustomText(
-                          text: AppLocalizations.of(context)!.addInvoice,
-                          fontSize: 20,
-                          desiredLineHeight: 28,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.02,
-                          color: const Color(0xFF171717),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          print("Check Customer List API Request");
-                          BlocProvider.of<InvoiceBloc>(context, listen: false)
-                              .add(const GetInvoiceDetails());
-                          setState(() {
-                            _isViewInvoiceVisible =
-                                !_isViewInvoiceVisible; // Toggle visibility
-                          });
-                        },
-                        child: Container(
-                          height: 48,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 32, vertical: 12),
-                          decoration: ShapeDecoration(
-                            color: const Color(0xFFF85A5A),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
-                          ),
-                          child: Text(
-                            AppLocalizations.of(context)!.viewInvoice,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w600,
+      child: BlocListener<CurrencyBloc, CurrencyState>(
+        listener: ( context,  state) {
+          if(state is GetCurrencyLoadedState){
+            int code = state.getCurrencyResponse?.statusCode ?? 0;
+            print('Code : $code');
+            if(code == SUCCESS){
+              setState(() {
+                currency_id = state.getCurrencyResponse!.currency![0].id!;
+                hkdToMop = state.getCurrencyResponse!.currency![0].hkdToMop!;
+                hkdToCny = state.getCurrencyResponse!.currency![0].hkdToCny!;
+              });
+            }
+          }
+        },
+        child: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.only(top: 68, right: 16.0, left: 16),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          height: 50,
+                          alignment: Alignment.centerLeft,
+                          child: InkWell(
+                            onTap: () {
+                              widget.onBackTap();
+                            },
+                            child: SvgPicture.asset(
+                              'assets/icons/back_arrow_icon.svg',
+                              width: 40,
+                              height: 40,
                             ),
                           ),
                         ),
-                      ),
-                    ]),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: _isViewInvoiceVisible
-                      ? isInvoiceList
-                          ? _buildInvoiceList()
-                          : const Center(child: CircularProgressIndicator())
-                      : Form(
-                          key: _formInvoiceKey,
-                          child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Auto Generate Checkbox and Manual Entry Field
-                                /*Row(
-                                  children: [
-                                    Checkbox(
-                                      value: isAutoGenerateInvoice,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          isAutoGenerateInvoice =
-                                              value ?? false;
-                                        });
-                                      },
-                                    ),
-                                    Text(AppLocalizations.of(context)!
-                                        .autoGenerateInvoice),
-                                  ],
-                                ),*/
-                                /*Visibility(
-                                  visible: !isAutoGenerateInvoice,
-                                  child:
-                                ),*/
-                                Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: const Color(0xFFE5E5E5),
-                                        width: 1),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
-                                    child: TextFormField(
-                                      controller: invoiceNumberController,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          errorInvoiceNumber = Validator
-                                                  .alphanumericValidate(value)
-                                              ? ''
-                                              : AppLocalizations.of(context)!
-                                                  .enterValidInvoiceNumber;
-                                        });
-                                        _updateButtonColor();
-                                      },
-                                      style: const TextStyle(
-                                        fontFamily: 'Inter',
-                                        color: Color(0xFF171717),
-                                        fontWeight: FontWeight.w400,
-                                        height: 1.50,
-                                        fontSize: 16,
+                        const SizedBox(width: 12),
+                        Container(
+                          height: 50,
+                          alignment: Alignment.centerLeft,
+                          child: CustomText(
+                            text: AppLocalizations.of(context)!.addInvoice,
+                            fontSize: 20,
+                            desiredLineHeight: 28,
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.02,
+                            color: const Color(0xFF171717),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            print("Check Customer List API Request");
+                            BlocProvider.of<InvoiceBloc>(context, listen: false)
+                                .add(const GetInvoiceDetails());
+                            setState(() {
+                              _isViewInvoiceVisible =
+                                  !_isViewInvoiceVisible; // Toggle visibility
+                            });
+                          },
+                          child: Container(
+                            height: 48,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 32, vertical: 12),
+                            decoration: ShapeDecoration(
+                              color: const Color(0xFFF85A5A),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                            ),
+                            child: Text(
+                              AppLocalizations.of(context)!.viewInvoice,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ]),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: _isViewInvoiceVisible
+                        ? isInvoiceList
+                            ? _buildInvoiceList()
+                            : const Center(child: CircularProgressIndicator())
+                        : Form(
+                            key: _formInvoiceKey,
+                            child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Auto Generate Checkbox and Manual Entry Field
+                                  /*Row(
+                                    children: [
+                                      Checkbox(
+                                        value: isAutoGenerateInvoice,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            isAutoGenerateInvoice =
+                                                value ?? false;
+                                          });
+                                        },
                                       ),
-                                      keyboardType: TextInputType.name,
-                                      textCapitalization:
-                                          TextCapitalization.words,
-                                      decoration: InputDecoration(
-                                        labelText:
-                                            '${AppLocalizations.of(context)!.invoiceNumber} *',
-                                        labelStyle: const TextStyle(
-                                          color: Color(0xFF737373),
+                                      Text(AppLocalizations.of(context)!
+                                          .autoGenerateInvoice),
+                                    ],
+                                  ),*/
+                                  /*Visibility(
+                                    visible: !isAutoGenerateInvoice,
+                                    child:
+                                  ),*/
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: const Color(0xFFE5E5E5),
+                                          width: 1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      child: TextFormField(
+                                        controller: invoiceNumberController,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            errorInvoiceNumber = Validator
+                                                    .alphanumericValidate(value)
+                                                ? ''
+                                                : AppLocalizations.of(context)!
+                                                    .enterValidInvoiceNumber;
+                                          });
+                                          _updateButtonColor();
+                                        },
+                                        style: const TextStyle(
+                                          fontFamily: 'Inter',
+                                          color: Color(0xFF171717),
+                                          fontWeight: FontWeight.w400,
+                                          height: 1.50,
+                                          fontSize: 16,
                                         ),
-                                        counterText: '',
-                                        border: InputBorder.none,
+                                        keyboardType: TextInputType.name,
+                                        textCapitalization:
+                                            TextCapitalization.words,
+                                        decoration: InputDecoration(
+                                          labelText:
+                                              '${AppLocalizations.of(context)!.invoiceNumber} *',
+                                          labelStyle: const TextStyle(
+                                            color: Color(0xFF737373),
+                                          ),
+                                          counterText: '',
+                                          border: InputBorder.none,
+                                        ),
+                                        maxLength: 17,
                                       ),
-                                      maxLength: 17,
                                     ),
                                   ),
-                                ),
-                                Visibility(
-                                  visible: errorInvoiceNumber.isNotEmpty,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 4, top: 12.0),
-                                    child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          SizedBox(
-                                            width: 16,
-                                            height: 16,
-                                            child: SvgPicture.asset(
-                                              'assets/icons/error_icon.svg',
-                                              height: 12.67,
-                                              width: 12.67,
-                                              alignment: Alignment.center,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Expanded(
-                                            child: CustomText(
-                                              text: errorInvoiceNumber,
-                                              fontSize: 12,
-                                              desiredLineHeight: 16,
-                                              fontFamily: 'Inter',
-                                              fontWeight: FontWeight.w500,
-                                              color: const Color(0xFFF85A5A),
-                                            ),
-                                          ),
-                                        ]),
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                // Customer Dropdown with Concatenated Address
-                                BlocBuilder<CustomerBloc, CustomerState>(
-                                  builder: (context, state) {
-                                    if (state is CustomerListInitialState) {
-                                      return const Center(
-                                          child: CircularProgressIndicator());
-                                    } else if (state
-                                        is CustomerListLoadedState) {
-                                      customerList = state
-                                          .getCustomerListResponse?.customers;
-                                      int? totalCustomer =
-                                          state.getCustomerListResponse?.total;
-                                      if (totalCustomer == 0) {
-                                        return const SizedBox.shrink();
-                                      } else {
-                                        return Container(
-                                          width:
-                                              MediaQuery.of(context).size.width,
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 6, horizontal: 15),
-                                          decoration: ShapeDecoration(
-                                            shape: RoundedRectangleBorder(
-                                              side: const BorderSide(
-                                                  width: 1,
-                                                  color: Color(0xFFE2E3E6)),
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                            ),
-                                          ),
-                                          child: DropdownSearch<Customers>(
-                                            popupProps: PopupProps.menu(
-                                              showSearchBox: true,
-                                              searchFieldProps: TextFieldProps(
-                                                decoration: InputDecoration(
-                                                  hintText: AppLocalizations.of(
-                                                          context)!
-                                                      .searchCustomer,
-                                                ),
-                                              ),
-                                            ),
-                                            items: customerList ?? [],
-                                            itemAsString: (Customers u) =>
-                                                '${u.companyName} - ${u.city}',
-                                            dropdownDecoratorProps:
-                                                DropDownDecoratorProps(
-                                              dropdownSearchDecoration:
-                                                  InputDecoration(
-                                                hintText: AppLocalizations.of(
-                                                        context)!
-                                                    .selectCustomer,
-                                                border: InputBorder.none,
-                                              ),
-                                            ),
-                                            onChanged: (Customers? newValue) {
-                                              setState(() {
-                                                selectedCustomer = newValue?.id;
-                                                saveValidation = true;
-                                              });
-                                            },
-                                          ),
-                                        );
-                                      }
-                                    } else {
-                                      return const SizedBox.shrink();
-                                    }
-                                  },
-                                ),
-                                Visibility(
-                                  visible: !saveValidation,
-                                  child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        const SizedBox(height: 12),
-                                        Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              SvgPicture.asset(
+                                  Visibility(
+                                    visible: errorInvoiceNumber.isNotEmpty,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 4, top: 12.0),
+                                      child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            SizedBox(
+                                              width: 16,
+                                              height: 16,
+                                              child: SvgPicture.asset(
                                                 'assets/icons/error_icon.svg',
                                                 height: 12.67,
                                                 width: 12.67,
+                                                alignment: Alignment.center,
                                               ),
-                                              const SizedBox(width: 4),
-                                              CustomText(
-                                                text:
-                                                    dropDownSelectionCustomerError,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: CustomText(
+                                                text: errorInvoiceNumber,
                                                 fontSize: 12,
                                                 desiredLineHeight: 16,
                                                 fontFamily: 'Inter',
                                                 fontWeight: FontWeight.w500,
-                                                color: const Color(0xFFDF4747),
-                                                textAlign: TextAlign.left,
+                                                color: const Color(0xFFF85A5A),
                                               ),
-                                            ]),
-                                      ]),
-                                ),
-                                const SizedBox(height: 12),
-                                // Amount and Currency Dropdown
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Container(
+                                            ),
+                                          ]),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  // Customer Dropdown with Concatenated Address
+                                  BlocBuilder<CustomerBloc, CustomerState>(
+                                    builder: (context, state) {
+                                      if (state is CustomerListInitialState) {
+                                        return const Center(
+                                            child: CircularProgressIndicator());
+                                      } else if (state
+                                          is CustomerListLoadedState) {
+                                        customerList = state
+                                            .getCustomerListResponse?.customers;
+                                        int? totalCustomer =
+                                            state.getCustomerListResponse?.total;
+                                        if (totalCustomer == 0) {
+                                          return const SizedBox.shrink();
+                                        } else {
+                                          return Container(
+                                            width:
+                                                MediaQuery.of(context).size.width,
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 6, horizontal: 15),
+                                            decoration: ShapeDecoration(
+                                              shape: RoundedRectangleBorder(
+                                                side: const BorderSide(
+                                                    width: 1,
+                                                    color: Color(0xFFE2E3E6)),
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                            ),
+                                            child: DropdownSearch<Customers>(
+                                              popupProps: PopupProps.menu(
+                                                showSearchBox: true,
+                                                searchFieldProps: TextFieldProps(
+                                                  decoration: InputDecoration(
+                                                    hintText: AppLocalizations.of(
+                                                            context)!
+                                                        .searchCustomer,
+                                                  ),
+                                                ),
+                                              ),
+                                              items: customerList ?? [],
+                                              itemAsString: (Customers u) =>
+                                                  '${u.companyName} - ${u.city}',
+                                              dropdownDecoratorProps:
+                                                  DropDownDecoratorProps(
+                                                dropdownSearchDecoration:
+                                                    InputDecoration(
+                                                  hintText: AppLocalizations.of(
+                                                          context)!
+                                                      .selectCustomer,
+                                                  border: InputBorder.none,
+                                                ),
+                                              ),
+                                              onChanged: (Customers? newValue) {
+                                                setState(() {
+                                                  selectedCustomer = newValue?.id;
+                                                  saveValidation = true;
+                                                });
+                                              },
+                                            ),
+                                          );
+                                        }
+                                      } else {
+                                        return const SizedBox.shrink();
+                                      }
+                                    },
+                                  ),
+                                  Visibility(
+                                    visible: !saveValidation,
+                                    child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          const SizedBox(height: 12),
+                                          Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                SvgPicture.asset(
+                                                  'assets/icons/error_icon.svg',
+                                                  height: 12.67,
+                                                  width: 12.67,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                CustomText(
+                                                  text:
+                                                      dropDownSelectionCustomerError,
+                                                  fontSize: 12,
+                                                  desiredLineHeight: 16,
+                                                  fontFamily: 'Inter',
+                                                  fontWeight: FontWeight.w500,
+                                                  color: const Color(0xFFDF4747),
+                                                  textAlign: TextAlign.left,
+                                                ),
+                                              ]),
+                                        ]),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  // Amount and Currency Dropdown
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: const Color(0xFFE5E5E5),
+                                                width: 1),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Padding(
+                                            padding:
+                                                const EdgeInsets.only(left: 8.0),
+                                            child: TextFormField(
+                                              controller: amountController,
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  errorAmount =
+                                                  Validator.amountValidate(
+                                                      value)
+                                                      ? ''
+                                                      : AppLocalizations.of(
+                                                      context)!
+                                                      .enterAmount;
+                                                  // Trigger conversion calculation when amount changes
+                                                  _calculateConversion();
+                                                });
+                                                _updateButtonColor();
+                                              },
+                                              style: const TextStyle(
+                                                fontFamily: 'Inter',
+                                                color: Color(0xFF171717),
+                                                fontWeight: FontWeight.w400,
+                                                height: 1.50,
+                                                fontSize: 16,
+                                              ),
+                                              keyboardType: TextInputType.number,
+                                              textCapitalization:
+                                              TextCapitalization.none,
+                                              decoration: InputDecoration(
+                                                labelText:
+                                                '${AppLocalizations.of(context)!.amount} *',
+                                                labelStyle: const TextStyle(
+                                                  color: Color(0xFF737373),
+                                                ),
+                                                counterText: '',
+                                                border: InputBorder.none,
+                                              ),
+                                              maxLength: 17,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      // Currency Dropdown
+                                      Container(
                                         decoration: BoxDecoration(
                                           border: Border.all(
                                               color: const Color(0xFFE5E5E5),
                                               width: 1),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(8),
                                         ),
                                         child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 8.0),
-                                          child: TextFormField(
-                                            controller: amountController,
-                                            onChanged: (value) {
+                                          padding: const EdgeInsets.all(5.0),
+                                          child: DropdownButton<String>(
+                                            value: _selectedCurrency,
+                                            hint: Text(
+                                                AppLocalizations.of(context)!
+                                                    .select_currency),
+                                            onChanged: (String? newValue) {
                                               setState(() {
-                                                errorAmount =
-                                                    Validator.amountValidate(
-                                                            value)
-                                                        ? ''
-                                                        : AppLocalizations.of(
-                                                                context)!
-                                                            .enterAmount;
+                                                _selectedCurrency = newValue;
+                                                _calculateConversion();
                                               });
-                                              _updateButtonColor();
                                             },
-                                            style: const TextStyle(
-                                              fontFamily: 'Inter',
-                                              color: Color(0xFF171717),
-                                              fontWeight: FontWeight.w400,
-                                              height: 1.50,
-                                              fontSize: 16,
-                                            ),
-                                            keyboardType: TextInputType.number,
-                                            textCapitalization:
-                                                TextCapitalization.none,
-                                            decoration: InputDecoration(
-                                              labelText:
-                                                  '${AppLocalizations.of(context)!.amount} *',
-                                              labelStyle: const TextStyle(
-                                                color: Color(0xFF737373),
-                                              ),
-                                              counterText: '',
-                                              border: InputBorder.none,
-                                            ),
-                                            maxLength: 17,
+                                            items: _currencies
+                                                .map<DropdownMenuItem<String>>(
+                                                    (String currency) {
+                                              return DropdownMenuItem<String>(
+                                                value: currency,
+                                                child: Text(currency),
+                                              );
+                                            }).toList(),
+                                            underline: const SizedBox.shrink(),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 5),
-                                    // Currency Dropdown
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: const Color(0xFFE5E5E5),
-                                            width: 1),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(5.0),
-                                        child: DropdownButton<String>(
-                                          value: _selectedCurrency,
-                                          hint: Text(
-                                              AppLocalizations.of(context)!
-                                                  .select_currency),
-                                          onChanged: (String? newValue) {
-                                            setState(() {
-                                              _selectedCurrency = newValue;
-                                            });
-                                          },
-                                          items: _currencies
-                                              .map<DropdownMenuItem<String>>(
-                                                  (String currency) {
-                                            return DropdownMenuItem<String>(
-                                              value: currency,
-                                              child: Text(currency),
-                                            );
-                                          }).toList(),
-                                          underline: const SizedBox.shrink(),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 5),
+                                  if (_conversionText.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4.0),
+                                      child: Text(
+                                        _conversionText,
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 12,
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                // Total Units Field
-                                /*Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: const Color(0xFFE5E5E5),
-                                        width: 1),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
-                                    child: TextFormField(
-                                      controller: totalUnitsController,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _updateButtonColor();
-                                        });
-                                      },
-                                      style: const TextStyle(
-                                        fontFamily: 'Inter',
-                                        color: Color(0xFF171717),
-                                        fontWeight: FontWeight.w400,
-                                        height: 1.50,
+                                  const SizedBox(height: 12),
+                                  // Total Units Field
+                                  /*Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: const Color(0xFFE5E5E5),
+                                          width: 1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      child: TextFormField(
+                                        controller: totalUnitsController,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _updateButtonColor();
+                                          });
+                                        },
+                                        style: const TextStyle(
+                                          fontFamily: 'Inter',
+                                          color: Color(0xFF171717),
+                                          fontWeight: FontWeight.w400,
+                                          height: 1.50,
+                                          fontSize: 16,
+                                        ),
+                                        keyboardType: TextInputType.number,
+                                        textCapitalization:
+                                            TextCapitalization.none,
+                                        decoration: InputDecoration(
+                                          labelText:
+                                              '${AppLocalizations.of(context)!.totalUnits} *',
+                                          labelStyle: const TextStyle(
+                                            color: Color(0xFF737373),
+                                          ),
+                                          counterText: '',
+                                          border: InputBorder.none,
+                                        ),
+                                        maxLength: 17,
+                                      ),
+                                    ),
+                                  ),*/
+                                  //const SizedBox(height: 12),
+                                  // Submit Button
+                                  Container(
+                                    width: double.infinity,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      color: buttonColor,
+                                    ),
+                                    child: TextButton(
+                                      onPressed: _onButtonPressed,
+                                      child: CustomText(
+                                        text:
+                                            AppLocalizations.of(context)!.submit,
                                         fontSize: 16,
+                                        desiredLineHeight: 24,
+                                        fontFamily: 'Inter',
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFFFFFFFF),
                                       ),
-                                      keyboardType: TextInputType.number,
-                                      textCapitalization:
-                                          TextCapitalization.none,
-                                      decoration: InputDecoration(
-                                        labelText:
-                                            '${AppLocalizations.of(context)!.totalUnits} *',
-                                        labelStyle: const TextStyle(
-                                          color: Color(0xFF737373),
-                                        ),
-                                        counterText: '',
-                                        border: InputBorder.none,
-                                      ),
-                                      maxLength: 17,
                                     ),
                                   ),
-                                ),*/
-                                //const SizedBox(height: 12),
-                                // Submit Button
-                                Container(
-                                  width: double.infinity,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    color: buttonColor,
-                                  ),
-                                  child: TextButton(
-                                    onPressed: _onButtonPressed,
-                                    child: CustomText(
-                                      text:
-                                          AppLocalizations.of(context)!.submit,
-                                      fontSize: 16,
-                                      desiredLineHeight: 24,
-                                      fontFamily: 'Inter',
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xFFFFFFFF),
-                                    ),
-                                  ),
-                                ),
-                              ]),
-                        ),
-                ),
-              ]),
+                                ]),
+                          ),
+                  ),
+                ]),
+          ),
         ),
       ),
     );

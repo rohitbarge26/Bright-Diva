@@ -1,7 +1,7 @@
 class OrderAddRequest {
   String? orderNumber;
   String? invoiceNumber;
-  int? amountOfDelivery;
+  num? amountOfDelivery;
   bool? partialDelivery;
   String? currency;
   int? deliveredUnits;

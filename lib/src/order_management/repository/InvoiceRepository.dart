@@ -50,9 +50,10 @@ class InvoiceRepository {
         options: await HeaderApiConfig.getOptionsWithJWToken(),
       );
       var data = response.data;
-      print('Response :$data');
       if (response.statusCode == SUCCESS) {
+        print("Print Invoice Repository:: ${data.toString()}");
         GetInvoiceResponse getInvoice = GetInvoiceResponse.fromJson(data);
+        print('get invoice Data: ${getInvoice.toString()}');
         return getInvoice;
       }
     } on DioException catch (e) {

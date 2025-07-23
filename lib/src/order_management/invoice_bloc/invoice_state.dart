@@ -47,9 +47,7 @@ class InvoiceGetInitialState extends InvoiceState {
 
 class InvoiceGetLoadedState extends InvoiceState {
   final GetInvoiceResponse? getInvoiceDetailsResponse;
-
   const InvoiceGetLoadedState({required this.getInvoiceDetailsResponse});
-
   @override
   List<Object?> get props => [getInvoiceDetailsResponse];
 }
