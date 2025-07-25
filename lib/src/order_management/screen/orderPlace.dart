@@ -21,6 +21,9 @@ import '../../../widgets/custom_text.dart';
 import '../../../widgets/edit_order_alert.dart';
 import '../../../widgets/error_dialog.dart';
 import '../../../widgets/show_alert_dialog.dart';
+import '../../settings/bloc/currency/currency_bloc.dart';
+import '../../settings/bloc/currency/currency_event.dart';
+import '../../settings/bloc/currency/currency_state.dart';
 import '../invoice_bloc/invoice_event.dart';
 import '../model/get_invoice_response.dart';
 import '../model/get_order_response.dart';
@@ -61,6 +64,36 @@ class _OrderPlaceState extends State<OrderPlace> {
   String errorAmount = '';
   OrderGetResponse? ordersListResponse;
   String? userRole;
+  double hkdToMop = 1.03; // Initial value for HKD to MOP
+  double hkdToCny = 0.92; // Initial value for HKD to CNY
+  String currency_id = "";
+  String _conversionText = '';
+  double _amountInHKD = 0.0;
+
+  void _updateConversionText() {
+    if (_selectedCurrency == 'HKD') {
+      setState(() => _conversionText = '');
+    } else {
+      final convertedAmount = _convertFromHKD(_amountInHKD, _selectedCurrency!);
+      setState(() {
+        _conversionText = '≈ ${convertedAmount.toStringAsFixed(2)} '
+            '$_selectedCurrency (${_amountInHKD.toStringAsFixed(2)} HKD)';
+      });
+    }
+  }
+
+
+  double _convertToHKD(double amount, String fromCurrency) {
+    if (fromCurrency == 'HKD') return amount;
+    final rate = fromCurrency == 'MOP' ? hkdToMop : hkdToCny;
+    return amount / rate;
+  }
+
+  double _convertFromHKD(double amountInHKD, String toCurrency) {
+    if (toCurrency == 'HKD') return amountInHKD;
+    final rate = toCurrency == 'MOP' ? hkdToMop : hkdToCny;
+    return amountInHKD * rate;
+  }
 
   // Fetch customer name based on invoice number
   void _fetchCustomerName(String invoiceNumber, List<Invoices> invoices) {
@@ -105,7 +138,8 @@ class _OrderPlaceState extends State<OrderPlace> {
       return false; // Validation failed
     }
     // Get the entered amount from controller and parse to double
-    final enteredAmount = double.tryParse(_deliveredValueController.text) ?? 0;
+    final enteredAmount = _amountInHKD;
+    print("Entered Amount for validate: $enteredAmount");
     // Validate against selected amount
     if (enteredAmount <= 0) {
       setState(() {
@@ -116,7 +150,7 @@ class _OrderPlaceState extends State<OrderPlace> {
 
     if (enteredAmount > _selectedRemainingAmount!) {
       setState(() {
-        errorAmount = 'Amount cannot exceed $_selectedRemainingAmount';
+        errorAmount = 'Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD';
       });
       return false;
     }
@@ -256,6 +290,7 @@ class _OrderPlaceState extends State<OrderPlace> {
     BlocProvider.of<InvoiceBloc>(context, listen: false)
         .add(const GetInvoiceDetails());
     userRole = Prefs.getUser('user')?.role!;
+    BlocProvider.of<CurrencyBloc>(context).add(const GetCurrencyUpdate());
   }
 
   @override
@@ -385,324 +420,370 @@ class _OrderPlaceState extends State<OrderPlace> {
           } else {}
         }
       },
-      child: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.only(top: 68, right: 16.0, left: 16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    height: 50,
-                    alignment: Alignment.centerLeft,
-                    child: InkWell(
-                      onTap: () {
-                        widget.onBackTap();
-                      },
-                      child: SvgPicture.asset(
-                        'assets/icons/back_arrow_icon.svg',
-                        width: 40,
-                        height: 40,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    height: 50,
-                    alignment: Alignment.centerLeft,
-                    child: CustomText(
-                      text: AppLocalizations.of(context)!.manageOrder,
-                      fontSize: 20,
-                      desiredLineHeight: 28,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.02,
-                      color: const Color(0xFF171717),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      print("Get Customer list");
-                      BlocProvider.of<OrderBloc>(context, listen: false)
-                          .add(const GetOrderList());
-                    },
-                    child: Container(
-                      height: 48,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 32, vertical: 12),
-                      decoration: ShapeDecoration(
-                        color: const Color(0xFFF85A5A),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+      child: BlocListener<CurrencyBloc, CurrencyState>(
+        listener: ( context,  state) {
+          if(state is GetCurrencyLoadedState){
+            int code = state.getCurrencyResponse?.statusCode ?? 0;
+            print('Code : $code');
+            if(code == SUCCESS){
+              setState(() {
+                currency_id = state.getCurrencyResponse!.currency![0].id!;
+                hkdToMop = state.getCurrencyResponse!.currency![0].hkdToMop!;
+                hkdToCny = state.getCurrencyResponse!.currency![0].hkdToCny!;
+              });
+            }
+          }
+        },
+        child: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.only(top: 68, right: 16.0, left: 16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 50,
+                      alignment: Alignment.centerLeft,
+                      child: InkWell(
+                        onTap: () {
+                          widget.onBackTap();
+                        },
+                        child: SvgPicture.asset(
+                          'assets/icons/back_arrow_icon.svg',
+                          width: 40,
+                          height: 40,
                         ),
                       ),
-                      child: Text(
-                        AppLocalizations.of(context)!.viewOrder,
+                    ),
+                    Container(
+                      height: 50,
+                      alignment: Alignment.centerLeft,
+                      child: CustomText(
+                        text: AppLocalizations.of(context)!.manageOrder,
+                        fontSize: 20,
+                        desiredLineHeight: 28,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.02,
+                        color: const Color(0xFF171717),
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        print("Get Customer list");
+                        BlocProvider.of<OrderBloc>(context, listen: false)
+                            .add(const GetOrderList());
+                      },
+                      child: Container(
+                        height: 48,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 12),
+                        decoration: ShapeDecoration(
+                          color: const Color(0xFFF85A5A),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)!.viewOrder,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              Expanded(
-                child: _isViewOrderVisible
-                    ? isOrderList
-                        ? _buildOrderList()
-                        : const Center(
-                            child:
-                                CircularProgressIndicator()) // Show View Order table
-                    : Form(
-                        key: _formOrderKey,
-                        child: ListView(
-                          children: [
-                            // Invoice Number (Searchable Dropdown)
+                  ],
+                ),
+                Expanded(
+                  child: _isViewOrderVisible
+                      ? isOrderList
+                          ? _buildOrderList()
+                          : const Center(
+                              child:
+                                  CircularProgressIndicator()) // Show View Order table
+                      : Form(
+                          key: _formOrderKey,
+                          child: ListView(
+                            children: [
+                              // Invoice Number (Searchable Dropdown)
 
-                            BlocBuilder<InvoiceBloc, InvoiceState>(
-                              builder: (context, state) {
-                                if (state is InvoiceGetInitialState) {
-                                  print("Search InvoiceGetInitialState List");
-                                  return const Center(
-                                      child: CircularProgressIndicator());
-                                } else if (state is InvoiceGetLoadedState) {
-                                  print("Search Invoice List");
-                                  List<Invoices> invoices = state
-                                          .getInvoiceDetailsResponse
-                                          ?.invoices ??
-                                      [];
+                              BlocBuilder<InvoiceBloc, InvoiceState>(
+                                builder: (context, state) {
+                                  if (state is InvoiceGetInitialState) {
+                                    print("Search InvoiceGetInitialState List");
+                                    return const Center(
+                                        child: CircularProgressIndicator());
+                                  } else if (state is InvoiceGetLoadedState) {
+                                    print("Search Invoice List");
+                                    List<Invoices> invoices = state
+                                            .getInvoiceDetailsResponse
+                                            ?.invoices ??
+                                        [];
 
-                                  return DropdownSearch<String>(
-                                    popupProps: PopupProps.menu(
-                                      showSearchBox: true,
-                                      searchFieldProps: const TextFieldProps(
-                                        decoration: InputDecoration(
-                                          labelText: "Search Invoice",
-                                          border: OutlineInputBorder(),
+                                    return DropdownSearch<String>(
+                                      popupProps: PopupProps.menu(
+                                        showSearchBox: true,
+                                        searchFieldProps: const TextFieldProps(
+                                          decoration: InputDecoration(
+                                            labelText: "Search Invoice",
+                                            border: OutlineInputBorder(),
+                                          ),
+                                        ),
+                                        // Disable selection of fulfilled invoices
+                                        disabledItemFn: (String item) =>
+                                            item.contains("(Fulfilled)"),
+                                      ),
+                                      selectedItem: _selectedInvoiceNumber,
+                                      items: invoices.map((invoice) {
+                                        // Append (Fulfilled) if remaining amount is 0 or negative
+                                        final isFulfilled =
+                                            (invoice.remainingAmount ?? 1) <= 0;
+                                        final invoiceNumber =
+                                            invoice.invoiceNumber ??
+                                                AppLocalizations.of(context)!
+                                                    .error_invoiceRequired;
+                                        return isFulfilled
+                                            ? "$invoiceNumber (Fulfilled)"
+                                            : invoiceNumber;
+                                      }).toList(),
+                                      dropdownDecoratorProps:
+                                          DropDownDecoratorProps(
+                                        dropdownSearchDecoration: InputDecoration(
+                                          labelText: AppLocalizations.of(context)!
+                                              .orderInvoiceNumber,
+                                          border: const OutlineInputBorder(),
                                         ),
                                       ),
-                                      // Disable selection of fulfilled invoices
-                                      disabledItemFn: (String item) =>
-                                          item.contains("(Fulfilled)"),
-                                    ),
-                                    selectedItem: _selectedInvoiceNumber,
-                                    items: invoices.map((invoice) {
-                                      // Append (Fulfilled) if remaining amount is 0 or negative
-                                      final isFulfilled =
-                                          (invoice.remainingAmount ?? 1) <= 0;
-                                      final invoiceNumber =
-                                          invoice.invoiceNumber ??
-                                              AppLocalizations.of(context)!
-                                                  .error_invoiceRequired;
-                                      return isFulfilled
-                                          ? "$invoiceNumber (Fulfilled)"
-                                          : invoiceNumber;
-                                    }).toList(),
-                                    dropdownDecoratorProps:
-                                        DropDownDecoratorProps(
-                                      dropdownSearchDecoration: InputDecoration(
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _selectedInvoiceNumber = value;
+                                          _fetchCustomerName(value!, invoices);
+                                        });
+                                      },
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return AppLocalizations.of(context)!
+                                              .errorOrderInvoiceNumber;
+                                        }
+                                        return null;
+                                      },
+                                    );
+                                  } else {
+                                    print('Else Condition');
+                                    return const SizedBox.shrink();
+                                  }
+                                },
+                              ),
+
+                              const SizedBox(height: 16),
+                              // Customer Name (Fetched automatically)
+                              TextFormField(
+                                controller: _customerNameController,
+                                decoration: InputDecoration(
+                                  labelText:
+                                      '${AppLocalizations.of(context)!.customerName} *',
+                                  border: const OutlineInputBorder(),
+                                  enabled: false, // Disabled as it's auto-filled
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return AppLocalizations.of(context)!
+                                        .error_customerNameRequired;
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Partial Delivery (Radio Buttons)
+                              Text(
+                                '${AppLocalizations.of(context)!.partialDelivery} *',
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              Row(
+                                children: [
+                                  Radio<bool>(
+                                    value: true,
+                                    groupValue: _isPartialDelivery,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _isPartialDelivery = value!;
+                                      });
+                                    },
+                                  ),
+                                  Text(AppLocalizations.of(context)!.yes),
+                                  const SizedBox(width: 16),
+                                  Radio<bool>(
+                                    value: false,
+                                    groupValue: _isPartialDelivery,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _isPartialDelivery = value!;
+                                      });
+                                    },
+                                  ),
+                                  Text(AppLocalizations.of(context)!.no),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Delivered Units (Input Field)
+                              /*TextFormField(
+                                controller: _deliveredUnitsController,
+                                decoration: InputDecoration(
+                                  labelText: AppLocalizations.of(context)!
+                                      .deliveredUnits,
+                                  border: const OutlineInputBorder(),
+                                ),
+                                keyboardType: TextInputType.number,
+                                enabled: _isPartialDelivery,
+                                // Enable only if Partial Delivery is Yes
+                                validator: (value) {
+                                  if (_isPartialDelivery &&
+                                      (value == null || value.isEmpty)) {
+                                    return AppLocalizations.of(context)!
+                                        .error_deliveredUnitsRequired;
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),*/
+
+                              // Delivered Value (Currency Dropdown + Input Field)
+                              Row(
+                                children: [
+                                  Expanded(
+                                    flex: 3,
+                                    child: DropdownButtonFormField<String>(
+                                      value: _selectedCurrency,
+                                      hint: Text(AppLocalizations.of(context)!
+                                          .select_currency),
+                                      decoration: InputDecoration(
                                         labelText: AppLocalizations.of(context)!
-                                            .orderInvoiceNumber,
+                                            .currency,
                                         border: const OutlineInputBorder(),
                                       ),
+                                      items:
+                                          ['HKD', 'MOP', 'CNY'].map((currency) {
+                                        return DropdownMenuItem(
+                                          value: currency,
+                                          child: Text(currency),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        if (value != null && value != _selectedCurrency) {
+                                          setState(() {
+                                            // Convert current amount to HKD first
+                                            final currentAmount = double.tryParse(_deliveredValueController.text) ?? 0;
+                                            _amountInHKD = _convertToHKD(currentAmount, _selectedCurrency!);
+
+                                            // Update currency and convert to new currency
+                                            _selectedCurrency = value;
+                                            final newAmount = _convertFromHKD(_amountInHKD, value);
+                                            _deliveredValueController.text = newAmount.toStringAsFixed(2);
+
+                                            // Update conversion text
+                                            _updateConversionText();
+                                          });
+                                        }
+                                      },
                                     ),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _selectedInvoiceNumber = value;
-                                        _fetchCustomerName(value!, invoices);
-                                      });
-                                    },
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return AppLocalizations.of(context)!
-                                            .errorOrderInvoiceNumber;
-                                      }
-                                      return null;
-                                    },
-                                  );
-                                } else {
-                                  print('Else Condition');
-                                  return const SizedBox.shrink();
-                                }
-                              },
-                            ),
-
-                            const SizedBox(height: 16),
-                            // Customer Name (Fetched automatically)
-                            TextFormField(
-                              controller: _customerNameController,
-                              decoration: InputDecoration(
-                                labelText:
-                                    '${AppLocalizations.of(context)!.customerName} *',
-                                border: const OutlineInputBorder(),
-                                enabled: false, // Disabled as it's auto-filled
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return AppLocalizations.of(context)!
-                                      .error_customerNameRequired;
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Partial Delivery (Radio Buttons)
-                            Text(
-                              '${AppLocalizations.of(context)!.partialDelivery} *',
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                            Row(
-                              children: [
-                                Radio<bool>(
-                                  value: true,
-                                  groupValue: _isPartialDelivery,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _isPartialDelivery = value!;
-                                    });
-                                  },
-                                ),
-                                Text(AppLocalizations.of(context)!.yes),
-                                const SizedBox(width: 16),
-                                Radio<bool>(
-                                  value: false,
-                                  groupValue: _isPartialDelivery,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _isPartialDelivery = value!;
-                                    });
-                                  },
-                                ),
-                                Text(AppLocalizations.of(context)!.no),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Delivered Units (Input Field)
-                            /*TextFormField(
-                              controller: _deliveredUnitsController,
-                              decoration: InputDecoration(
-                                labelText: AppLocalizations.of(context)!
-                                    .deliveredUnits,
-                                border: const OutlineInputBorder(),
-                              ),
-                              keyboardType: TextInputType.number,
-                              enabled: _isPartialDelivery,
-                              // Enable only if Partial Delivery is Yes
-                              validator: (value) {
-                                if (_isPartialDelivery &&
-                                    (value == null || value.isEmpty)) {
-                                  return AppLocalizations.of(context)!
-                                      .error_deliveredUnitsRequired;
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 16),*/
-
-                            // Delivered Value (Currency Dropdown + Input Field)
-                            Row(
-                              children: [
-                                Expanded(
-                                  flex: 3,
-                                  child: DropdownButtonFormField<String>(
-                                    value: _selectedCurrency,
-                                    hint: Text(AppLocalizations.of(context)!
-                                        .select_currency),
-                                    decoration: InputDecoration(
-                                      labelText: AppLocalizations.of(context)!
-                                          .currency,
-                                      border: const OutlineInputBorder(),
-                                    ),
-                                    items:
-                                        ['HKD', 'MOP', 'CNY'].map((currency) {
-                                      return DropdownMenuItem(
-                                        value: currency,
-                                        child: Text(currency),
-                                      );
-                                    }).toList(),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _selectedCurrency = value;
-                                      });
-                                    },
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  flex: 3,
-                                  child: TextFormField(
-                                    controller: _deliveredValueController,
-                                    decoration: InputDecoration(
-                                      labelText: AppLocalizations.of(context)!
-                                          .deliveredValue,
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    enabled: _isPartialDelivery,
-                                    // Enable only if Partial Delivery is Yes
-                                    validator: (value) {
-                                      if (_isPartialDelivery &&
-                                          (value == null || value.isEmpty)) {
-                                        return AppLocalizations.of(context)!
-                                            .error_deliveredValueRequired;
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Visibility(
-                              visible: errorAmount.isNotEmpty,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 4, top: 12.0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SvgPicture.asset(
-                                      'assets/icons/error_icon.svg',
-                                      height: 12.67,
-                                      width: 12.67,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Expanded(
-                                      child: CustomText(
-                                        text: errorAmount,
-                                        fontSize: 12,
-                                        desiredLineHeight: 16,
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.w500,
-                                        color: const Color(0xFFF85A5A),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    flex: 3,
+                                    child: TextFormField(
+                                      controller: _deliveredValueController,
+                                      decoration: InputDecoration(
+                                        labelText: AppLocalizations.of(context)!
+                                            .deliveredValue,
+                                        border: const OutlineInputBorder(),
                                       ),
+                                      keyboardType: TextInputType.number,
+                                      enabled: _isPartialDelivery,
+                                      onChanged: (value) {
+                                        final amount = double.tryParse(value) ?? 0;
+                                        setState(() {
+                                          _amountInHKD = _convertToHKD(amount, _selectedCurrency!);
+                                          _updateConversionText();
+                                        });
+                                      },
+                                      validator: (value) {
+                                        if (_isPartialDelivery && (value == null || value.isEmpty)) {
+                                          return AppLocalizations.of(context)!.error_deliveredValueRequired;
+                                        }
+                                        if (_amountInHKD <= 0) {
+                                          return 'Please enter a valid amount';
+                                        }
+                                        if (_selectedRemainingAmount != null &&
+                                            _amountInHKD > _selectedRemainingAmount!) {
+                                          return 'Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD';
+                                        }
+                                        return null;
+                                      },
                                     ),
-                                  ],
+                                  ),
+                                ],
+                              ),
+                              Visibility(
+                                visible: errorAmount.isNotEmpty,
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.only(left: 4, top: 12.0),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      SvgPicture.asset(
+                                        'assets/icons/error_icon.svg',
+                                        height: 12.67,
+                                        width: 12.67,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: CustomText(
+                                          text: errorAmount,
+                                          fontSize: 12,
+                                          desiredLineHeight: 16,
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.w500,
+                                          color: const Color(0xFFF85A5A),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 24),
-
-                            // Submit Button
-                            ElevatedButton(
-                              onPressed: _submitForm,
-                              child: Text(AppLocalizations.of(context)!.submit),
-                            ),
-                          ],
+                              const SizedBox(height: 5),
+                              if (_conversionText.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4.0),
+                                  child: Text(
+                                    _conversionText,
+                                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                  ),
+                                ),
+                              const SizedBox(height: 24),
+                              // Submit Button
+                              ElevatedButton(
+                                onPressed: _submitForm,
+                                child: Text(AppLocalizations.of(context)!.submit),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
