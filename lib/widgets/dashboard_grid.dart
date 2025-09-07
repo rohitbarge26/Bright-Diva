@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 import '../src/dashboard/model/dashboard_chart_response.dart';
 
 class DashboardGrid extends StatelessWidget {
@@ -58,8 +59,20 @@ class DashboardGrid extends StatelessWidget {
         itemCount: data.length,
         itemBuilder: (context, index) {
           String key = data.keys.elementAt(index);
-          String value = data[key] ?? '0';
+          String value = data[key] ?? '0 HK\$'; // Default fallback
 
+          // Extract numeric part (handles negatives)
+          String numericString = value.replaceAll(RegExp(r'[^0-9\-]'), '');
+          int? parsedNumber = int.tryParse(numericString) ?? 0;
+
+          // Format in Chinese style
+          final chineseFormat = NumberFormat('#,##0', 'zh_CN');
+          String formattedValue = chineseFormat.format(parsedNumber);
+
+          // 3. Add currency symbol (HK$)
+          String displayValue = 'HK\$ $formattedValue';
+
+          print('Value: $value   -----   formated value: $formattedValue');
           return Card(
             color: Colors.white,
             // White background
@@ -82,7 +95,7 @@ class DashboardGrid extends StatelessWidget {
                   ),
                   const SizedBox(height: 5),
                   Text(
-                    value,
+                    displayValue,
                     style: const TextStyle(
                       fontSize: 14,
                       color: Colors.blue,
