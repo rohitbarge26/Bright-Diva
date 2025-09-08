@@ -137,28 +137,45 @@ class _OrderPlaceState extends State<OrderPlace> {
       });
       return false; // Validation failed
     }
-    // Get the entered amount from controller and parse to double
-    final enteredAmount = _amountInHKD;
-    print("Entered Amount for validate: $enteredAmount");
-    // Validate against selected amount
-    if (enteredAmount <= 0) {
-      setState(() {
-        errorAmount = 'Please enter a valid amount';
-      });
-      return false;
-    }
 
-    if (enteredAmount > _selectedRemainingAmount!) {
+    // Get the entered amount from controller and parse to double
+    final enteredAmountText = _deliveredValueController.text;
+    print("Entered Amount for validate: $enteredAmountText");
+
+// Parse the string to double with error handling
+    try {
+      final enteredAmount = double.parse(enteredAmountText);
+      print('Entered Amount: $enteredAmount');
+      // Validate against selected amount
+      if (enteredAmount <= 0) {
+        setState(() {
+          print('enteredAmount <= 0');
+          errorAmount = 'Please enter a valid amount';
+        });
+        return false;
+      }
+
+      if (enteredAmount > _selectedRemainingAmount!) {
+        setState(() {
+          errorAmount =
+          'Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD';
+        });
+        return false;
+      }
+
+      // If validation passes
       setState(() {
-        errorAmount =
-            'Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD';
+        errorAmount = '';
+      });
+      return true;
+
+    } catch (e) {
+      setState(() {
+        print('catch');
+        errorAmount = 'Please enter a valid number';
       });
       return false;
     }
-    setState(() {
-      errorAmount = ''; // Clear error message if validation passes
-    });
-    return true; // Validation passed
   }
 
   // Submit form
@@ -557,7 +574,6 @@ class _OrderPlaceState extends State<OrderPlace> {
                                     return const Center(
                                         child: CircularProgressIndicator());
                                   } else if (state is InvoiceGetLoadedState) {
-                                    print("Search Invoice List");
                                     List<Invoices> invoices = state
                                             .getInvoiceDetailsResponse
                                             ?.invoices ??
@@ -753,7 +769,7 @@ class _OrderPlaceState extends State<OrderPlace> {
                                                 _amountInHKD, value);
                                             _deliveredValueController.text =
                                                 newAmount.toStringAsFixed(2);
-
+                                            print('New amount: $newAmount');
                                             // Update conversion text
                                             _updateConversionText();
                                           });
@@ -791,9 +807,7 @@ class _OrderPlaceState extends State<OrderPlace> {
                                           return AppLocalizations.of(context)!
                                               .error_deliveredValueRequired;
                                         }
-                                        if (_amountInHKD <= 0) {
-                                          return 'Please enter a valid amount';
-                                        }
+
                                         if (_selectedRemainingAmount != null &&
                                             _amountInHKD >
                                                 _selectedRemainingAmount!) {
