@@ -66,7 +66,7 @@ class PdfService {
     final pdf = pw.Document();
     double amountInHkd = double.parse(order.amountInHkd!);
     double amountOfDelivery = double.parse(order.amountOfDelivery!);
-
+    print('Customer name: ${order.customer?.companyName}');
     pdf.addPage(
       pw.Page(
         build: (pw.Context context) {
@@ -112,7 +112,6 @@ class PdfService {
                     children: [
                       pw.Text('DATE & TIME'),
                       pw.Text('DESCRIPTION'),
-                      pw.Text('UNIT PRICE'),
                       pw.Text('TOTAL HKD'),
                     ],
                   ),
@@ -123,19 +122,13 @@ class PdfService {
                               DateTime.parse(order.createdAt!).toLocal())
                           : "N/A"),
                       pw.Text('Cognac/Whiskey/Wine'),
-                      pw.Text('1'),
-                      pw.Text('${amountOfDelivery.round()}'),
                       pw.Text('${amountInHkd.round()}'),
                     ],
                   ),
                 ],
               ),
               pw.SizedBox(height: 20),
-              pw.Text(
-                  'Unless otherwise agreed, all invoices are payable within 10 days by wire transfer to our bank account'),
               pw.Text('SUB TOTAL: ${amountInHkd.round()}'),
-              pw.Text('DISCOUNT: -'),
-              pw.Text('Amount due HKD: ${amountInHkd.round()}'),
             ],
           );
         },
@@ -218,7 +211,6 @@ class PdfService {
                     children: [
                       pw.Text('DATE & TIME'),
                       pw.Text('DESCRIPTION'),
-                      pw.Text('UNIT PRICE'),
                       pw.Text('TOTAL HKD'),
                     ],
                   ),
@@ -230,16 +222,12 @@ class PdfService {
                           : "N/A"),
                       pw.Text('Cognac/Whiskey/Wine'),
                       pw.Text('${amountInHkd.round()}'),
-                      pw.Text('${amountInHkd.round()}'),
                     ],
                   ),
                 ],
               ),
               pw.SizedBox(height: 20),
-              pw.Text(
-                  'Unless otherwise agreed, all invoices are payable within 10 days by wire transfer to our bank account'),
               pw.Text('SUB TOTAL: ${amountInHkd.round()}'),
-              pw.Text('Amount due HKD: ${amountInHkd.round()}'),
             ],
           );
         },
@@ -321,7 +309,6 @@ class PdfService {
                     children: [
                       pw.Text('DATE & TIME'),
                       pw.Text('DESCRIPTION'),
-                      pw.Text('UNIT PRICE'),
                       pw.Text('TOTAL HKD'),
                     ],
                   ),
@@ -334,16 +321,12 @@ class PdfService {
                           : "N/A"),
                       pw.Text('Cognac/Whiskey/Wine'),
                       pw.Text('${amountInHkd.round()}'),
-                      pw.Text('${amountInHkd.round()}'),
                     ],
                   ),
                 ],
               ),
               pw.SizedBox(height: 20),
-              pw.Text(
-                  'Unless otherwise agreed, all invoices are payable within 10 days by wire transfer to our bank account'),
               pw.Text('SUB TOTAL: ${amountInHkd.round()}'),
-              pw.Text('Amount due HKD: ${amountInHkd.round()}'),
               pw.Text('Pickup By: ${cashReceiptData.pickedBy ?? "N/A"}'),
             ],
           );

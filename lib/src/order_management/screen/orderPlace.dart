@@ -712,28 +712,6 @@ class _OrderPlaceState extends State<OrderPlace> {
                               ),
                               const SizedBox(height: 16),
 
-                              // Delivered Units (Input Field)
-                              /*TextFormField(
-                                controller: _deliveredUnitsController,
-                                decoration: InputDecoration(
-                                  labelText: AppLocalizations.of(context)!
-                                      .deliveredUnits,
-                                  border: const OutlineInputBorder(),
-                                ),
-                                keyboardType: TextInputType.number,
-                                enabled: _isPartialDelivery,
-                                // Enable only if Partial Delivery is Yes
-                                validator: (value) {
-                                  if (_isPartialDelivery &&
-                                      (value == null || value.isEmpty)) {
-                                    return AppLocalizations.of(context)!
-                                        .error_deliveredUnitsRequired;
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 16),*/
-
                               // Delivered Value (Currency Dropdown + Input Field)
                               Row(
                                 children: [
@@ -913,7 +891,7 @@ class _OrderPlaceState extends State<OrderPlace> {
 
         // Determine statuses
         final paymentStatus = order.partialDelivery == true ? 'Partial' : 'Full';
-        final completionStatus = order.partialDelivery == true ? 'Completed' : 'Incomplete';
+        final completionStatus = order.partialDelivery == true ? 'Complete' : 'Incomplete';
 
         return Container(
           margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
@@ -964,9 +942,20 @@ class _OrderPlaceState extends State<OrderPlace> {
                               order.partialDelivery == true ? Colors.orange : Colors.green,
                             ),
                             const SizedBox(width: 6),
-                            _buildStatusBadge(
-                              completionStatus,
-                              order.partialDelivery == true ? Colors.green : Colors.red,
+                            BlocBuilder<InvoiceBloc, InvoiceState>(
+                              builder: (context, state) {
+                                if (state is InvoiceGetLoadedState) {
+                                  return _buildInvoiceStatus(
+                                      order.invoiceNumber!,
+                                      state.getInvoiceDetailsResponse?.invoices ?? []
+                                  );
+                                }
+                                return const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -1061,6 +1050,20 @@ class _OrderPlaceState extends State<OrderPlace> {
           ),
         );
       },
+    );
+  }
+  Widget _buildInvoiceStatus(String invoiceNumber, List<Invoices> invoices) {
+    // Find the invoice that matches this cash receipt
+    final invoice = invoices.firstWhere(
+          (inv) => inv.invoiceNumber == invoiceNumber,
+      orElse: () => Invoices(remainingAmount: 1), // Default to incomplete
+    );
+
+    final isCompleted = invoice.remainingAmount != null && invoice.remainingAmount! <= 0;
+
+    return _buildStatusBadge(
+      isCompleted ? 'Complete' : 'Incomplete',
+      isCompleted ? Colors.green : Colors.orange,
     );
   }
 

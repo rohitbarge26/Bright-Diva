@@ -109,8 +109,52 @@ class _InvoiceState extends State<Invoice> {
           isButtonEnabled ? const Color(0xFF2986CC) : const Color(0xFF88C2F7);
     });
   }
+  bool _validateFields() {
+    bool isValid = true;
+
+    // Validate Invoice Number
+    if (!isAutoGenerateInvoice && (invoiceNumberController.text.isEmpty ||
+        !Validator.alphanumericValidate(invoiceNumberController.text))) {
+      setState(() {
+        errorInvoiceNumber = AppLocalizations.of(context)!.enterValidInvoiceNumber;
+      });
+      isValid = false;
+    }
+
+    // Validate Customer Selection
+    if (selectedCustomer == null) {
+      setState(() {
+        dropDownSelectionCustomerError = AppLocalizations.of(context)!.selectCustomer;
+        saveValidation = false;
+      });
+      isValid = false;
+    }
+
+    // Validate Amount
+    if (amountController.text.isEmpty ||
+        !Validator.amountValidate(amountController.text) ||
+        double.parse(amountController.text) <= 0) {
+      setState(() {
+        errorAmount = AppLocalizations.of(context)!.enterAmount;
+      });
+      isValid = false;
+    }
+
+    // Validate Invoice Date
+    if (invoiceDateController.text.isEmpty) {
+      setState(() {
+        errorInvoiceDate = AppLocalizations.of(context)!.selectInvoiceDate;
+      });
+      isValid = false;
+    }
+
+    return isValid;
+  }
 
   void _onButtonPressed() {
+    if (!_validateFields()) {
+      return; // Stop submission if validation fails
+    }
     if (_formInvoiceKey.currentState!.validate()) {
       // Handle form submission
       print('Form submitted successfully');
@@ -940,26 +984,6 @@ class _InvoiceState extends State<Invoice> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Auto Generate Checkbox and Manual Entry Field
-                                  /*Row(
-                                    children: [
-                                      Checkbox(
-                                        value: isAutoGenerateInvoice,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            isAutoGenerateInvoice =
-                                                value ?? false;
-                                          });
-                                        },
-                                      ),
-                                      Text(AppLocalizations.of(context)!
-                                          .autoGenerateInvoice),
-                                    ],
-                                  ),*/
-                                  /*Visibility(
-                                    visible: !isAutoGenerateInvoice,
-                                    child:
-                                  ),*/
                                   Container(
                                     decoration: BoxDecoration(
                                       border: Border.all(
@@ -1246,6 +1270,41 @@ class _InvoiceState extends State<Invoice> {
                                     ],
                                   ),
                                   const SizedBox(height: 5),
+                                  Visibility(
+                                    visible: errorAmount.isNotEmpty,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 4, top: 12.0),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: SvgPicture.asset(
+                                              'assets/icons/error_icon.svg',
+                                              height: 12.67,
+                                              width: 12.67,
+                                              alignment: Alignment.center,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: CustomText(
+                                              text: errorAmount,
+                                              fontSize: 12,
+                                              desiredLineHeight: 16,
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.w500,
+                                              color: const Color(0xFFF85A5A),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+
                                   if (_conversionText.isNotEmpty)
                                     Padding(
                                       padding: const EdgeInsets.only(top: 4.0),
@@ -1333,46 +1392,6 @@ class _InvoiceState extends State<Invoice> {
                                     ),
                                   ),
 
-                                  // Total Units Field
-                                  /*Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: const Color(0xFFE5E5E5),
-                                          width: 1),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 8.0),
-                                      child: TextFormField(
-                                        controller: totalUnitsController,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            _updateButtonColor();
-                                          });
-                                        },
-                                        style: const TextStyle(
-                                          fontFamily: 'Inter',
-                                          color: Color(0xFF171717),
-                                          fontWeight: FontWeight.w400,
-                                          height: 1.50,
-                                          fontSize: 16,
-                                        ),
-                                        keyboardType: TextInputType.number,
-                                        textCapitalization:
-                                            TextCapitalization.none,
-                                        decoration: InputDecoration(
-                                          labelText:
-                                              '${AppLocalizations.of(context)!.totalUnits} *',
-                                          labelStyle: const TextStyle(
-                                            color: Color(0xFF737373),
-                                          ),
-                                          counterText: '',
-                                          border: InputBorder.none,
-                                        ),
-                                        maxLength: 17,
-                                      ),
-                                    ),
-                                  ),*/
                                   const SizedBox(height: 12),
                                   // Submit Button
                                   Container(
