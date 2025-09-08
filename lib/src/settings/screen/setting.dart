@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:frequent_flow/src/settings/bloc/logout/logout_bloc.dart';
 import 'package:frequent_flow/src/settings/bloc/logout/logout_event.dart';
 import 'package:frequent_flow/src/settings/bloc/logout/logout_state.dart';
@@ -38,13 +39,24 @@ class _SettingState extends State<Setting> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<LogoutBloc, LogoutState>(
-      listener: (BuildContext context, LogoutState state) {
+      listener: (BuildContext context, LogoutState state) async {
         if (state is LogoutInitialState) {
           const CircularProgressIndicator();
         } else if (state is LogoutLoadedState) {
           int code = state.logoutResponse?.statusCode ?? 0;
           print('Code : $code');
           if (code == SUCCESS) {
+            Fluttertoast.showToast(
+              msg: "Logout successful!",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              backgroundColor: Colors.green,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+
+            // Simulate token removal and navigation
+            await Future.delayed(const Duration(milliseconds: 1500));
             Prefs.remove(TOKEN).then((_) {
               Prefs.setBool(LOGIN_FLAG, false).then((_) {
                 rootNavigatorKey.currentState?.pushNamed(ROUT_SPLASH);

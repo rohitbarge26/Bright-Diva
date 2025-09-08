@@ -48,6 +48,7 @@ class _OrderPlaceState extends State<OrderPlace> {
       TextEditingController();
   final TextEditingController _deliveredValueController =
       TextEditingController();
+  final TextEditingController _deliveredByController = TextEditingController();
 
   // State variables
   String? _selectedInvoiceNumber;
@@ -81,7 +82,6 @@ class _OrderPlaceState extends State<OrderPlace> {
       });
     }
   }
-
 
   double _convertToHKD(double amount, String fromCurrency) {
     if (fromCurrency == 'HKD') return amount;
@@ -150,7 +150,8 @@ class _OrderPlaceState extends State<OrderPlace> {
 
     if (enteredAmount > _selectedRemainingAmount!) {
       setState(() {
-        errorAmount = 'Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD';
+        errorAmount =
+            'Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD';
       });
       return false;
     }
@@ -177,7 +178,8 @@ class _OrderPlaceState extends State<OrderPlace> {
       BlocProvider.of<OrderBloc>(context).add(AddOrder(
           addOrderRequest: OrderAddRequest(
               invoiceNumber: _selectedInvoiceNumber,
-              amountOfDelivery: num.tryParse(_deliveredValueController.text), // Uses num
+              amountOfDelivery: num.tryParse(_deliveredValueController.text),
+              deliveredBy: _deliveredByController.text,
               partialDelivery: _isPartialDelivery,
               currency: _selectedCurrency,
               deliveredUnits: 0,
@@ -191,16 +193,6 @@ class _OrderPlaceState extends State<OrderPlace> {
   void _clearForm() {
     _deliveredUnitsController.clear();
     _deliveredValueController.clear();
-  }
-
-  // Function to handle view action
-  void _viewOrder(String orderNumber) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Container();
-      },
-    );
   }
 
   void _showEditOrderDialog(BuildContext context, Orders order) {
@@ -234,12 +226,15 @@ class _OrderPlaceState extends State<OrderPlace> {
           callSave: (BuildContext context, int units, String value) {
             Navigator.pop(context);
             context.read<OrderBloc>().add(EditOrder(
-                orderId: order.id!,
-                orderEditRequest: OrderEditRequest(
-                    amountOfDelivery: int.parse(value),
-                    partialDelivery: _isPartialEditDelivery,
-                    currency: _selectedCurrency,
-                    deliveredUnits: units)));
+              orderId: order.id!,
+              orderEditRequest: OrderEditRequest(
+                amountOfDelivery: int.parse(value),
+                partialDelivery: _isPartialEditDelivery,
+                currency: _selectedCurrency,
+                deliveredUnits: units,
+                deliveredBy: _deliveredByController.text, // Add this field to your request
+              ),
+            ));
           },
         );
       },
@@ -278,7 +273,6 @@ class _OrderPlaceState extends State<OrderPlace> {
 
   // Function to handle print invoice action
   void _printInvoice(String orderNumber) {
-    // Implement print functionality (e.g., generate PDF)
     BlocProvider.of<OrderBloc>(context, listen: false)
         .add(GetOrderDetails(orderId: orderNumber));
   }
@@ -421,11 +415,11 @@ class _OrderPlaceState extends State<OrderPlace> {
         }
       },
       child: BlocListener<CurrencyBloc, CurrencyState>(
-        listener: ( context,  state) {
-          if(state is GetCurrencyLoadedState){
+        listener: (context, state) {
+          if (state is GetCurrencyLoadedState) {
             int code = state.getCurrencyResponse?.statusCode ?? 0;
             print('Code : $code');
-            if(code == SUCCESS){
+            if (code == SUCCESS) {
               setState(() {
                 currency_id = state.getCurrencyResponse!.currency![0].id!;
                 hkdToMop = state.getCurrencyResponse!.currency![0].hkdToMop!;
@@ -557,9 +551,11 @@ class _OrderPlaceState extends State<OrderPlace> {
                                       }).toList(),
                                       dropdownDecoratorProps:
                                           DropDownDecoratorProps(
-                                        dropdownSearchDecoration: InputDecoration(
-                                          labelText: AppLocalizations.of(context)!
-                                              .orderInvoiceNumber,
+                                        dropdownSearchDecoration:
+                                            InputDecoration(
+                                          labelText:
+                                              AppLocalizations.of(context)!
+                                                  .orderInvoiceNumber,
                                           border: const OutlineInputBorder(),
                                         ),
                                       ),
@@ -592,7 +588,8 @@ class _OrderPlaceState extends State<OrderPlace> {
                                   labelText:
                                       '${AppLocalizations.of(context)!.customerName} *',
                                   border: const OutlineInputBorder(),
-                                  enabled: false, // Disabled as it's auto-filled
+                                  enabled:
+                                      false, // Disabled as it's auto-filled
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
@@ -603,7 +600,45 @@ class _OrderPlaceState extends State<OrderPlace> {
                                 },
                               ),
                               const SizedBox(height: 16),
-
+                              // Delivered By Field
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: const Color(0xFFE5E5E5), width: 1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: TextFormField(
+                                  controller: _deliveredByController,
+                                  decoration: InputDecoration(
+                                    labelText:
+                                        '${AppLocalizations.of(context)!.deliveredBy} *',
+                                    border: InputBorder.none,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 12),
+                                    prefixIcon: const Icon(Icons.person,
+                                        size: 20, color: Colors.grey),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return AppLocalizations.of(context)!
+                                          .error_deliveredByRequired;
+                                    }
+                                    if (value.length < 2) {
+                                      return 'Name must be at least 2 characters';
+                                    }
+                                    return null;
+                                  },
+                                  onChanged: (value) {
+                                    setState(() {
+                                      // Clear error when user starts typing
+                                      if (value.isNotEmpty) {
+                                        // Clear any existing error
+                                      }
+                                    });
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 16),
                               // Partial Delivery (Radio Buttons)
                               Text(
                                 '${AppLocalizations.of(context)!.partialDelivery} *',
@@ -681,16 +716,25 @@ class _OrderPlaceState extends State<OrderPlace> {
                                         );
                                       }).toList(),
                                       onChanged: (value) {
-                                        if (value != null && value != _selectedCurrency) {
+                                        if (value != null &&
+                                            value != _selectedCurrency) {
                                           setState(() {
                                             // Convert current amount to HKD first
-                                            final currentAmount = double.tryParse(_deliveredValueController.text) ?? 0;
-                                            _amountInHKD = _convertToHKD(currentAmount, _selectedCurrency!);
+                                            final currentAmount =
+                                                double.tryParse(
+                                                        _deliveredValueController
+                                                            .text) ??
+                                                    0;
+                                            _amountInHKD = _convertToHKD(
+                                                currentAmount,
+                                                _selectedCurrency!);
 
                                             // Update currency and convert to new currency
                                             _selectedCurrency = value;
-                                            final newAmount = _convertFromHKD(_amountInHKD, value);
-                                            _deliveredValueController.text = newAmount.toStringAsFixed(2);
+                                            final newAmount = _convertFromHKD(
+                                                _amountInHKD, value);
+                                            _deliveredValueController.text =
+                                                newAmount.toStringAsFixed(2);
 
                                             // Update conversion text
                                             _updateConversionText();
@@ -712,21 +756,26 @@ class _OrderPlaceState extends State<OrderPlace> {
                                       keyboardType: TextInputType.number,
                                       enabled: _isPartialDelivery,
                                       onChanged: (value) {
-                                        final amount = double.tryParse(value) ?? 0;
+                                        final amount =
+                                            double.tryParse(value) ?? 0;
                                         setState(() {
-                                          _amountInHKD = _convertToHKD(amount, _selectedCurrency!);
+                                          _amountInHKD = _convertToHKD(
+                                              amount, _selectedCurrency!);
                                           _updateConversionText();
                                         });
                                       },
                                       validator: (value) {
-                                        if (_isPartialDelivery && (value == null || value.isEmpty)) {
-                                          return AppLocalizations.of(context)!.error_deliveredValueRequired;
+                                        if (_isPartialDelivery &&
+                                            (value == null || value.isEmpty)) {
+                                          return AppLocalizations.of(context)!
+                                              .error_deliveredValueRequired;
                                         }
                                         if (_amountInHKD <= 0) {
                                           return 'Please enter a valid amount';
                                         }
                                         if (_selectedRemainingAmount != null &&
-                                            _amountInHKD > _selectedRemainingAmount!) {
+                                            _amountInHKD >
+                                                _selectedRemainingAmount!) {
                                           return 'Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD';
                                         }
                                         return null;
@@ -741,7 +790,8 @@ class _OrderPlaceState extends State<OrderPlace> {
                                   padding:
                                       const EdgeInsets.only(left: 4, top: 12.0),
                                   child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       SvgPicture.asset(
                                         'assets/icons/error_icon.svg',
@@ -769,14 +819,16 @@ class _OrderPlaceState extends State<OrderPlace> {
                                   padding: const EdgeInsets.only(top: 4.0),
                                   child: Text(
                                     _conversionText,
-                                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                    style: TextStyle(
+                                        color: Colors.grey[600], fontSize: 12),
                                   ),
                                 ),
                               const SizedBox(height: 24),
                               // Submit Button
                               ElevatedButton(
                                 onPressed: _submitForm,
-                                child: Text(AppLocalizations.of(context)!.submit),
+                                child:
+                                    Text(AppLocalizations.of(context)!.submit),
                               ),
                             ],
                           ),
@@ -795,52 +847,196 @@ class _OrderPlaceState extends State<OrderPlace> {
     sortedList.sort((a, b) {
       final dateA = DateTime.parse(a.updatedAt!);
       final dateB = DateTime.parse(b.updatedAt!);
-      return dateB.compareTo(dateA); // For newest first (descending)
-      // Use dateA.compareTo(dateB) for oldest first (ascending)
+      return dateB.compareTo(dateA);
     });
+
     return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
       itemCount: sortedList.length,
-      // Assuming `order` is a list
       itemBuilder: (context, index) {
         final order = sortedList[index];
         String dateString = order.updatedAt!;
         DateTime dateTime = DateTime.parse(dateString);
-        // Extract date and time
-        String date = DateFormat('yyyy-MM-dd').format(dateTime);
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-          child: ListTile(
-            title: Text('${order.orderNumber}'),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(order.customer?.companyName ?? "N/A"),
-                Text('${order.invoiceNumber}'),
-                Text(date),
-              ],
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (userRole == 'Admin')
-                  IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.orange),
-                    onPressed: () => _showEditOrderDialog(context, order),
-                  ),
-                if (userRole == 'Admin')
-                  IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => _deleteOrder(order.id!),
-                  ),
-                IconButton(
-                  icon: Icon(Icons.print, color: Colors.green),
-                  onPressed: () => _printInvoice(order.id!),
+        String formattedDate = DateFormat('dd MMM yyyy').format(dateTime);
+        String formattedTime = DateFormat('hh:mm a').format(dateTime);
+
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {
+                // Add tap functionality if needed
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Order Number Header
+                    Text(
+                      order.orderNumber ?? 'ORD-0000',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1A5B92),
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Order Details
+                    _buildDetailRow(
+                      icon: Icons.business,
+                      label: 'Customer',
+                      value: order.customer?.companyName ?? 'N/A',
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    _buildDetailRow(
+                      icon: Icons.receipt,
+                      label: 'Invoice',
+                      value: order.invoiceNumber ?? 'N/A',
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    _buildDetailRow(
+                      icon: Icons.calendar_today,
+                      label: 'Updated',
+                      value: '$formattedDate at $formattedTime',
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Divider
+                    const Divider(height: 1, color: Color(0xFFE5E5E5)),
+                    const SizedBox(height: 12),
+
+                    // Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        // Print Button
+                        _buildActionButton(
+                          icon: Icons.print,
+                          color: Colors.green,
+                          tooltip: 'Print Order',
+                          onPressed: () => _printInvoice(order.id!),
+                        ),
+
+                        if (userRole == 'Admin') ...[
+                          const SizedBox(width: 8),
+                          // Edit Button
+                          _buildActionButton(
+                            icon: Icons.edit,
+                            color: Colors.orange,
+                            tooltip: 'Edit Order',
+                            onPressed: () => _showEditOrderDialog(context, order),
+                          ),
+
+                          const SizedBox(width: 8),
+                          // Delete Button
+                          _buildActionButton(
+                            icon: Icons.delete,
+                            color: Colors.red,
+                            tooltip: 'Delete Order',
+                            onPressed: () => _deleteOrder(order.id!),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         );
       },
+    );
+  }
+
+// Helper method for detail rows
+  Widget _buildDetailRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: Colors.grey[600],
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Inter',
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF171717),
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Inter',
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+// Helper method for action buttons
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: Icon(icon, size: 20, color: color),
+        onPressed: onPressed,
+        tooltip: tooltip,
+        splashRadius: 20,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+      ),
     );
   }
 }

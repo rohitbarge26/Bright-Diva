@@ -440,6 +440,7 @@ class _AddCustomerState extends State<AddCustomer> {
                                 },
                                 keyboardType: TextInputType.name,
                                 textCapitalization: TextCapitalization.words,
+                                isMandatory: true,
                               ),
                               _buildTextField(
                                 controller: _address1Controller,
@@ -453,6 +454,7 @@ class _AddCustomerState extends State<AddCustomer> {
                                 },
                                 keyboardType: TextInputType.name,
                                 textCapitalization: TextCapitalization.words,
+                                isMandatory: true,
                               ),
                               _buildTextField(
                                 controller: _cityController,
@@ -465,6 +467,7 @@ class _AddCustomerState extends State<AddCustomer> {
                                 },
                                 keyboardType: TextInputType.name,
                                 textCapitalization: TextCapitalization.words,
+                                isMandatory: true,
                               ),
                               _buildTextField(
                                 controller: _countryController,
@@ -478,6 +481,7 @@ class _AddCustomerState extends State<AddCustomer> {
                                 },
                                 keyboardType: TextInputType.name,
                                 textCapitalization: TextCapitalization.words,
+                                isMandatory: true,
                               ),
                               _buildTextField(
                                 controller: _brnController,
@@ -504,6 +508,7 @@ class _AddCustomerState extends State<AddCustomer> {
                                 },
                                 keyboardType: TextInputType.name,
                                 textCapitalization: TextCapitalization.none,
+                                isMandatory: true,
                               ),
                               _buildTextField(
                                 controller: _contactNumberController,
@@ -520,6 +525,7 @@ class _AddCustomerState extends State<AddCustomer> {
                                   });
                                 },
                                 textCapitalization: TextCapitalization.none,
+                                isMandatory: true,
                               ),
                               /*_buildTextField(
                                 controller: _emailController,
@@ -561,42 +567,203 @@ class _AddCustomerState extends State<AddCustomer> {
   Widget _buildCustomerList() {
     return ListView.builder(
       controller: _scrollController,
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
       itemCount: customers?.length ?? 0,
-      // Always use the length of the customers list
       itemBuilder: (context, index) {
-        // Safely access the customer at the current index
         final customer = customers?[index];
         if (customer == null) {
-          return const SizedBox
-              .shrink(); // Return an empty widget if customer is null
+          return const SizedBox.shrink();
         }
 
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-          child: ListTile(
-            title: Text(customer.companyName ?? 'No Name'),
-            subtitle: Text(
-                customer.mobileNumber ?? 'No Number'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.blue),
-                  onPressed: () => _editCustomer(customer),
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {
+                // Add tap functionality if needed
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header Row
+                    Text(
+                      customer.companyName ?? 'No Name',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1A5B92),
+                        fontFamily: 'Inter',
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Contact Person
+                    _buildDetailRow(
+                      icon: Icons.person,
+                      label: 'Contact Person',
+                      value: customer.contactPersonName ?? 'N/A',
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // Mobile Number
+                    _buildDetailRow(
+                      icon: Icons.phone,
+                      label: 'Mobile',
+                      value: customer.mobileNumber ?? 'No Number',
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // Email
+                    _buildDetailRow(
+                      icon: Icons.email,
+                      label: 'Email',
+                      value: customer.emailId ?? 'N/A',
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // Location
+                    Row(
+                      children: [
+                        Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '${customer.city ?? ''}${customer.city != null && customer.country != null ? ', ' : ''}${customer.country ?? ''}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                              fontFamily: 'Inter',
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Divider
+                    const Divider(height: 1, color: Color(0xFFE5E5E5)),
+                    const SizedBox(height: 12),
+
+                    // Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        // Edit Button
+                        _buildActionButton(
+                          icon: Icons.edit,
+                          color: Colors.blue,
+                          tooltip: 'Edit Customer',
+                          onPressed: () => _editCustomer(customer),
+                        ),
+
+                        const SizedBox(width: 8),
+
+                        // Delete Button
+                        _buildActionButton(
+                          icon: Icons.delete,
+                          color: Colors.red,
+                          tooltip: 'Delete Customer',
+                          onPressed: () => _deleteCustomer('${customer.id}'),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => _deleteCustomer('${customer.id}'),
-                ),
-              ],
+              ),
             ),
-            onTap: () {
-              // Navigate to an edit screen or show a dialog for updating
-            },
           ),
         );
       },
+    );
+  }
+
+// Helper method for detail rows
+  Widget _buildDetailRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 16, color: Colors.grey[600]),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Inter',
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF171717),
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Inter',
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+// Helper method for action buttons
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: Icon(icon, size: 20, color: color),
+        onPressed: onPressed,
+        tooltip: tooltip,
+        splashRadius: 20,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+      ),
     );
   }
 
@@ -607,6 +774,7 @@ class _AddCustomerState extends State<AddCustomer> {
     required Function(String) onChanged,
     required TextInputType keyboardType,
     required TextCapitalization textCapitalization,
+    bool isMandatory = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -627,18 +795,30 @@ class _AddCustomerState extends State<AddCustomer> {
                 labelStyle: const TextStyle(color: Color(0xFF737373)),
                 border: InputBorder.none,
               ),
+              validator: isMandatory ? (value) {
+                if (value == null || value.isEmpty) {
+                  return 'This field is required';
+                }
+                return null;
+              } : null,
             ),
           ),
         ),
         if (errorText.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(left: 4, top: 8.0),
-            child: Text(
-              errorText,
-              style: const TextStyle(
-                color: Color(0xFFF85A5A),
-                fontSize: 12,
-              ),
+            child: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 16),
+                const SizedBox(width: 4),
+                Text(
+                  errorText,
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
             ),
           ),
         const SizedBox(height: 12),

@@ -1,7 +1,7 @@
 class InvoiceRequest {
   String? invoiceNumber;
   String? customerId;
-  int? amount;
+  num? amount;
   String? invoiceDate;
   String? currency;
   int? totalUnits;

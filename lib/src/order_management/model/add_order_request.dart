@@ -1,6 +1,7 @@
 class OrderAddRequest {
   String? orderNumber;
   String? invoiceNumber;
+  String? deliveredBy;
   num? amountOfDelivery;
   bool? partialDelivery;
   String? currency;
@@ -10,6 +11,7 @@ class OrderAddRequest {
   OrderAddRequest(
       {required this.orderNumber,
         required this.invoiceNumber,
+        required this.deliveredBy,
         required this.amountOfDelivery,
         required this.partialDelivery,
         required this.currency,
@@ -19,6 +21,7 @@ class OrderAddRequest {
   OrderAddRequest.fromJson(Map<String, dynamic> json) {
     orderNumber = json['orderNumber'];
     invoiceNumber = json['invoiceNumber'];
+    deliveredBy = json['deliveredBy'];
     amountOfDelivery = json['amountOfDelivery'];
     partialDelivery = json['partialDelivery'];
     currency = json['currency'];
@@ -30,6 +33,7 @@ class OrderAddRequest {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['orderNumber'] = this.orderNumber;
     data['invoiceNumber'] = this.invoiceNumber;
+    data['deliveredBy'] = this.deliveredBy;
     data['amountOfDelivery'] = this.amountOfDelivery;
     data['partialDelivery'] = this.partialDelivery;
     data['currency'] = this.currency;

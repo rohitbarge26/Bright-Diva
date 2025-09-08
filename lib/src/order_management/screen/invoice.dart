@@ -1,5 +1,6 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_svg/svg.dart';
@@ -44,6 +45,10 @@ class _InvoiceState extends State<Invoice> {
   TextEditingController invoiceNumberController = TextEditingController();
   TextEditingController amountController = TextEditingController();
   TextEditingController totalUnitsController = TextEditingController();
+  TextEditingController invoiceDateController = TextEditingController();
+  String errorInvoiceDate = '';
+  DateTime? selectedInvoiceDate;
+  String? selectedInvoiceDateAPI;
   String errorInvoiceNumber = '';
   String errorCustomer = '';
   String errorAmount = '';
@@ -67,6 +72,7 @@ class _InvoiceState extends State<Invoice> {
   String? _selectedCurrency = 'HKD'; // Default value
   final List<String> _currencies = ['HKD', 'MOP', 'CNY'];
   String? userRole;
+
   // Conversion rates (replace with actual rates or API calls)
   void _calculateConversion() {
     if (amountController.text.isEmpty ||
@@ -82,7 +88,7 @@ class _InvoiceState extends State<Invoice> {
     } else {
       final rate = _selectedCurrency == 'MOP' ? hkdToMop : hkdToCny;
       final convertedAmount = _selectedCurrency == 'MOP'
-          ? amount / rate  // Convert MOP→HKD (500 MOP → 500/1.03 ≈ 485.44 HKD)
+          ? amount / rate // Convert MOP→HKD (500 MOP → 500/1.03 ≈ 485.44 HKD)
           : amount / rate; // Convert CNY→HKD
 
       setState(() {
@@ -97,7 +103,8 @@ class _InvoiceState extends State<Invoice> {
           Validator.stringValidate(invoiceNumberController.text);
       bool isAmountEntered = Validator.amountValidate(amountController.text);
 
-      isButtonEnabled = isValidInvoice && isAmountEntered;
+      isButtonEnabled =
+          isValidInvoice && isAmountEntered && selectedInvoiceDate != null;
       buttonColor =
           isButtonEnabled ? const Color(0xFF2986CC) : const Color(0xFF88C2F7);
     });
@@ -119,11 +126,112 @@ class _InvoiceState extends State<Invoice> {
                   ? generateInvoiceNumber() // Auto-generate invoice number
                   : invoiceNumberController.text,
               customerId: selectedCustomer,
-              amount: int.parse(amountController.text),
-              invoiceDate: getCurrentTimeInISO8601Format(),
+              amount: num.tryParse(amountController.text),
+              invoiceDate: selectedInvoiceDateAPI,
               currency: _selectedCurrency,
               totalUnits: 0)));
       _clearForm();
+    }
+  }
+
+  Future<void> _selectInvoiceDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedInvoiceDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      // Allow dates from year 2000
+      lastDate: DateTime(2100),
+      // Allow dates up to year 2100
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Colors.blue, // Header background color
+              onPrimary: Colors.white, // Header text color
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != selectedInvoiceDate) {
+      setState(() {
+        selectedInvoiceDate = picked;
+        print('selectedInvoiceDate: $selectedInvoiceDate');
+        // Format for API - dd/MM/yyyy
+        selectedInvoiceDateAPI = _formatDateForAPI(picked);
+        print('selectedInvoiceDateAPI: $selectedInvoiceDateAPI');
+
+        invoiceDateController.text =
+            _formatDateWithOrdinal(picked); // Updated formatting
+        errorInvoiceDate = ''; // Clear any previous error
+        _updateButtonColor();
+      });
+    }
+  }
+
+  String _formatDateForAPI(DateTime date) {
+    // Format the date as dd/MM/yyyy
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final year = date.year.toString();
+
+    return '$day/$month/$year';
+  }
+
+  String _formatDateWithOrdinal(DateTime date) {
+    final day = date.day;
+    final month = DateFormat('MMMM').format(date); // Full month name
+    final year = date.year;
+
+    // Add ordinal suffix (st, nd, rd, th)
+    String ordinalSuffix;
+    if (day >= 11 && day <= 13) {
+      ordinalSuffix = 'th';
+    } else {
+      switch (day % 10) {
+        case 1:
+          ordinalSuffix = 'st';
+          break;
+        case 2:
+          ordinalSuffix = 'nd';
+          break;
+        case 3:
+          ordinalSuffix = 'rd';
+          break;
+        default:
+          ordinalSuffix = 'th';
+      }
+    }
+
+    return '$day$ordinalSuffix $month $year';
+  }
+
+  void _formatAmountInput(String value) {
+    if (value.isEmpty) return;
+
+    // Remove any non-numeric characters except decimal point
+    String cleanedValue = value.replaceAll(RegExp(r'[^0-9\.]'), '');
+
+    // Check for multiple decimal points
+    if (cleanedValue.split('.').length > 2) {
+      cleanedValue = cleanedValue.substring(0, cleanedValue.length - 1);
+    }
+
+    // Limit to 2 decimal places
+    if (cleanedValue.contains('.')) {
+      List<String> parts = cleanedValue.split('.');
+      if (parts[1].length > 2) {
+        cleanedValue = '${parts[0]}.${parts[1].substring(0, 2)}';
+      }
+    }
+
+    // Update controller if value changed
+    if (cleanedValue != value) {
+      amountController.text = cleanedValue;
+      amountController.selection =
+          TextSelection.collapsed(offset: cleanedValue.length);
     }
   }
 
@@ -137,89 +245,409 @@ class _InvoiceState extends State<Invoice> {
   void _modifyOrder(Invoices invoice) {
     double amountInHkd = double.parse(invoice.amountInHkd!);
     amountController.text = amountInHkd.toStringAsFixed(0);
-    //totalUnitsController.text = invoice.totalUnits!.toString();
     _selectedCurrency = invoice.currency!;
+
+    // Parse the invoice date from the invoice object
+    DateTime invoiceDate = DateTime.parse(invoice.invoiceDate!);
+    selectedInvoiceDate = invoiceDate;
+    invoiceDateController.text = _formatDateWithOrdinal(invoiceDate);
+
+    String? errorInvoiceDate;
 
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Edit Invoice'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  invoice.invoiceNumber!,
-                  textAlign: TextAlign.start,
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w600,
-                  ),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Dialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
                 ),
-                Text(
-                  invoice.customer!.companyName!,
-                  textAlign: TextAlign.start,
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                TextFormField(
-                  controller: amountController,
-                  decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.amount),
-                ),
-                DropdownButton<String>(
-                  value: _selectedCurrency,
-                  hint: const Text("Select Currency"),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedCurrency = newValue;
-                    });
-                  },
-                  items: _currencies
-                      .map<DropdownMenuItem<String>>((String currency) {
-                    return DropdownMenuItem<String>(
-                      value: currency,
-                      child: Text(currency),
-                    );
-                  }).toList(),
-                  underline: const SizedBox.shrink(),
-                )
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-              child: Text(AppLocalizations.of(context)!.txtCancel),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                context.read<InvoiceBloc>().add(EditInvoice(
-                    invoiceId: invoice.id!,
-                    editRequest: InvoiceEditRequest(
-                        customerId: invoice.customer!.id!,
-                        amount: int.parse(amountController.text),
-                        invoiceDate: getCurrentTimeInISO8601Format(),
-                        currency: _selectedCurrency,
-                        totalUnits: 0)));
-              },
-              child: Text(AppLocalizations.of(context)!.txtSave),
-            ),
-          ],
+                child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Edit Invoice',
+                            style: TextStyle(
+                              color: Colors.blue[800],
+                              fontSize: 20,
+                              fontFamily: 'Inter',
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.close,
+                                color: Colors.grey[600], size: 24),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 16),
+                      const Divider(height: 1, color: Color(0xFFE5E5E5)),
+                      const SizedBox(height: 20),
+
+                      // Invoice Details
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE5E5E5)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildDetailRow(
+                                'Invoice Number:', invoice.invoiceNumber!),
+                            const SizedBox(height: 8),
+                            _buildDetailRow(
+                                'Customer:', invoice.customer!.companyName!),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Form Fields
+                      Text(
+                        'Edit Details',
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: 16,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Amount Field
+                      Text(
+                        'Amount *',
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: 14,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                              color: const Color(0xFFE5E5E5), width: 1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: TextFormField(
+                            controller: amountController,
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              color: Color(0xFF171717),
+                              fontWeight: FontWeight.w400,
+                              fontSize: 16,
+                            ),
+                            keyboardType:
+                                TextInputType.numberWithOptions(decimal: true),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d*\.?\d{0,2}')),
+                            ],
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Enter amount',
+                              hintStyle: TextStyle(color: Color(0xFF737373)),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Currency Dropdown
+                      Text(
+                        'Currency *',
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: 14,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                              color: const Color(0xFFE5E5E5), width: 1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: DropdownButton<String>(
+                          value: _selectedCurrency,
+                          isExpanded: true,
+                          underline: const SizedBox(),
+                          icon: Icon(Icons.arrow_drop_down,
+                              color: Colors.grey[600]),
+                          style: const TextStyle(
+                            fontFamily: 'Inter',
+                            color: Color(0xFF171717),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 16,
+                          ),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _selectedCurrency = newValue;
+                            });
+                          },
+                          items: _currencies
+                              .map<DropdownMenuItem<String>>((String currency) {
+                            return DropdownMenuItem<String>(
+                              value: currency,
+                              child: Text(currency),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Invoice Date Field
+                      Text(
+                        'Invoice Date *',
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: 14,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: () async {
+                          final DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: selectedInvoiceDate ?? DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                            builder: (BuildContext context, Widget? child) {
+                              return Theme(
+                                data: ThemeData.light().copyWith(
+                                  colorScheme: ColorScheme.light(
+                                    primary: Colors.blue[800]!,
+                                    onPrimary: Colors.white,
+                                  ),
+                                ),
+                                child: child!,
+                              );
+                            },
+                          );
+
+                          if (picked != null) {
+                            setState(() {
+                              selectedInvoiceDate = picked;
+                              invoiceDateController.text =
+                                  _formatDateWithOrdinal(picked);
+                              errorInvoiceDate = null;
+                            });
+                          }
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                                color: errorInvoiceDate != null
+                                    ? Colors.red
+                                    : const Color(0xFFE5E5E5),
+                                width: 1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                invoiceDateController.text.isNotEmpty
+                                    ? invoiceDateController.text
+                                    : 'Select date',
+                                style: TextStyle(
+                                  color: invoiceDateController.text.isNotEmpty
+                                      ? const Color(0xFF171717)
+                                      : const Color(0xFF737373),
+                                  fontFamily: 'Inter',
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Icon(Icons.calendar_today,
+                                  color: Colors.blue[800], size: 20),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      if (errorInvoiceDate != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline,
+                                  color: Colors.red, size: 16),
+                              const SizedBox(width: 4),
+                              Text(
+                                errorInvoiceDate!,
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 12,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      const SizedBox(height: 24),
+
+                      // Action Buttons
+                      Row(children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.blue[800],
+                              side: BorderSide(color: Colors.blue[800]!),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              AppLocalizations.of(context)!.txtCancel,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (selectedInvoiceDate == null) {
+                                setState(() {
+                                  errorInvoiceDate =
+                                      AppLocalizations.of(context)!
+                                          .selectInvoiceDate;
+                                });
+                                return;
+                              }
+
+                              if (amountController.text.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(AppLocalizations.of(context)!
+                                        .enterAmount),
+                                    backgroundColor: Colors.red,
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              Navigator.pop(context);
+                              context.read<InvoiceBloc>().add(EditInvoice(
+                                    invoiceId: invoice.id!,
+                                    editRequest: InvoiceEditRequest(
+                                      customerId: invoice.customer!.id!,
+                                      amount:
+                                          double.parse(amountController.text)
+                                              .round(),
+                                      invoiceDate: selectedInvoiceDate!
+                                          .toIso8601String(),
+                                      currency: _selectedCurrency,
+                                      totalUnits: 0,
+                                    ),
+                                  ));
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue[800],
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              AppLocalizations.of(context)!.txtSave,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ]),
+                    ]),
+              ),
+            );
+          },
         );
       },
+    );
+  }
+
+// Helper method for detail rows
+  Widget _buildDetailRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 14,
+            fontFamily: 'Inter',
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: Color(0xFF171717),
+              fontSize: 14,
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -229,8 +657,10 @@ class _InvoiceState extends State<Invoice> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(AppLocalizations.of(context)!.confirmDelete), // 确认删除
-          content: Text(AppLocalizations.of(context)!.areYouSureDelete), // 您确定要删除吗？
+          title: Text(AppLocalizations.of(context)!.confirmDelete),
+          // 确认删除
+          content: Text(AppLocalizations.of(context)!.areYouSureDelete),
+          // 您确定要删除吗？
           actions: <Widget>[
             TextButton(
               child: Text(AppLocalizations.of(context)!.no), // 否
@@ -242,7 +672,8 @@ class _InvoiceState extends State<Invoice> {
               child: Text(AppLocalizations.of(context)!.yes), // 是
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
-                BlocProvider.of<InvoiceBloc>(context).add(DeleteInvoice(invoiceId: id));
+                BlocProvider.of<InvoiceBloc>(context)
+                    .add(DeleteInvoice(invoiceId: id));
               },
             ),
           ],
@@ -291,7 +722,7 @@ class _InvoiceState extends State<Invoice> {
                   false,
                   0),
             );
-          } else if(code == INTERNAL_SERVER_ERROR){
+          } else if (code == INTERNAL_SERVER_ERROR) {
             showDialog(
               barrierDismissible: false,
               context: context,
@@ -303,7 +734,7 @@ class _InvoiceState extends State<Invoice> {
                   false,
                   0),
             );
-          }else {
+          } else {
             showDialog(
               barrierDismissible: false,
               context: context,
@@ -369,7 +800,7 @@ class _InvoiceState extends State<Invoice> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                   content:
-                  Text(AppLocalizations.of(context)!.successMessageDelete)),
+                      Text(AppLocalizations.of(context)!.successMessageDelete)),
             );
           } else {
             showDialog(
@@ -403,7 +834,7 @@ class _InvoiceState extends State<Invoice> {
                     alertLogoPath: 'assets/icons/error_icon.svg',
                     status: AppLocalizations.of(context)!.unableToProcess,
                     statusInfo:
-                    AppLocalizations.of(context)!.somethingWentWrong,
+                        AppLocalizations.of(context)!.somethingWentWrong,
                     buttonText: AppLocalizations.of(context)!.btnOkay,
                     onPress: () {
                       Navigator.of(context).pop();
@@ -412,11 +843,11 @@ class _InvoiceState extends State<Invoice> {
         }
       },
       child: BlocListener<CurrencyBloc, CurrencyState>(
-        listener: ( context,  state) {
-          if(state is GetCurrencyLoadedState){
+        listener: (context, state) {
+          if (state is GetCurrencyLoadedState) {
             int code = state.getCurrencyResponse?.statusCode ?? 0;
             print('Code : $code');
-            if(code == SUCCESS){
+            if (code == SUCCESS) {
               setState(() {
                 currency_id = state.getCurrencyResponse!.currency![0].id!;
                 hkdToMop = state.getCurrencyResponse!.currency![0].hkdToMop!;
@@ -617,14 +1048,15 @@ class _InvoiceState extends State<Invoice> {
                                           is CustomerListLoadedState) {
                                         customerList = state
                                             .getCustomerListResponse?.customers;
-                                        int? totalCustomer =
-                                            state.getCustomerListResponse?.total;
+                                        int? totalCustomer = state
+                                            .getCustomerListResponse?.total;
                                         if (totalCustomer == 0) {
                                           return const SizedBox.shrink();
                                         } else {
                                           return Container(
-                                            width:
-                                                MediaQuery.of(context).size.width,
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
                                             padding: const EdgeInsets.symmetric(
                                                 vertical: 6, horizontal: 15),
                                             decoration: ShapeDecoration(
@@ -639,11 +1071,13 @@ class _InvoiceState extends State<Invoice> {
                                             child: DropdownSearch<Customers>(
                                               popupProps: PopupProps.menu(
                                                 showSearchBox: true,
-                                                searchFieldProps: TextFieldProps(
+                                                searchFieldProps:
+                                                    TextFieldProps(
                                                   decoration: InputDecoration(
-                                                    hintText: AppLocalizations.of(
-                                                            context)!
-                                                        .searchCustomer,
+                                                    hintText:
+                                                        AppLocalizations.of(
+                                                                context)!
+                                                            .searchCustomer,
                                                   ),
                                                 ),
                                               ),
@@ -662,7 +1096,8 @@ class _InvoiceState extends State<Invoice> {
                                               ),
                                               onChanged: (Customers? newValue) {
                                                 setState(() {
-                                                  selectedCustomer = newValue?.id;
+                                                  selectedCustomer =
+                                                      newValue?.id;
                                                   saveValidation = true;
                                                 });
                                               },
@@ -698,7 +1133,8 @@ class _InvoiceState extends State<Invoice> {
                                                   desiredLineHeight: 16,
                                                   fontFamily: 'Inter',
                                                   fontWeight: FontWeight.w500,
-                                                  color: const Color(0xFFDF4747),
+                                                  color:
+                                                      const Color(0xFFDF4747),
                                                   textAlign: TextAlign.left,
                                                 ),
                                               ]),
@@ -720,20 +1156,22 @@ class _InvoiceState extends State<Invoice> {
                                                 BorderRadius.circular(8),
                                           ),
                                           child: Padding(
-                                            padding:
-                                                const EdgeInsets.only(left: 8.0),
+                                            padding: const EdgeInsets.only(
+                                                left: 8.0),
                                             child: TextFormField(
                                               controller: amountController,
                                               onChanged: (value) {
+                                                // Format the input to allow only numbers and up to 2 decimal places
+                                                _formatAmountInput(value);
+
                                                 setState(() {
                                                   errorAmount =
-                                                  Validator.amountValidate(
-                                                      value)
-                                                      ? ''
-                                                      : AppLocalizations.of(
-                                                      context)!
-                                                      .enterAmount;
-                                                  // Trigger conversion calculation when amount changes
+                                                      Validator.amountValidate(
+                                                              value)
+                                                          ? ''
+                                                          : AppLocalizations.of(
+                                                                  context)!
+                                                              .enterAmount;
                                                   _calculateConversion();
                                                 });
                                                 _updateButtonColor();
@@ -745,12 +1183,20 @@ class _InvoiceState extends State<Invoice> {
                                                 height: 1.50,
                                                 fontSize: 16,
                                               ),
-                                              keyboardType: TextInputType.number,
+                                              keyboardType: const TextInputType
+                                                  .numberWithOptions(
+                                                  decimal: true),
                                               textCapitalization:
-                                              TextCapitalization.none,
+                                                  TextCapitalization.none,
+                                              inputFormatters: [
+                                                FilteringTextInputFormatter
+                                                    .allow(RegExp(
+                                                        r'^\d*\.?\d{0,2}')),
+                                                // Allow only numbers and up to 2 decimals
+                                              ],
                                               decoration: InputDecoration(
                                                 labelText:
-                                                '${AppLocalizations.of(context)!.amount} *',
+                                                    '${AppLocalizations.of(context)!.amount} *',
                                                 labelStyle: const TextStyle(
                                                   color: Color(0xFF737373),
                                                 ),
@@ -769,7 +1215,8 @@ class _InvoiceState extends State<Invoice> {
                                           border: Border.all(
                                               color: const Color(0xFFE5E5E5),
                                               width: 1),
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                         ),
                                         child: Padding(
                                           padding: const EdgeInsets.all(5.0),
@@ -811,6 +1258,81 @@ class _InvoiceState extends State<Invoice> {
                                       ),
                                     ),
                                   const SizedBox(height: 12),
+                                  // Invoice Date Field
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: const Color(0xFFE5E5E5),
+                                          width: 1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      child: TextFormField(
+                                        controller: invoiceDateController,
+                                        readOnly: true,
+                                        // Prevent manual editing
+                                        onTap: () =>
+                                            _selectInvoiceDate(context),
+                                        style: const TextStyle(
+                                          fontFamily: 'Inter',
+                                          color: Color(0xFF171717),
+                                          fontWeight: FontWeight.w400,
+                                          height: 1.50,
+                                          fontSize: 16,
+                                        ),
+                                        decoration: InputDecoration(
+                                          labelText:
+                                              '${AppLocalizations.of(context)!.invoiceDate} *',
+                                          labelStyle: const TextStyle(
+                                              color: Color(0xFF737373)),
+                                          suffixIcon: IconButton(
+                                            icon: const Icon(
+                                                Icons.calendar_today,
+                                                size: 20),
+                                            onPressed: () =>
+                                                _selectInvoiceDate(context),
+                                          ),
+                                          border: InputBorder.none,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Visibility(
+                                    visible: errorInvoiceDate.isNotEmpty,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 4, top: 12.0),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: SvgPicture.asset(
+                                              'assets/icons/error_icon.svg',
+                                              height: 12.67,
+                                              width: 12.67,
+                                              alignment: Alignment.center,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: CustomText(
+                                              text: errorInvoiceDate,
+                                              fontSize: 12,
+                                              desiredLineHeight: 16,
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.w500,
+                                              color: const Color(0xFFF85A5A),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+
                                   // Total Units Field
                                   /*Container(
                                     decoration: BoxDecoration(
@@ -851,7 +1373,7 @@ class _InvoiceState extends State<Invoice> {
                                       ),
                                     ),
                                   ),*/
-                                  //const SizedBox(height: 12),
+                                  const SizedBox(height: 12),
                                   // Submit Button
                                   Container(
                                     width: double.infinity,
@@ -863,8 +1385,8 @@ class _InvoiceState extends State<Invoice> {
                                     child: TextButton(
                                       onPressed: _onButtonPressed,
                                       child: CustomText(
-                                        text:
-                                            AppLocalizations.of(context)!.submit,
+                                        text: AppLocalizations.of(context)!
+                                            .submit,
                                         fontSize: 16,
                                         desiredLineHeight: 24,
                                         fontFamily: 'Inter',
@@ -888,49 +1410,221 @@ class _InvoiceState extends State<Invoice> {
     sortedList.sort((a, b) {
       final dateA = DateTime.parse(a.updatedAt!);
       final dateB = DateTime.parse(b.updatedAt!);
-      return dateB.compareTo(dateA); // For newest first (descending)
-      // Use dateA.compareTo(dateB) for oldest first (ascending)
+      return dateB.compareTo(dateA); // Newest first
     });
+
     return ListView.builder(
-      padding: EdgeInsets.zero,
-      itemCount: sortedList.length ?? 0,
-      // Always use the length of the customers list
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
+      itemCount: sortedList.length,
       itemBuilder: (context, index) {
-        // Safely access the customer at the current index
         final invoice = sortedList[index];
         String dateString = invoice.invoiceDate!;
         DateTime dateTime = DateTime.parse(dateString);
+        String formattedDate = DateFormat('dd MMM yyyy').format(dateTime);
+        String formattedTime = DateFormat('hh:mm a').format(dateTime);
 
-        // Extract date and time
-        String date = DateFormat('yyyy-MM-dd').format(dateTime);
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-          child: ListTile(
-            title: Text(invoice.invoiceNumber ?? 'No Name'),
-            subtitle: Text(
-                '${invoice.customer!.companyName ?? 'No Email'} \n${double.parse(invoice.amountInHkd!).round()}\n$date'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (userRole == 'Admin')
-                  IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.orange),
-                    onPressed: () => _modifyOrder(invoice),
-                  ),
-                if (userRole == 'Admin')
-                  IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => _deleteInvoice(invoice.id!),
-                  ),
-                IconButton(
-                  icon: const Icon(Icons.print, color: Colors.green),
-                  onPressed: () => _printInvoice(invoice.id!),
+        double amount = double.parse(invoice.amountInHkd!);
+        String formattedAmount = NumberFormat('#,##0').format(amount.round());
+
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {
+                // Add tap functionality if needed
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Invoice Number
+                        Text(
+                          invoice.invoiceNumber ?? 'INV-0000',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1A5B92),
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+
+                        // Status Badge (You can customize based on status)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.green[50],
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.green[300]!),
+                          ),
+                          child: Text(
+                            'Paid', // Change based on your status field
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.green[700],
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Customer Info
+                    Text(
+                      invoice.customer!.companyName ?? 'No Company',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF171717),
+                        fontFamily: 'Inter',
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // Details Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Amount
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Amount',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'HK\$ $formattedAmount',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF171717),
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // Date
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'Date',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              formattedDate,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF171717),
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        // Print Button
+                        _buildActionButton(
+                          icon: Icons.print,
+                          color: Colors.green,
+                          tooltip: 'Print Invoice',
+                          onPressed: () => _printInvoice(invoice.id!),
+                        ),
+
+                        if (userRole == 'Admin') ...[
+                          const SizedBox(width: 8),
+                          // Edit Button
+                          _buildActionButton(
+                            icon: Icons.edit,
+                            color: Colors.orange,
+                            tooltip: 'Edit Invoice',
+                            onPressed: () => _modifyOrder(invoice),
+                          ),
+
+                          const SizedBox(width: 8),
+                          // Delete Button
+                          _buildActionButton(
+                            icon: Icons.delete,
+                            color: Colors.red,
+                            tooltip: 'Delete Invoice',
+                            onPressed: () => _deleteInvoice(invoice.id!),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         );
       },
+    );
+  }
+
+// Helper method for action buttons
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: Icon(icon, size: 20, color: color),
+        onPressed: onPressed,
+        tooltip: tooltip,
+        splashRadius: 20,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+      ),
     );
   }
 }

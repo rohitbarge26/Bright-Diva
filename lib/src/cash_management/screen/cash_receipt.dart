@@ -936,52 +936,224 @@ class _CashReceiptState extends State<CashReceipt> {
     sortedList.sort((a, b) {
       final dateA = DateTime.parse(a.updatedAt!);
       final dateB = DateTime.parse(b.updatedAt!);
-      return dateB.compareTo(dateA); // For newest first (descending)
-      // Use dateA.compareTo(dateB) for oldest first (ascending)
+      return dateB.compareTo(dateA);
     });
+
     return ListView.builder(
       controller: _scrollController,
-      padding: EdgeInsets.zero,
-      itemCount: sortedList.length ?? 0,
-      // Always use the length of the customers list
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
+      itemCount: sortedList.length,
       itemBuilder: (context, index) {
-        // Safely access the customer at the current index
         final cashReceipt = sortedList[index];
         String dateString = cashReceipt.updatedAt!;
         DateTime dateTime = DateTime.parse(dateString);
-        // Extract date and time
-        String date = DateFormat('yyyy-MM-dd').format(dateTime);
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-          child: ListTile(
-            title: Text(cashReceipt.customer!.companyName ?? 'No Name'),
-            subtitle: Text(
-                '${cashReceipt.customer!.mobileNumber ?? 'No Number'}\n$date'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (userRole == 'Admin')
-                  IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.orange),
-                    onPressed: () => _showEditCashDialog(context, cashReceipt),
-                  ),
-                if (userRole == 'Admin')
-                  IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => _deleteCashReceipt(cashReceipt.id!),
-                  ),
-                IconButton(
-                  icon: const Icon(Icons.print, color: Colors.green),
-                  onPressed: () => _printInvoice(cashReceipt.id!),
+        String formattedDate = DateFormat('dd MMM yyyy').format(dateTime);
+        String formattedTime = DateFormat('hh:mm a').format(dateTime);
+
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {
+                // Add tap functionality if needed
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Customer Name
+                        Expanded(
+                          child: Text(
+                            cashReceipt.customer!.companyName ?? 'No Name',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1A5B92),
+                              fontFamily: 'Inter',
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+
+                        // Receipt Amount
+                        Text(
+                          'HK\$${_formatAmount(cashReceipt.amount ?? '0')}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF27AE60),
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Customer Details
+                    _buildDetailRow(
+                      icon: Icons.phone,
+                      label: 'Mobile',
+                      value: cashReceipt.customer!.mobileNumber ?? 'No Number',
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    _buildDetailRow(
+                      icon: Icons.receipt_long,
+                      label: 'Receipt ID',
+                      value: cashReceipt.receiptNumber ?? 'N/A',
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    _buildDetailRow(
+                      icon: Icons.calendar_today,
+                      label: 'Updated',
+                      value: '$formattedDate at $formattedTime',
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Divider
+                    const Divider(height: 1, color: Color(0xFFE5E5E5)),
+                    const SizedBox(height: 12),
+
+                    // Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        // Print Button
+                        _buildActionButton(
+                          icon: Icons.print,
+                          color: Colors.green,
+                          tooltip: 'Print Receipt',
+                          onPressed: () => _printInvoice(cashReceipt.id!),
+                        ),
+
+                        if (userRole == 'Admin') ...[
+                          const SizedBox(width: 8),
+                          // Edit Button
+                          _buildActionButton(
+                            icon: Icons.edit,
+                            color: Colors.orange,
+                            tooltip: 'Edit Receipt',
+                            onPressed: () => _showEditCashDialog(context, cashReceipt),
+                          ),
+
+                          const SizedBox(width: 8),
+                          // Delete Button
+                          _buildActionButton(
+                            icon: Icons.delete,
+                            color: Colors.red,
+                            tooltip: 'Delete Receipt',
+                            onPressed: () => _deleteCashReceipt(cashReceipt.id!),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-            onTap: () {
-              // Navigate to an edit screen or show a dialog for updating
-            },
           ),
         );
       },
+    );
+  }
+
+// Helper method to format amount
+  String _formatAmount(String amount) {
+    final parsedAmount = double.tryParse(amount) ?? 0;
+    return NumberFormat('#,##0.00').format(parsedAmount);
+  }
+
+// Helper method for detail rows
+  Widget _buildDetailRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: Colors.grey[600],
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Inter',
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF171717),
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Inter',
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+// Helper method for action buttons
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: Icon(icon, size: 20, color: color),
+        onPressed: onPressed,
+        tooltip: tooltip,
+        splashRadius: 20,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+      ),
     );
   }
 }

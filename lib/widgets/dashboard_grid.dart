@@ -21,11 +21,11 @@ class DashboardGrid extends StatelessWidget {
       AppLocalizations.of(context)!.nonDelivered:
       (response.nonDeliveredValue ?? 0).toStringAsFixed(0),
       AppLocalizations.of(context)!.cashPickUp:
-      '${(response.totalCashPickup ?? 0).toStringAsFixed(0)} HKD',
+      '${(response.totalCashPickup ?? 0).toStringAsFixed(0)}',
       AppLocalizations.of(context)!.deliveredCash:
-      '${(response.deliveredCashPickup ?? 0).toStringAsFixed(0)} HKD',
+      '${(response.deliveredCashPickup ?? 0).toStringAsFixed(0)}',
       AppLocalizations.of(context)!.netDue:
-      '${(response.totalNetDue ?? 0).toStringAsFixed(0)} HKD',
+      '${(response.totalNetDue ?? 0).toStringAsFixed(0)}',
     };
 
     // Image paths (Replace with actual paths)
@@ -69,10 +69,10 @@ class DashboardGrid extends StatelessWidget {
           final chineseFormat = NumberFormat('#,##0', 'zh_CN');
           String formattedValue = chineseFormat.format(parsedNumber);
 
-          // 3. Add currency symbol (HK$)
-          String displayValue = 'HK\$ $formattedValue';
-
+          // Add currency symbol (HK$) only for indices >= 3
+          String displayValue = index >= 3 ? 'HK\$ $formattedValue' : formattedValue;
           print('Value: $value   -----   formated value: $formattedValue');
+
           return Card(
             color: Colors.white,
             // White background
