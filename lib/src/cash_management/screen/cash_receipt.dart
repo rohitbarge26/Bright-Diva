@@ -289,6 +289,21 @@ class _CashReceiptState extends State<CashReceipt> {
     );
   }
 
+  Widget _buildInvoiceStatus(String invoiceNumber, List<Invoices> invoices) {
+    // Find the invoice that matches this cash receipt
+    final invoice = invoices.firstWhere(
+          (inv) => inv.invoiceNumber == invoiceNumber,
+      orElse: () => Invoices(remainingAmount: 1), // Default to incomplete
+    );
+
+    final isCompleted = invoice.remainingAmount != null && invoice.remainingAmount! <= 0;
+
+    return _buildStatusBadge(
+      isCompleted ? 'Completed' : 'In-completed',
+      isCompleted ? Colors.green : Colors.orange,
+    );
+  }
+
   // Function to handle modify action
   void _modifyOrder(String id) {
     // Navigate to a modify order screen or show a dialog
@@ -1040,35 +1055,55 @@ class _CashReceiptState extends State<CashReceipt> {
 
                     // Action Buttons
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Print Button
-                        _buildActionButton(
-                          icon: Icons.print,
-                          color: Colors.green,
-                          tooltip: 'Print Receipt',
-                          onPressed: () => _printInvoice(cashReceipt.id!),
+                        BlocBuilder<InvoiceBloc, InvoiceState>(
+                          builder: (context, state) {
+                            if (state is InvoiceGetLoadedState) {
+                              return _buildInvoiceStatus(
+                                  cashReceipt.invoiceNumber!,
+                                  state.getInvoiceDetailsResponse?.invoices ?? []
+                              );
+                            }
+                            return const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            );
+                          },
                         ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            // Print Button
+                            _buildActionButton(
+                              icon: Icons.print,
+                              color: Colors.green,
+                              tooltip: 'Print Receipt',
+                              onPressed: () => _printInvoice(cashReceipt.id!),
+                            ),
 
-                        if (userRole == 'Admin') ...[
-                          const SizedBox(width: 8),
-                          // Edit Button
-                          _buildActionButton(
-                            icon: Icons.edit,
-                            color: Colors.orange,
-                            tooltip: 'Edit Receipt',
-                            onPressed: () => _showEditCashDialog(context, cashReceipt),
-                          ),
+                            if (userRole == 'Admin') ...[
+                              const SizedBox(width: 8),
+                              // Edit Button
+                              _buildActionButton(
+                                icon: Icons.edit,
+                                color: Colors.orange,
+                                tooltip: 'Edit Receipt',
+                                onPressed: () => _showEditCashDialog(context, cashReceipt),
+                              ),
 
-                          const SizedBox(width: 8),
-                          // Delete Button
-                          _buildActionButton(
-                            icon: Icons.delete,
-                            color: Colors.red,
-                            tooltip: 'Delete Receipt',
-                            onPressed: () => _deleteCashReceipt(cashReceipt.id!),
-                          ),
-                        ],
+                              const SizedBox(width: 8),
+                              // Delete Button
+                              _buildActionButton(
+                                icon: Icons.delete,
+                                color: Colors.red,
+                                tooltip: 'Delete Receipt',
+                                onPressed: () => _deleteCashReceipt(cashReceipt.id!),
+                              ),
+                            ],
+                          ],
+                        ),
                       ],
                     ),
                   ],
@@ -1078,6 +1113,26 @@ class _CashReceiptState extends State<CashReceipt> {
           ),
         );
       },
+    );
+  }
+
+  // Helper method for status badges
+  Widget _buildStatusBadge(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3), width: 1),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 

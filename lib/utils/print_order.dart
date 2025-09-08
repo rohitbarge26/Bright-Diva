@@ -77,13 +77,14 @@ class PdfService {
                   style: pw.TextStyle(
                       fontSize: 18, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 10),
-              pw.Text('Address: ${order.customer?.address ?? "N/A"}, '
-                  '${order.customer?.city ?? "N/A"}, '
-                  '${order.customer?.country ?? "N/A"}'),
-              pw.Text('Phone: ${order.customer?.mobileNumber ?? "N/A"}'),
-              pw.Text('Date: ${order.customer?.createdAt ?? "N/A"}'),
               pw.Text(
-                  'Business Registration#: ${order.customer?.businessRegistrationNumber ?? "N/A"}'),
+                  'Address: Flat L, 7/F, Block 2, ED. KeckSeng Industrial Building, 146-173 Avenida.de Venceslau De Morais, Macau'),
+              pw.Text('Phone: +853 - 62074090'),
+              pw.Text(
+                  'Date: ${order.customer?.createdAt != null ? DateTime.parse(order.customer?.createdAt ?? "").toLocal().toString().split(' ')[0] : "N/A"}'),
+              pw.Text(
+                  'Time: ${order.customer?.createdAt != null ? DateTime.parse(order.customer?.createdAt ?? "").toLocal().toString().split(' ')[1].split('.')[0] : "N/A"}'),
+
               pw.Text('Invoice#: ${order.invoiceNumber ?? "N/A"}'),
               pw.SizedBox(height: 20),
               pw.Table(
@@ -119,9 +120,9 @@ class PdfService {
                     children: [
                       pw.Text(order.createdAt != null
                           ? DateFormat('yyyy-MM-dd HH:mm:ss').format(
-                          DateTime.parse(order.createdAt!).toLocal())
+                              DateTime.parse(order.createdAt!).toLocal())
                           : "N/A"),
-                      pw.Text('Service Charge'),
+                      pw.Text('Cognac/Whiskey/Wine'),
                       pw.Text('1'),
                       pw.Text('${amountOfDelivery.round()}'),
                       pw.Text('${amountInHkd.round()}'),
@@ -183,16 +184,13 @@ class PdfService {
                   style: pw.TextStyle(
                       fontSize: 18, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 10),
-              pw.Text('Address: ${order.customer?.address ?? "N/A"}, '
-                  '${order.customer?.city ?? "N/A"}, '
-                  '${order.customer?.country ?? "N/A"}'),
-              pw.Text('Phone: ${order.customer?.mobileNumber ?? "N/A"}'),
+              pw.Text(
+                  'Address: Flat L, 7/F, Block 2, ED. KeckSeng Industrial Building, 146-173 Avenida.de Venceslau De Morais, Macau'),
+              pw.Text('Phone: +853 - 62074090'),
               pw.Text(
                   'Date: ${order.customer?.createdAt != null ? DateTime.parse(order.customer?.createdAt ?? "").toLocal().toString().split(' ')[0] : "N/A"}'),
               pw.Text(
                   'Time: ${order.customer?.createdAt != null ? DateTime.parse(order.customer?.createdAt ?? "").toLocal().toString().split(' ')[1].split('.')[0] : "N/A"}'),
-              pw.Text(
-                  'Business Registration#: ${order.customer?.businessRegistrationNumber ?? "N/A"}'),
               pw.Text('Invoice#: ${order.invoiceNumber ?? "N/A"}'),
               pw.SizedBox(height: 20),
               pw.Table(
@@ -230,7 +228,7 @@ class PdfService {
                           ? DateFormat('yyyy-MM-dd HH:mm:ss').format(
                               DateTime.parse(order.createdAt!).toLocal())
                           : "N/A"),
-                      pw.Text('Service Charge'),
+                      pw.Text('Cognac/Whiskey/Wine'),
                       pw.Text('${amountInHkd.round()}'),
                       pw.Text('${amountInHkd.round()}'),
                     ],
@@ -292,14 +290,10 @@ class PdfService {
                   style: pw.TextStyle(
                       fontSize: 18, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 10),
-              pw.Text('Address: ${cashReceiptData.customer?.address ?? "N/A"}, '
-                  '${cashReceiptData.customer?.city ?? "N/A"}, '
-                  '${cashReceiptData.customer?.country ?? "N/A"}'),
               pw.Text(
-                  'Phone: ${cashReceiptData.customer?.mobileNumber ?? "N/A"}'),
+                  'Address: Flat L, 7/F, Block 2, ED. KeckSeng Industrial Building, 146-173 Avenida.de Venceslau De Morais, Macau'),
+              pw.Text('Phone: +853 - 62074090'),
               pw.Text('Date: ${cashReceiptData.createdAt ?? "N/A"}'),
-              pw.Text(
-                  'Business Registration#: ${cashReceiptData.customer?.businessRegistrationNumber ?? "N/A"}'),
               pw.Text('Invoice#: ${cashReceiptData.invoiceNumber ?? "N/A"}'),
               pw.SizedBox(height: 20),
               pw.Table(
@@ -334,9 +328,11 @@ class PdfService {
                   pw.TableRow(
                     children: [
                       pw.Text(cashReceiptData.createdAt != null
-                          ? DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.parse(cashReceiptData.createdAt!).toLocal())
+                          ? DateFormat('yyyy-MM-dd HH:mm:ss').format(
+                              DateTime.parse(cashReceiptData.createdAt!)
+                                  .toLocal())
                           : "N/A"),
-                      pw.Text('Service Charge'),
+                      pw.Text('Cognac/Whiskey/Wine'),
                       pw.Text('${amountInHkd.round()}'),
                       pw.Text('${amountInHkd.round()}'),
                     ],

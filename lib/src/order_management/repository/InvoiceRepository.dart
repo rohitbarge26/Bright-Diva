@@ -75,6 +75,7 @@ class InvoiceRepository {
       var data = response.data;
       print("Response: $data");
       if (response.statusCode == SUCCESS) {
+        print("object");
         InvoiceDetailsByIdResponse getByIdResponse =
             InvoiceDetailsByIdResponse.fromJson(data);
         print("Print Invoice Repository:: ${getByIdResponse.toString()}");

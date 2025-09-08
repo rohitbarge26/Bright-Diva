@@ -2,8 +2,8 @@ class InvoiceDetailsByIdResponse {
   String? message;
   String? error;
   InvoiceDetails? invoice;
-  int? totalPaidAmount;
-  int? remainingAmount;
+  num? totalPaidAmount;
+  num? remainingAmount;
   int? statusCode;
 
   InvoiceDetailsByIdResponse(
@@ -18,7 +18,7 @@ class InvoiceDetailsByIdResponse {
     message = json['message'];
     error = json['error'];
     invoice = json['invoice'] != null
-        ? new InvoiceDetails.fromJson(json['invoice'])
+        ? InvoiceDetails.fromJson(json['invoice'])
         : null;
     totalPaidAmount = json['totalPaidAmount'];
     remainingAmount = json['remainingAmount'];

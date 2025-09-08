@@ -190,6 +190,46 @@ class _OrderPlaceState extends State<OrderPlace> {
     }
   }
 
+  String _formatAmount(String? amount) {
+    if (amount == null || amount == 'N/A') return 'N/A';
+
+    try {
+      final parsedAmount = double.tryParse(amount);
+      if (parsedAmount == null) return amount;
+
+      return parsedAmount.toStringAsFixed(2);
+    } catch (e) {
+      return amount;
+    }
+  }
+
+  void _formatAmountInput(String value) {
+    if (value.isEmpty) return;
+
+    // Remove any non-numeric characters except decimal point
+    String cleanedValue = value.replaceAll(RegExp(r'[^0-9\.]'), '');
+
+    // Check for multiple decimal points
+    if (cleanedValue.split('.').length > 2) {
+      cleanedValue = cleanedValue.substring(0, cleanedValue.length - 1);
+    }
+
+    // Limit to 2 decimal places
+    if (cleanedValue.contains('.')) {
+      List<String> parts = cleanedValue.split('.');
+      if (parts[1].length > 2) {
+        cleanedValue = '${parts[0]}.${parts[1].substring(0, 2)}';
+      }
+    }
+
+    // Update controller if value changed
+    if (cleanedValue != value) {
+      _deliveredValueController.text = cleanedValue;
+      _deliveredValueController.selection =
+          TextSelection.collapsed(offset: cleanedValue.length);
+    }
+  }
+
   void _clearForm() {
     _deliveredUnitsController.clear();
     _deliveredValueController.clear();
@@ -756,6 +796,9 @@ class _OrderPlaceState extends State<OrderPlace> {
                                       keyboardType: TextInputType.number,
                                       enabled: _isPartialDelivery,
                                       onChanged: (value) {
+                                        // Format the input to allow only numbers and up to 2 decimal places
+                                        _formatAmountInput(value);
+
                                         final amount =
                                             double.tryParse(value) ?? 0;
                                         setState(() {
@@ -855,10 +898,22 @@ class _OrderPlaceState extends State<OrderPlace> {
       itemCount: sortedList.length,
       itemBuilder: (context, index) {
         final order = sortedList[index];
-        String dateString = order.updatedAt!;
-        DateTime dateTime = DateTime.parse(dateString);
-        String formattedDate = DateFormat('dd MMM yyyy').format(dateTime);
-        String formattedTime = DateFormat('hh:mm a').format(dateTime);
+        // Format date and time
+        String formattedDate = 'N/A';
+        String formattedTime = '';
+        if (order.updatedAt != null) {
+          try {
+            DateTime dateTime = DateTime.parse(order.updatedAt!);
+            formattedDate = DateFormat('dd MMM yyyy').format(dateTime);
+            formattedTime = DateFormat('hh:mm a').format(dateTime);
+          } catch (e) {
+            formattedDate = 'Invalid Date';
+          }
+        }
+
+        // Determine statuses
+        final paymentStatus = order.partialDelivery == true ? 'Partial' : 'Full';
+        final completionStatus = order.partialDelivery == true ? 'Completed' : 'Incomplete';
 
         return Container(
           margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
@@ -886,14 +941,36 @@ class _OrderPlaceState extends State<OrderPlace> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Order Number Header
-                    Text(
-                      order.orderNumber ?? 'ORD-0000',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1A5B92),
-                        fontFamily: 'Inter',
-                      ),
+                    Row(
+                      children: [
+                        // Order Number
+                        Expanded(
+                          child: Text(
+                            order.orderNumber ?? 'ORD-0000',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1A5B92),
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                        ),
+
+                        // Status Badges
+                        Row(
+                          children: [
+                            _buildStatusBadge(
+                              paymentStatus,
+                              order.partialDelivery == true ? Colors.orange : Colors.green,
+                            ),
+                            const SizedBox(width: 6),
+                            _buildStatusBadge(
+                              completionStatus,
+                              order.partialDelivery == true ? Colors.green : Colors.red,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
 
                     const SizedBox(height: 12),
@@ -904,9 +981,7 @@ class _OrderPlaceState extends State<OrderPlace> {
                       label: 'Customer',
                       value: order.customer?.companyName ?? 'N/A',
                     ),
-
                     const SizedBox(height: 8),
-
                     _buildDetailRow(
                       icon: Icons.receipt,
                       label: 'Invoice',
@@ -915,12 +990,31 @@ class _OrderPlaceState extends State<OrderPlace> {
 
                     const SizedBox(height: 8),
 
-                    _buildDetailRow(
-                      icon: Icons.calendar_today,
-                      label: 'Updated',
-                      value: '$formattedDate at $formattedTime',
-                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Amount Column
+                        Expanded(
+                          child: _buildDetailColumn(
+                            icon: Icons.attach_money,
+                            label: 'Amount (HKD)',
+                            value: _formatAmount(order.amountInHkd),
+                          ),
+                        ),
 
+                        // Date Column
+                        Expanded(
+                          child: _buildDetailColumn(
+                            icon: Icons.calendar_today,
+                            label: 'Updated',
+                            value: formattedDate != 'N/A'
+                                ? '$formattedDate\n$formattedTime'
+                                : 'N/A',
+                          ),
+                        ),
+
+                      ],
+                    ),
                     const SizedBox(height: 12),
 
                     // Divider
@@ -967,6 +1061,68 @@ class _OrderPlaceState extends State<OrderPlace> {
           ),
         );
       },
+    );
+  }
+
+  // Helper method for status badges
+  Widget _buildStatusBadge(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3), width: 1),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+// Helper method for detail columns (for date and amount)
+  Widget _buildDetailColumn({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: Colors.grey[600],
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Inter',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Color(0xFF171717),
+            fontWeight: FontWeight.w600,
+            fontFamily: 'Inter',
+          ),
+        ),
+      ],
     );
   }
 
