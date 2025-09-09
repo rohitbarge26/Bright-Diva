@@ -171,7 +171,7 @@ class _InvoiceState extends State<Invoice> {
                   : invoiceNumberController.text,
               customerId: selectedCustomer,
               amount: num.tryParse(amountController.text),
-              invoiceDate: selectedInvoiceDate?.toUtc().toIso8601String(),
+              invoiceDate: DateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(selectedInvoiceDate!),
               currency: _selectedCurrency,
               totalUnits: 0)));
       _clearForm();
@@ -630,8 +630,7 @@ class _InvoiceState extends State<Invoice> {
                                       amount:
                                           double.parse(amountController.text)
                                               .round(),
-                                      invoiceDate: selectedInvoiceDate!
-                                          .toIso8601String(),
+                                      invoiceDate: DateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(selectedInvoiceDate!),
                                       currency: _selectedCurrency,
                                       totalUnits: 0,
                                     ),
@@ -1438,12 +1437,8 @@ class _InvoiceState extends State<Invoice> {
       itemBuilder: (context, index) {
         final invoice = sortedList[index];
         String dateString = invoice.invoiceDate!;
-        print('Date String: $dateString');
         DateTime dateTime = DateTime.parse(dateString).toLocal();
-        print('Date Time: $dateTime');
         String formattedDate = DateFormat('dd MMM yyyy').format(dateTime);
-        print('Formatted Date: $formattedDate');
-
         double amount = double.parse(invoice.amountInHkd!);
         String formattedAmount = NumberFormat('#,##0').format(amount.round());
 

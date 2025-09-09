@@ -143,91 +143,218 @@ class _AddCustomerState extends State<AddCustomer> {
   }
 
   void _editCustomer(Customers customer) {
-    _companyNameController.text = customer.contactPersonName!;
-    _address1Controller.text = customer.emailId!;
-    _cityController.text = customer.city!;
-    _countryController.text = customer.country!;
-    _brnController.text = customer.businessRegistrationNumber!;
-    _emailController.text = customer.emailId!;
-    _contactPersonController.text = customer.contactPersonName!;
-    _contactNumberController.text = customer.mobileNumber!;
+    _companyNameController.text = customer.companyName ?? '';
+    _address1Controller.text = customer.address ?? '';
+    _cityController.text = customer.city ?? '';
+    _countryController.text = customer.country ?? '';
+    _brnController.text = customer.businessRegistrationNumber ?? '';
+    _emailController.text = customer.emailId ?? '';
+    _contactPersonController.text = customer.contactPersonName ?? '';
+    _contactNumberController.text = customer.mobileNumber ?? '';
 
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Edit Customer'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: _companyNameController,
-                  decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.companyName),
-                ),
-                TextFormField(
-                  controller: _address1Controller,
-                  decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.address),
-                ),
-                TextFormField(
-                  controller: _cityController,
-                  decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.city),
-                ),
-                TextFormField(
-                  controller: _countryController,
-                  decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.country),
-                ),
-                TextFormField(
-                  controller: _brnController,
-                  decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.brn),
-                ),
-                TextFormField(
-                  controller: _contactPersonController,
-                  decoration: InputDecoration(
-                      labelText:
-                          AppLocalizations.of(context)!.contactPersonName),
-                ),
-                TextFormField(
-                  controller: _contactNumberController,
-                  decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.contactNumber),
-                ),
-              ],
+        return Dialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+            ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.editCustomer,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF171717),
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, size: 24),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+                  const Divider(height: 1, color: Color(0xFFE5E5E5)),
+                  const SizedBox(height: 24),
+
+                  // Form Fields
+                  _buildFormField(
+                    controller: _companyNameController,
+                    label: AppLocalizations.of(context)!.companyName,
+                    icon: Icons.business,
+                  ),
+
+                  const SizedBox(height: 16),
+                  _buildFormField(
+                    controller: _contactPersonController,
+                    label: AppLocalizations.of(context)!.contactPersonName,
+                    icon: Icons.person,
+                  ),
+
+                  const SizedBox(height: 16),
+                  _buildFormField(
+                    controller: _emailController,
+                    label: AppLocalizations.of(context)!.email,
+                    icon: Icons.email,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+
+                  const SizedBox(height: 16),
+                  _buildFormField(
+                    controller: _contactNumberController,
+                    label: AppLocalizations.of(context)!.contactNumber,
+                    icon: Icons.phone,
+                    keyboardType: TextInputType.phone,
+                  ),
+
+                  const SizedBox(height: 16),
+                  _buildFormField(
+                    controller: _brnController,
+                    label: AppLocalizations.of(context)!.brn,
+                    icon: Icons.assignment,
+                  ),
+
+                  const SizedBox(height: 16),
+                  _buildFormField(
+                    controller: _address1Controller,
+                    label: AppLocalizations.of(context)!.address,
+                    icon: Icons.location_on,
+                  ),
+
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildFormField(
+                          controller: _cityController,
+                          label: AppLocalizations.of(context)!.city,
+                          icon: Icons.location_city,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildFormField(
+                          controller: _countryController,
+                          label: AppLocalizations.of(context)!.country,
+                          icon: Icons.public,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: const Color(0xFF171717),
+                            side: const BorderSide(color: Color(0xFFE5E5E5)),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(AppLocalizations.of(context)!.txtCancel),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            context.read<CustomerBloc>().add(EditCustomer(
+                              customerId: customer.id!,
+                              addCustomerRequest: CustomerAddRequest(
+                                address: _address1Controller.text,
+                                contactPersonName: _contactPersonController.text,
+                                mobileNumber: _contactNumberController.text,
+                                emailId: _emailController.text,
+                                businessRegistrationNumber: _brnController.text,
+                                city: _cityController.text,
+                                country: _countryController.text,
+                                customerName: _companyNameController.text,
+                                companyName: _companyNameController.text,
+                              ),
+                            ));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2563EB),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(AppLocalizations.of(context)!.txtSave),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-              child: Text(AppLocalizations.of(context)!.txtCancel),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                context.read<CustomerBloc>().add(EditCustomer(
-                    customerId: customer.id!,
-                    addCustomerRequest: CustomerAddRequest(
-                        address: _address1Controller.text,
-                        contactPersonName: _contactPersonController.text,
-                        mobileNumber: _contactNumberController.text,
-                        emailId: _emailController.text,
-                        businessRegistrationNumber: _brnController.text,
-                        city: _cityController.text,
-                        country: _countryController.text,
-                        customerName: _companyNameController.text,
-                        companyName: _companyNameController.text)));
-              },
-              child: Text(AppLocalizations.of(context)!.txtSave),
-            ),
-          ],
         );
       },
+    );
+  }
+
+// Helper method to build consistent form fields
+  Widget _buildFormField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      style: const TextStyle(
+        fontFamily: 'Inter',
+        color: Color(0xFF171717),
+        fontSize: 16,
+      ),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(
+          color: Color(0xFF737373),
+          fontFamily: 'Inter',
+        ),
+        prefixIcon: Icon(icon, size: 20, color: const Color(0xFF737373)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Color(0xFFE5E5E5)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Color(0xFFE5E5E5)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Color(0xFF2563EB)),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      ),
     );
   }
 

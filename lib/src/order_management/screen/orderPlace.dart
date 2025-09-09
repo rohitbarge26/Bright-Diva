@@ -63,6 +63,7 @@ class _OrderPlaceState extends State<OrderPlace> {
   int? _selectedInvoiceUnit;
   num? _selectedRemainingAmount;
   String errorAmount = '';
+  String errorDeliveredBy = '';
   OrderGetResponse? ordersListResponse;
   String? userRole;
   double hkdToMop = 1.03; // Initial value for HKD to MOP
@@ -116,7 +117,7 @@ class _OrderPlaceState extends State<OrderPlace> {
     if (selectedInvoice.remainingAmount != null) {
       try {
         _deliveredValueController.text =
-            selectedInvoice.remainingAmount!.toString();
+            selectedInvoice.remainingAmount!.toStringAsFixed(2);
         _selectedRemainingAmount = selectedInvoice.remainingAmount;
       } catch (e) {
         _deliveredValueController.text = '0';
@@ -129,58 +130,68 @@ class _OrderPlaceState extends State<OrderPlace> {
     }
   }
 
-// Function to validate the amount
-  bool _validateAmount() {
+  bool _validateFields() {
+    bool isValid = true;
+
     if (_selectedRemainingAmount == 0) {
+      print('Cash Receipt already generated');
       setState(() {
-        errorAmount = 'Order already generated'; // Set error message
+        errorAmount = 'Cash Receipt already generated'; // Set error message
       });
-      return false; // Validation failed
+      isValid = false;
     }
 
-    // Get the entered amount from controller and parse to double
-    final enteredAmountText = _deliveredValueController.text;
-    print("Entered Amount for validate: $enteredAmountText");
+    // Validate Amount
+    if (_deliveredByController.text.isEmpty) {
+      print('Please enter a valid pickup by');
+      setState(() {
+        errorDeliveredBy = AppLocalizations.of(context)!.error_deliveredByRequired;
+      });
+      isValid = false;
+    }
 
-// Parse the string to double with error handling
+    print('_validateFields amount in HKD: $_amountInHKD');
+    print('_validateFields amountController: ${_deliveredValueController.text}');
+
+    final enteredAmountHKD = _deliveredValueController.text;
+
     try {
-      final enteredAmount = double.parse(enteredAmountText);
+      final enteredAmount = double.parse(enteredAmountHKD);
       print('Entered Amount: $enteredAmount');
       // Validate against selected amount
       if (enteredAmount <= 0) {
+        print('Please enter a valid amount');
         setState(() {
-          print('enteredAmount <= 0');
           errorAmount = 'Please enter a valid amount';
         });
-        return false;
+        isValid = false;
       }
-
       if (enteredAmount > _selectedRemainingAmount!) {
+        print('Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD');
         setState(() {
-          errorAmount =
-          'Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD';
+          errorAmount = 'Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD';
         });
-        return false;
+        isValid = false;
       }
-
-      // If validation passes
       setState(() {
-        errorAmount = '';
+        errorAmount = ''; // Clear error message if validation passes
       });
-      return true;
 
+      isValid = true;
     } catch (e) {
       setState(() {
         print('catch');
         errorAmount = 'Please enter a valid number';
       });
-      return false;
+      isValid = false;
     }
+
+    return isValid;
   }
 
   // Submit form
   void _submitForm() {
-    if (!_validateAmount()) {
+    if (!_validateFields()) {
       return; // Stop submission if validation fails
     }
 
@@ -256,6 +267,7 @@ class _OrderPlaceState extends State<OrderPlace> {
     double amountInHkd = double.parse(order.amountInHkd!);
     _deliveredValueController.text = amountInHkd.toStringAsFixed(0);
     _deliveredUnitsController.text = order.deliveredUnits!.toString();
+    _deliveredByController.text = order.deliveredBy ?? '';
 
     showDialog(
       context: context,
@@ -277,22 +289,25 @@ class _OrderPlaceState extends State<OrderPlace> {
           },
           deliveredUnitsController: _deliveredUnitsController,
           deliveredValueController: _deliveredValueController,
+          valueHkdToMop: hkdToMop,
+          valueHkdToCny: hkdToCny,
           callCancel: (BuildContext context) {
             Navigator.pop(context);
           },
           callSave: (BuildContext context, int units, String value) {
+            print('callSave: $value');
             Navigator.pop(context);
             context.read<OrderBloc>().add(EditOrder(
-              orderId: order.id!,
-              orderEditRequest: OrderEditRequest(
-                amountOfDelivery: int.parse(value),
-                partialDelivery: _isPartialEditDelivery,
-                currency: _selectedCurrency,
-                deliveredUnits: units,
-                deliveredBy: _deliveredByController.text, // Add this field to your request
-              ),
-            ));
-          },
+                  orderId: order.id!,
+                  orderEditRequest: OrderEditRequest(
+                    amountOfDelivery: num.tryParse(value),
+                    partialDelivery: _isPartialEditDelivery,
+                    currency: _selectedCurrency,
+                    deliveredUnits: units,
+                    deliveredBy: _deliveredByController.text,
+                  ),
+                ));
+          }, deliveredByController: _deliveredByController,
         );
       },
     );
@@ -464,11 +479,25 @@ class _OrderPlaceState extends State<OrderPlace> {
           int? code = state.editOrderResponse!.statusCode;
           print('Code : $code');
           if (code == SUCCESS) {
+            Navigator.of(context).pop();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                   content: Text(AppLocalizations.of(context)!.msgUpdateOrder)),
             );
-          } else {}
+          } else {
+            showDialog(
+                barrierDismissible: false,
+                context: context,
+                builder: (context) => ErrorAlertDialog(
+                    alertLogoPath: 'assets/icons/error_icon.svg',
+                    status: AppLocalizations.of(context)!.unableToProcess,
+                    statusInfo:
+                        AppLocalizations.of(context)!.somethingWentWrong,
+                    buttonText: AppLocalizations.of(context)!.btnOkay,
+                    onPress: () {
+                      Navigator.of(context).pop();
+                    }));
+          }
         }
       },
       child: BlocListener<CurrencyBloc, CurrencyState>(
@@ -674,16 +703,6 @@ class _OrderPlaceState extends State<OrderPlace> {
                                     prefixIcon: const Icon(Icons.person,
                                         size: 20, color: Colors.grey),
                                   ),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return AppLocalizations.of(context)!
-                                          .error_deliveredByRequired;
-                                    }
-                                    if (value.length < 2) {
-                                      return 'Name must be at least 2 characters';
-                                    }
-                                    return null;
-                                  },
                                   onChanged: (value) {
                                     setState(() {
                                       // Clear error when user starts typing
@@ -692,6 +711,35 @@ class _OrderPlaceState extends State<OrderPlace> {
                                       }
                                     });
                                   },
+                                ),
+                              ),
+                              Visibility(
+                                visible: errorDeliveredBy.isNotEmpty,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 4, top: 12.0),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    children: [
+                                      SvgPicture.asset(
+                                        'assets/icons/error_icon.svg',
+                                        height: 12.67,
+                                        width: 12.67,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: CustomText(
+                                          text: errorDeliveredBy,
+                                          fontSize: 12,
+                                          desiredLineHeight: 16,
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.w500,
+                                          color: const Color(0xFFF85A5A),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 16),
@@ -904,8 +952,10 @@ class _OrderPlaceState extends State<OrderPlace> {
         }
 
         // Determine statuses
-        final paymentStatus = order.partialDelivery == true ? 'Partial' : 'Full';
-        final completionStatus = order.partialDelivery == true ? 'Complete' : 'Incomplete';
+        final paymentStatus =
+            order.partialDelivery == true ? 'Partial' : 'Full';
+        final completionStatus =
+            order.partialDelivery == true ? 'Complete' : 'Incomplete';
 
         return Container(
           margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
@@ -953,7 +1003,9 @@ class _OrderPlaceState extends State<OrderPlace> {
                           children: [
                             _buildStatusBadge(
                               paymentStatus,
-                              order.partialDelivery == true ? Colors.orange : Colors.green,
+                              order.partialDelivery == true
+                                  ? Colors.orange
+                                  : Colors.green,
                             ),
                             const SizedBox(width: 6),
                             BlocBuilder<InvoiceBloc, InvoiceState>(
@@ -961,13 +1013,15 @@ class _OrderPlaceState extends State<OrderPlace> {
                                 if (state is InvoiceGetLoadedState) {
                                   return _buildInvoiceStatus(
                                       order.invoiceNumber!,
-                                      state.getInvoiceDetailsResponse?.invoices ?? []
-                                  );
+                                      state.getInvoiceDetailsResponse
+                                              ?.invoices ??
+                                          []);
                                 }
                                 return const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
                                 );
                               },
                             ),
@@ -1010,12 +1064,10 @@ class _OrderPlaceState extends State<OrderPlace> {
                           child: _buildDetailColumn(
                             icon: Icons.calendar_today,
                             label: 'Updated',
-                            value: formattedDate != 'N/A'
-                                ? '$formattedDate\n$formattedTime'
-                                : 'N/A',
+                            value:
+                                formattedDate != 'N/A' ? formattedDate : 'N/A',
                           ),
                         ),
-
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -1043,7 +1095,8 @@ class _OrderPlaceState extends State<OrderPlace> {
                             icon: Icons.edit,
                             color: Colors.orange,
                             tooltip: 'Edit Order',
-                            onPressed: () => _showEditOrderDialog(context, order),
+                            onPressed: () =>
+                                _showEditOrderDialog(context, order),
                           ),
 
                           const SizedBox(width: 8),
@@ -1066,14 +1119,16 @@ class _OrderPlaceState extends State<OrderPlace> {
       },
     );
   }
+
   Widget _buildInvoiceStatus(String invoiceNumber, List<Invoices> invoices) {
     // Find the invoice that matches this cash receipt
     final invoice = invoices.firstWhere(
-          (inv) => inv.invoiceNumber == invoiceNumber,
+      (inv) => inv.invoiceNumber == invoiceNumber,
       orElse: () => Invoices(remainingAmount: 1), // Default to incomplete
     );
 
-    final isCompleted = invoice.remainingAmount != null && invoice.remainingAmount! <= 0;
+    final isCompleted =
+        invoice.remainingAmount != null && invoice.remainingAmount! <= 0;
 
     return _buildStatusBadge(
       isCompleted ? 'Complete' : 'Incomplete',

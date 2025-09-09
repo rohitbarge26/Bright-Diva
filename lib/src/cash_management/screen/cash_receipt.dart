@@ -101,6 +101,33 @@ class _CashReceiptState extends State<CashReceipt> {
     });
   }
 
+  void _formatAmountInput(String value) {
+    if (value.isEmpty) return;
+
+    // Remove any non-numeric characters except decimal point
+    String cleanedValue = value.replaceAll(RegExp(r'[^0-9\.]'), '');
+
+    // Check for multiple decimal points
+    if (cleanedValue.split('.').length > 2) {
+      cleanedValue = cleanedValue.substring(0, cleanedValue.length - 1);
+    }
+
+    // Limit to 2 decimal places
+    if (cleanedValue.contains('.')) {
+      List<String> parts = cleanedValue.split('.');
+      if (parts[1].length > 2) {
+        cleanedValue = '${parts[0]}.${parts[1].substring(0, 2)}';
+      }
+    }
+
+    // Update controller if value changed
+    if (cleanedValue != value) {
+      amountController.text = cleanedValue;
+      amountController.selection =
+          TextSelection.collapsed(offset: cleanedValue.length);
+    }
+  }
+
   void _updateAmount(String value) {
     final amount = double.tryParse(value) ?? 0;
     _updateConversionText(_convertToHKD(amount, _selectedCurrency!));
@@ -151,41 +178,71 @@ class _CashReceiptState extends State<CashReceipt> {
     }
 
     if (selectedInvoice.remainingAmount != null) {
-      amountController.text = selectedInvoice.remainingAmount.toString();
+      amountController.text = selectedInvoice.remainingAmount!.toStringAsFixed(2);
       /*double.parse(selectedInvoice.remainingAmount!).toStringAsFixed(0);*/
     } else {
       amountController.text = ''; // Clear if no amount is available
     }
   }
 
-  // Function to validate the amount
-  bool _validateAmount() {
+
+  bool _validateFields() {
+    bool isValid = true;
+
     if (_selectedRemainingAmount == 0) {
+      print('Cash Receipt already generated');
       setState(() {
         errorAmount = 'Cash Receipt already generated'; // Set error message
       });
-      return false; // Validation failed
-    }
-    // Get the entered amount from controller and parse to double
-    final enteredAmountHKD = _amountInHKD;
-    // Validate against selected amount
-    if (enteredAmountHKD <= 0) {
-      setState(() {
-        errorAmount = 'Please enter a valid amount';
-      });
-      return false;
+      isValid = false;
     }
 
-    if (enteredAmountHKD > _selectedRemainingAmount!) {
+    // Validate Amount
+    if (pickupByController.text.isEmpty) {
+      print('Please enter a valid pickup by');
       setState(() {
-        errorAmount = 'Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD';
+        errorPickupBy = AppLocalizations.of(context)!.enterValidPickupBy;
       });
-      return false;
+      isValid = false;
     }
-    setState(() {
-      errorAmount = ''; // Clear error message if validation passes
-    });
-    return true; // Validation passed
+
+    print('_validateFields amount in HKD: $_amountInHKD');
+    print('_validateFields amountController: ${amountController.text}');
+
+    final enteredAmountHKD = amountController.text;
+
+    try {
+      final enteredAmount = double.parse(enteredAmountHKD);
+      print('Entered Amount: $enteredAmount');
+      // Validate against selected amount
+      if (enteredAmount <= 0) {
+        print('Please enter a valid amount');
+        setState(() {
+          errorAmount = 'Please enter a valid amount';
+        });
+        isValid = false;
+      }
+      if (enteredAmount > _selectedRemainingAmount!) {
+        print('Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD');
+        setState(() {
+          errorAmount = 'Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD';
+        });
+        isValid = false;
+      }
+      setState(() {
+        errorAmount = ''; // Clear error message if validation passes
+      });
+
+      isValid = true;
+    } catch (e) {
+      setState(() {
+        print('catch');
+        errorAmount = 'Please enter a valid number';
+      });
+      isValid = false;
+    }
+
+    return isValid;
   }
 
   void _updateButtonColor() {
@@ -203,11 +260,15 @@ class _CashReceiptState extends State<CashReceipt> {
   }
 
   void _onButtonPressed() {
-    if (!_validateAmount()) {
+    if (!_validateFields()) {
+      print('_onButtonPressed not press');
       return; // Stop submission if validation fails
+    }else{
+      print('_onButtonPressed');
     }
 
     if (_formCashKey.currentState!.validate()) {
+      print('Form submitted successfully');
       setState(() {
         isSubmitting = true;
       });
@@ -495,6 +556,7 @@ class _CashReceiptState extends State<CashReceipt> {
           int? code = state.editInvoiceResponse!.statusCode;
           print('Code : $code');
           if (code == SUCCESS) {
+            Navigator.of(context).pop();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                   content:
@@ -739,7 +801,8 @@ class _CashReceiptState extends State<CashReceipt> {
                                                 controller: amountController,
                                                 enabled: _isPartialPayment,
                                                 onChanged: (value) {
-                                                  _updateAmount(value); // Call your conversion function
+                                                  _formatAmountInput(value); // Format first
+                                                  _updateAmount(amountController.text);
                                                   setState(() {
                                                     errorAmount = Validator.amountValidate(value)
                                                         ? ''
@@ -1044,7 +1107,7 @@ class _CashReceiptState extends State<CashReceipt> {
                     _buildDetailRow(
                       icon: Icons.calendar_today,
                       label: 'Updated',
-                      value: '$formattedDate at $formattedTime',
+                      value: formattedDate,
                     ),
 
                     const SizedBox(height: 12),

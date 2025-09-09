@@ -1,5 +1,5 @@
 class OrderEditRequest {
-  int? amountOfDelivery;
+  num? amountOfDelivery;
   bool? partialDelivery;
   String? currency;
   int? deliveredUnits;

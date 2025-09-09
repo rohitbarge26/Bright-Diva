@@ -32,15 +32,16 @@ class ExpectedDate extends StatefulWidget {
 class _ExpectedDateState extends State<ExpectedDate> {
   final _formOrderKey = GlobalKey<FormState>();
   final TextEditingController _customerNameController = TextEditingController();
+  TextEditingController invoiceDateController = TextEditingController();
   String? _selectedInvoiceNumber;
   String? _invoiceId;
   String? _selectedCustomerId;
-  String? _selectedExpectedDate;
-  late DateTime selectedExpectedDate = DateTime.now();
+  DateTime? selectedInvoiceDate;
+  String errorInvoiceDate = '';
 
   void _fetchCustomerName(String invoiceNumber, List<Invoices> invoices) {
     Invoices? selectedInvoice = invoices.firstWhere(
-      (invoice) => invoice.invoiceNumber == invoiceNumber,
+          (invoice) => invoice.invoiceNumber == invoiceNumber,
       orElse: () => Invoices(),
     );
 
@@ -56,9 +57,10 @@ class _ExpectedDateState extends State<ExpectedDate> {
         try {
           DateTime parsedExpectedDate = DateTime.parse(selectedInvoice.expectedPaymentDate!);
           setState(() {
-            selectedExpectedDate = parsedExpectedDate;
+            selectedInvoiceDate = parsedExpectedDate;
+            invoiceDateController.text = _formatDateWithOrdinal(parsedExpectedDate);
           });
-          print('Fetched and Parsed Expected Date: $selectedExpectedDate');
+          print('Fetched and Parsed Expected Date: $selectedInvoiceDate');
         } catch (e) {
           print('Error parsing expectedPaymentDate: $e');
         }
@@ -71,9 +73,17 @@ class _ExpectedDateState extends State<ExpectedDate> {
   }
 
   void _submitForm() {
+    // Validate that date is not in the past
+    if (selectedInvoiceDate != null && selectedInvoiceDate!.isBefore(DateTime.now())) {
+      setState(() {
+        errorInvoiceDate = 'Past dates are not allowed for expected payment date';
+      });
+      return;
+    }
+
     if (_formOrderKey.currentState!.validate()) {
       String expectedDate =
-          DateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(selectedExpectedDate);
+      DateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(selectedInvoiceDate!);
 
       print('Expected Date: $expectedDate');
       // Handle form submission here
@@ -84,6 +94,34 @@ class _ExpectedDateState extends State<ExpectedDate> {
               expectedPaymentDate: expectedDate),
           invoiceId: _invoiceId!));
     }
+  }
+
+  String _formatDateWithOrdinal(DateTime date) {
+    final day = date.day;
+    final month = DateFormat('MMMM').format(date); // Full month name
+    final year = date.year;
+
+    // Add ordinal suffix (st, nd, rd, th)
+    String ordinalSuffix;
+    if (day >= 11 && day <= 13) {
+      ordinalSuffix = 'th';
+    } else {
+      switch (day % 10) {
+        case 1:
+          ordinalSuffix = 'st';
+          break;
+        case 2:
+          ordinalSuffix = 'nd';
+          break;
+        case 3:
+          ordinalSuffix = 'rd';
+          break;
+        default:
+          ordinalSuffix = 'th';
+      }
+    }
+
+    return '$day$ordinalSuffix $month $year';
   }
 
   @override
@@ -230,7 +268,7 @@ class _ExpectedDateState extends State<ExpectedDate> {
                         controller: _customerNameController,
                         decoration: InputDecoration(
                           labelText:
-                              '${AppLocalizations.of(context)!.customerName} *',
+                          '${AppLocalizations.of(context)!.customerName} *',
                           border: const OutlineInputBorder(),
                           enabled: false,
                         ),
@@ -244,67 +282,91 @@ class _ExpectedDateState extends State<ExpectedDate> {
                       ),
                       const SizedBox(height: 16),
                       // Expected Date Section
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        child: InkWell(
-                          onTap: () {
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return CalendarJobFilterDialog(
-                                    currentDate: selectedExpectedDate,
-                                    startDate: DateTime.utc(2023),
-                                  );
-                                }).then((value) {
-                              if (value != null) {
-                                setState(() {
-                                  selectedExpectedDate = value;
-                                });
-                              }
-                            });
-                          },
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      CustomText(
-                                        text: AppLocalizations.of(context)!
-                                            .txtExpectedDate,
-                                        fontSize: 14,
-                                        desiredLineHeight: 24,
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: -0.28,
-                                        color: const Color(0xFF737373),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      CustomText(
-                                        text: DateFormat('EEEE, MMMM d')
-                                            .format(selectedExpectedDate),
-                                        fontSize: 14,
-                                        desiredLineHeight: 20,
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.w400,
-                                        letterSpacing: -0.28,
-                                        color: Colors.black.withOpacity(0.5),
-                                      ),
-                                    ]),
-                                const Icon(
-                                  Icons.calendar_today,
-                                  size: 24,
-                                  color: Colors.black,
-                                ),
-                              ]),
+                      Text(
+                        'Expected Payment Date *',
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: 14,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: () async {
+                          final DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: selectedInvoiceDate ?? DateTime.now(),
+                            firstDate: DateTime.now(), // KEY CHANGE: Prevent past dates
+                            lastDate: DateTime(2100),
+                            builder: (BuildContext context, Widget? child) {
+                              return Theme(
+                                data: ThemeData.light().copyWith(
+                                  colorScheme: ColorScheme.light(
+                                    primary: Colors.blue[800]!,
+                                    onPrimary: Colors.white,
+                                  ),
+                                ),
+                                child: child!,
+                              );
+                            },
+                          );
+
+                          if (picked != null) {
+                            setState(() {
+                              selectedInvoiceDate = picked;
+                              invoiceDateController.text =
+                                  _formatDateWithOrdinal(picked);
+                              errorInvoiceDate = ""; // Clear any previous error
+                            });
+                          }
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                                color: errorInvoiceDate.isNotEmpty
+                                    ? Colors.red
+                                    : const Color(0xFFE5E5E5),
+                                width: 1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                selectedInvoiceDate != null
+                                    ? _formatDateWithOrdinal(selectedInvoiceDate!)
+                                    : 'Select date',
+                                style: TextStyle(
+                                  color: selectedInvoiceDate != null
+                                      ? const Color(0xFF171717)
+                                      : const Color(0xFF737373),
+                                  fontFamily: 'Inter',
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Icon(Icons.calendar_today,
+                                  color: Colors.blue[800], size: 20),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Error message for past date
+                      if (errorInvoiceDate.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            errorInvoiceDate,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                        ),
+
                       const SizedBox(height: 25),
                       // Submit Button
                       ElevatedButton(

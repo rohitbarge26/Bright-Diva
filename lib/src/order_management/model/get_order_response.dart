@@ -35,6 +35,7 @@ class Orders {
   String? amountOfDelivery;
   String? currency;
   int? deliveredUnits;
+  String? deliveredBy;
   String? amountInHkd;
   String? customerId;
   String? createdAt;
@@ -50,6 +51,7 @@ class Orders {
         this.amountOfDelivery,
         this.currency,
         this.deliveredUnits,
+        this.deliveredBy,
         this.amountInHkd,
         this.customerId,
         this.createdAt,
@@ -65,6 +67,7 @@ class Orders {
     amountOfDelivery = json['amountOfDelivery'];
     currency = json['currency'];
     deliveredUnits = json['deliveredUnits'];
+    deliveredBy = json['deliveredBy'];
     amountInHkd = json['amountInHkd'];
     customerId = json['customerId'];
     createdAt = json['createdAt'];
@@ -84,6 +87,7 @@ class Orders {
     data['amountOfDelivery'] = this.amountOfDelivery;
     data['currency'] = this.currency;
     data['deliveredUnits'] = this.deliveredUnits;
+    data['deliveredBy'] = this.deliveredBy;
     data['amountInHkd'] = this.amountInHkd;
     data['customerId'] = this.customerId;
     data['createdAt'] = this.createdAt;
