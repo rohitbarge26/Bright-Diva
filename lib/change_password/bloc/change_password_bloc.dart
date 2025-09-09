@@ -24,11 +24,6 @@ class ChangePasswordBloc
       final changePasswdResponse =
       await changePasswordRepository.changePassword(event.changePasswordRequest);
       emit(ChangePasswordSuccess(response: changePasswdResponse));
-      if (changePasswdResponse != null) {
-        emit(ChangePasswordError(error: changePasswdResponse.message ?? "Password change failed"));
-      } else {
-        emit(const ChangePasswordError(error: "Unexpected Error"));
-      }
     } catch (error) {
       emit(ChangePasswordError(error: error.toString()));
     }

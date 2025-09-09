@@ -35,17 +35,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   void _onButtonPressed(BuildContext context) async {
     if (_formKey.currentState?.validate() ?? false) {
-      // setState(() {
-      //   _isLoading = true;
-      // });
-
-      // API call implementation
-      // await Future.delayed(Duration(seconds: 2));
       final changePasswordRequest = ChangePasswordRequest(
         oldPassword: _currentPasswordController.text,
         newPassword: _newPasswordController.text,
       );
       print(changePasswordRequest.toJson());
+
       context.read<ChangePasswordBloc>().add(
             ChangePassword(
               changePasswordRequest: changePasswordRequest,
@@ -60,7 +55,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text(
-            'Error',
+            '',
             style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
           ),
           content: Text(errorMessage),
@@ -110,15 +105,23 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             int code = state.response?.statusCode ?? 0;
             print('Code : $code');
             if(code == SUCCESS){
+              print('Print Success: $code');
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content:
                   Text(AppLocalizations.of(context)!.prPassSuccessMessage),
                 ),
               );
+              Navigator.of(context).pop();
+            }else{
+              print('Print Success: $code');
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content:
+                  Text(state.response!.message!),));
             }
-            Navigator.of(context).pop();
           } else if (state is ChangePasswordError) {
+            print('Print Success: ${state.error}');
             _showErrorDialog(context, state.error);
           }
         },
