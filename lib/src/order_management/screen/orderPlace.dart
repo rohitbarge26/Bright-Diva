@@ -145,13 +145,15 @@ class _OrderPlaceState extends State<OrderPlace> {
     if (_deliveredByController.text.isEmpty) {
       print('Please enter a valid pickup by');
       setState(() {
-        errorDeliveredBy = AppLocalizations.of(context)!.error_deliveredByRequired;
+        errorDeliveredBy =
+            AppLocalizations.of(context)!.error_deliveredByRequired;
       });
       isValid = false;
     }
 
     print('_validateFields amount in HKD: $_amountInHKD');
-    print('_validateFields amountController: ${_deliveredValueController.text}');
+    print(
+        '_validateFields amountController: ${_deliveredValueController.text}');
 
     final enteredAmountHKD = _deliveredValueController.text;
 
@@ -167,9 +169,11 @@ class _OrderPlaceState extends State<OrderPlace> {
         isValid = false;
       }
       if (enteredAmount > _selectedRemainingAmount!) {
-        print('Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD');
+        print(
+            'Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD');
         setState(() {
-          errorAmount = 'Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD';
+          errorAmount =
+              'Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD';
         });
         isValid = false;
       }
@@ -272,9 +276,11 @@ class _OrderPlaceState extends State<OrderPlace> {
     // Get the remaining amount from the invoice data
     double remainingAmount = 0.0;
     if (BlocProvider.of<InvoiceBloc>(context).state is InvoiceGetLoadedState) {
-      final invoiceState = BlocProvider.of<InvoiceBloc>(context).state as InvoiceGetLoadedState;
-      final invoice = invoiceState.getInvoiceDetailsResponse?.invoices?.firstWhere(
-            (inv) => inv.invoiceNumber == order.invoiceNumber,
+      final invoiceState =
+          BlocProvider.of<InvoiceBloc>(context).state as InvoiceGetLoadedState;
+      final invoice =
+          invoiceState.getInvoiceDetailsResponse?.invoices?.firstWhere(
+        (inv) => inv.invoiceNumber == order.invoiceNumber,
         orElse: () => Invoices(remainingAmount: 0),
       );
       remainingAmount = invoice?.remainingAmount?.toDouble() ?? 0.0;
@@ -288,7 +294,8 @@ class _OrderPlaceState extends State<OrderPlace> {
           companyName: order.customer!.companyName!,
           initialPartialDelivery: _isPartialEditDelivery,
           initialCurrency: _selectedCurrency!,
-          remainingAmount: remainingAmount, // Pass the remaining amount
+          remainingAmount: remainingAmount,
+          // Pass the remaining amount
           onPartialDeliveryChanged: (value) {
             setState(() {
               _isPartialEditDelivery = value;
@@ -319,7 +326,8 @@ class _OrderPlaceState extends State<OrderPlace> {
                     deliveredBy: _deliveredByController.text,
                   ),
                 ));
-          }, deliveredByController: _deliveredByController,
+          },
+          deliveredByController: _deliveredByController,
         );
       },
     );
@@ -728,11 +736,11 @@ class _OrderPlaceState extends State<OrderPlace> {
                               Visibility(
                                 visible: errorDeliveredBy.isNotEmpty,
                                 child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 4, top: 12.0),
+                                  padding:
+                                      const EdgeInsets.only(left: 4, top: 12.0),
                                   child: Row(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                        CrossAxisAlignment.start,
                                     children: [
                                       SvgPicture.asset(
                                         'assets/icons/error_icon.svg',
@@ -966,8 +974,6 @@ class _OrderPlaceState extends State<OrderPlace> {
         // Determine statuses
         final paymentStatus =
             order.partialDelivery == true ? 'Partial' : 'Full';
-        final completionStatus =
-            order.partialDelivery == true ? 'Complete' : 'Incomplete';
 
         return Container(
           margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
@@ -990,7 +996,7 @@ class _OrderPlaceState extends State<OrderPlace> {
                 // Add tap functionality if needed
               },
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1009,7 +1015,6 @@ class _OrderPlaceState extends State<OrderPlace> {
                             ),
                           ),
                         ),
-
                         // Status Badges
                         Row(
                           children: [
@@ -1044,12 +1049,30 @@ class _OrderPlaceState extends State<OrderPlace> {
 
                     const SizedBox(height: 12),
 
-                    // Order Details
-                    _buildDetailRow(
-                      icon: Icons.business,
-                      label: 'Customer',
-                      value: order.customer?.companyName ?? 'N/A',
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Amount Column
+                        Expanded(
+                          child: _buildDetailRow(
+                            icon: Icons.business,
+                            label: 'Customer',
+                            value: order.customer?.companyName ?? 'N/A',
+                          ),
+                        ),
+
+                        // Date Column
+                        Expanded(
+                          child: _buildDetailColumn(
+                            icon: Icons.account_box,
+                            label: 'Delivered By',
+                            value: order.deliveredBy!,
+                          ),
+                        ),
+                      ],
                     ),
+
+                    // Order Details
                     const SizedBox(height: 8),
                     _buildDetailRow(
                       icon: Icons.receipt,

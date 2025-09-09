@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frequent_flow/authentication/login_email_bloc/login_bloc.dart';
@@ -251,11 +252,15 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                           labelText:
                                               AppLocalizations.of(context)!
                                                   .email,
-                                          labelStyle: TextStyle(
+                                          labelStyle: const TextStyle(
                                             color: Color(0xFF737373),
                                           ),
                                           border: InputBorder.none,
                                         ),
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.deny(
+                                              RegExp(r'\s')),
+                                        ],
                                       ),
                                     ),
                                   ),
@@ -340,6 +345,10 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                           keyboardType:
                                               TextInputType.visiblePassword,
                                           textInputAction: TextInputAction.done,
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter.deny(
+                                                RegExp(r'\s')),
+                                          ],
                                         ),
                                       ),
                                       Positioned(
@@ -435,13 +444,13 @@ class _LoginEmailScreenState extends State<LoginEmailScreen> {
                                           alignment: Alignment.centerLeft,
                                           child: InkWell(
                                             onTap: () {
-                                              Navigator.pushNamed(
-                                                  context, ROUT_FORGOT_PASSWORD);
+                                              Navigator.pushNamed(context,
+                                                  ROUT_FORGOT_PASSWORD);
                                             },
                                             child: CustomText(
-                                                text:
-                                                    AppLocalizations.of(context)!
-                                                        .forgotPassword,
+                                                text: AppLocalizations.of(
+                                                        context)!
+                                                    .forgotPassword,
                                                 fontSize: 16,
                                                 desiredLineHeight: 14.52,
                                                 fontFamily: 'Inter',
