@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
@@ -54,21 +55,63 @@ class _MisReportState extends State<MisReport> {
 
   Future<void> requestStoragePermission() async {
     if (Platform.isAndroid) {
-      // Android-specific storage permission handling
-      if (await Permission.manageExternalStorage.isGranted) {
-        setState(() {
-          _isPermissionGranted = true;
-        });
-      } else {
-        var status = await Permission.manageExternalStorage.request();
-        if (status.isGranted) {
+      // Check Android version
+      if (await DeviceInfoPlugin().androidInfo.then((info) => info.version.sdkInt) >= 30) {
+        // Android 11 (API 30) and above
+        if (await Permission.manageExternalStorage.isGranted) {
           setState(() {
             _isPermissionGranted = true;
           });
         } else {
-          print("Storage permission denied");
-          if (status.isPermanentlyDenied) {
-            await openAppSettings();
+          var status = await Permission.manageExternalStorage.request();
+          if (status.isGranted) {
+            setState(() {
+              _isPermissionGranted = true;
+            });
+          } else {
+            print("Storage permission denied");
+            if (status.isPermanentlyDenied) {
+              // Show a dialog explaining why the permission is needed
+              await showDialog(
+                context: context,
+                builder: (BuildContext context) => AlertDialog(
+                  title: Text("Permission Required"),
+                  content: Text("Storage permission is needed to download MIS reports"),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text("Cancel"),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                    TextButton(
+                      child: Text("Open Settings"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        openAppSettings();
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }
+          }
+        }
+      } else {
+        // Android 10 and below
+        if (await Permission.storage.isGranted) {
+          setState(() {
+            _isPermissionGranted = true;
+          });
+        } else {
+          var status = await Permission.storage.request();
+          if (status.isGranted) {
+            setState(() {
+              _isPermissionGranted = true;
+            });
+          } else {
+            print("Storage permission denied");
+            if (status.isPermanentlyDenied) {
+              await openAppSettings();
+            }
           }
         }
       }
@@ -77,14 +120,9 @@ class _MisReportState extends State<MisReport> {
       setState(() {
         _isPermissionGranted = true;
       });
-
-      // Optional: Request photo library permission if you need to save to Photos
-      // var photoStatus = await Permission.photos.request();
-      // if (photoStatus.isGranted) {
-      //   print("Photos permission granted");
-      // }
     }
   }
+
   @override
   void dispose() {
     super.dispose();

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
+
+import 'custom_text.dart';
 
 class EditOrderDialog extends StatefulWidget {
   final String invoiceNumber;
   final String companyName;
   final bool initialPartialDelivery;
+  final num remainingAmount;
   final String initialCurrency;
   final double valueHkdToMop; // Conversion rate HKD to MOP
   final double valueHkdToCny; // Conversion rate HKD to CNY
@@ -31,6 +35,7 @@ class EditOrderDialog extends StatefulWidget {
     required this.deliveredByController,
     required this.callCancel,
     required this.callSave,
+    required this.remainingAmount,
   }) : super(key: key);
 
   @override
@@ -41,10 +46,13 @@ class _EditOrderDialogState extends State<EditOrderDialog> {
   final _formKey = GlobalKey<FormState>();
   late bool _isPartialDelivery;
   late String _selectedCurrency;
-  final TextEditingController _orderedAmountController = TextEditingController();
-  final TextEditingController _balanceAmountController = TextEditingController();
+  final TextEditingController _orderedAmountController =
+      TextEditingController();
+  final TextEditingController _balanceAmountController =
+      TextEditingController();
   String _errorDeliveredBy = '';
   String _conversionText = '';
+  String _errorDeliveredValue = ''; // Added error for delivered value
   double _originalHkdAmount = 0; // Store original HKD amount for conversions
 
   @override
@@ -54,7 +62,8 @@ class _EditOrderDialogState extends State<EditOrderDialog> {
     _selectedCurrency = widget.initialCurrency;
 
     // Store the original HKD amount
-    _originalHkdAmount = double.tryParse(widget.deliveredValueController.text) ?? 0;
+    _originalHkdAmount =
+        double.tryParse(widget.deliveredValueController.text) ?? 0;
 
     _orderedAmountController.text = widget.deliveredValueController.text;
     _calculateBalance();
@@ -63,7 +72,8 @@ class _EditOrderDialogState extends State<EditOrderDialog> {
 
   void _calculateBalance() {
     final orderedAmount = double.tryParse(_orderedAmountController.text) ?? 0;
-    final deliveredAmount = double.tryParse(widget.deliveredValueController.text) ?? 0;
+    final deliveredAmount =
+        double.tryParse(widget.deliveredValueController.text) ?? 0;
     final balance = orderedAmount - deliveredAmount;
     _balanceAmountController.text = balance.toStringAsFixed(2);
   }
@@ -118,7 +128,9 @@ class _EditOrderDialogState extends State<EditOrderDialog> {
       return;
     }
 
-    final rate = _selectedCurrency == 'MOP' ? widget.valueHkdToMop : widget.valueHkdToCny;
+    final rate = _selectedCurrency == 'MOP'
+        ? widget.valueHkdToMop
+        : widget.valueHkdToCny;
     final convertedAmount = _originalHkdAmount;
 
     setState(() {
@@ -142,7 +154,24 @@ class _EditOrderDialogState extends State<EditOrderDialog> {
     }
 
     if (widget.deliveredValueController.text.isEmpty) {
+      setState(() {
+        _errorDeliveredValue = 'Please enter delivered value';
+      });
       isValid = false;
+    } else {
+      final deliveredAmount = double.tryParse(widget.deliveredValueController.text) ?? 0;
+      final remainingAmount = widget.remainingAmount.toDouble();
+
+      if (deliveredAmount > remainingAmount) {
+        setState(() {
+          _errorDeliveredValue = 'Cannot exceed remaining amount (${remainingAmount.toStringAsFixed(2)} HKD)';
+        });
+        isValid = false;
+      } else {
+        setState(() {
+          _errorDeliveredValue = '';
+        });
+      }
     }
 
     if (widget.deliveredUnitsController.text.isEmpty) {
@@ -233,16 +262,16 @@ class _EditOrderDialogState extends State<EditOrderDialog> {
                       'Balance Amount:',
                       style: TextStyle(
                         color: Colors.blue[800],
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                         fontFamily: 'Inter',
                       ),
                     ),
                     Text(
-                      'HK\$ ${numberFormat.format(double.tryParse(_balanceAmountController.text) ?? 0)}',
+                      'HK\$ ${widget.remainingAmount}',
                       style: TextStyle(
                         color: Colors.blue[800],
-                        fontSize: 16,
+                        fontSize: 12,
                         fontWeight: FontWeight.w700,
                         fontFamily: 'Inter',
                       ),
@@ -283,6 +312,35 @@ class _EditOrderDialogState extends State<EditOrderDialog> {
                 keyboardType: TextInputType.number,
                 onChanged: _updateOriginalHkdAmount,
                 prefixText: '$_selectedCurrency ',
+              ),
+              Visibility(
+                visible: _errorDeliveredValue.isNotEmpty,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                      left: 4, top: 12.0),
+                  child: Row(
+                    crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/icons/error_icon.svg',
+                        height: 12.67,
+                        width: 12.67,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: CustomText(
+                          text: _errorDeliveredValue,
+                          fontSize: 12,
+                          desiredLineHeight: 16,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFFF85A5A),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
 
               // Conversion info text
@@ -373,11 +431,13 @@ class _EditOrderDialogState extends State<EditOrderDialog> {
                           widget.callSave(
                             context,
                             int.parse(widget.deliveredUnitsController.text),
-                            _originalHkdAmount.toStringAsFixed(2), // Save as HKD
+                            _originalHkdAmount
+                                .toStringAsFixed(2), // Save as HKD
                           );
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: const Text('Order updated successfully!'),
+                              content:
+                                  const Text('Order updated successfully!'),
                               backgroundColor: Colors.green,
                               behavior: SnackBarBehavior.floating,
                               shape: RoundedRectangleBorder(
@@ -552,7 +612,8 @@ class _EditOrderDialogState extends State<EditOrderDialog> {
                 _updateConversionText();
               });
             },
-            items: ['HKD', 'MOP', 'CNY'].map<DropdownMenuItem<String>>((String currency) {
+            items: ['HKD', 'MOP', 'CNY']
+                .map<DropdownMenuItem<String>>((String currency) {
               return DropdownMenuItem<String>(
                 value: currency,
                 child: Text(currency),

@@ -109,14 +109,17 @@ class _InvoiceState extends State<Invoice> {
           isButtonEnabled ? const Color(0xFF2986CC) : const Color(0xFF88C2F7);
     });
   }
+
   bool _validateFields() {
     bool isValid = true;
 
     // Validate Invoice Number
-    if (!isAutoGenerateInvoice && (invoiceNumberController.text.isEmpty ||
-        !Validator.alphanumericValidate(invoiceNumberController.text))) {
+    if (!isAutoGenerateInvoice &&
+        (invoiceNumberController.text.isEmpty ||
+            !Validator.alphanumericValidate(invoiceNumberController.text))) {
       setState(() {
-        errorInvoiceNumber = AppLocalizations.of(context)!.enterValidInvoiceNumber;
+        errorInvoiceNumber =
+            AppLocalizations.of(context)!.enterValidInvoiceNumber;
       });
       isValid = false;
     }
@@ -124,7 +127,8 @@ class _InvoiceState extends State<Invoice> {
     // Validate Customer Selection
     if (selectedCustomer == null) {
       setState(() {
-        dropDownSelectionCustomerError = AppLocalizations.of(context)!.selectCustomer;
+        dropDownSelectionCustomerError =
+            AppLocalizations.of(context)!.selectCustomer;
         saveValidation = false;
       });
       isValid = false;
@@ -171,7 +175,8 @@ class _InvoiceState extends State<Invoice> {
                   : invoiceNumberController.text,
               customerId: selectedCustomer,
               amount: num.tryParse(amountController.text),
-              invoiceDate: DateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(selectedInvoiceDate!),
+              invoiceDate: DateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                  .format(selectedInvoiceDate!),
               currency: _selectedCurrency,
               totalUnits: 0)));
       _clearForm();
@@ -630,7 +635,9 @@ class _InvoiceState extends State<Invoice> {
                                       amount:
                                           double.parse(amountController.text)
                                               .round(),
-                                      invoiceDate: DateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(selectedInvoiceDate!),
+                                      invoiceDate:
+                                          DateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                                              .format(selectedInvoiceDate!),
                                       currency: _selectedCurrency,
                                       totalUnits: 0,
                                     ),
@@ -1276,7 +1283,7 @@ class _InvoiceState extends State<Invoice> {
                                           left: 4, top: 12.0),
                                       child: Row(
                                         crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                            CrossAxisAlignment.start,
                                         children: [
                                           SizedBox(
                                             width: 16,
@@ -1437,6 +1444,16 @@ class _InvoiceState extends State<Invoice> {
       itemBuilder: (context, index) {
         final invoice = sortedList[index];
         String dateString = invoice.invoiceDate!;
+        String expectedDateString = invoice.expectedPaymentDate ?? 'NA';
+        String expectedDateFormatted;
+        if (expectedDateString == 'NA') {
+          expectedDateFormatted = 'NA';
+        } else {
+          DateTime expectedDate = DateTime.parse(expectedDateString).toLocal();
+          expectedDateFormatted =
+              DateFormat('dd MMM yyyy').format(expectedDate);
+        }
+
         DateTime dateTime = DateTime.parse(dateString).toLocal();
         String formattedDate = DateFormat('dd MMM yyyy').format(dateTime);
         double amount = double.parse(invoice.amountInHkd!);
@@ -1481,24 +1498,28 @@ class _InvoiceState extends State<Invoice> {
                             fontFamily: 'Inter',
                           ),
                         ),
-
-                        // Status Badge (You can customize based on status)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.green[50],
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.green[300]!),
-                          ),
-                          child: Text(
-                            'Paid', // Change based on your status field
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.green[700],
-                              fontFamily: 'Inter',
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'Date',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                                fontFamily: 'Inter',
+                              ),
                             ),
-                          ),
+                            const SizedBox(height: 2),
+                            Text(
+                              formattedDate,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF171717),
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -1554,7 +1575,7 @@ class _InvoiceState extends State<Invoice> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              'Date',
+                              'Expected Payment Date',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey[600],
@@ -1563,7 +1584,7 @@ class _InvoiceState extends State<Invoice> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              formattedDate,
+                              expectedDateFormatted,
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,

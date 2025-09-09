@@ -269,6 +269,17 @@ class _OrderPlaceState extends State<OrderPlace> {
     _deliveredUnitsController.text = order.deliveredUnits!.toString();
     _deliveredByController.text = order.deliveredBy ?? '';
 
+    // Get the remaining amount from the invoice data
+    double remainingAmount = 0.0;
+    if (BlocProvider.of<InvoiceBloc>(context).state is InvoiceGetLoadedState) {
+      final invoiceState = BlocProvider.of<InvoiceBloc>(context).state as InvoiceGetLoadedState;
+      final invoice = invoiceState.getInvoiceDetailsResponse?.invoices?.firstWhere(
+            (inv) => inv.invoiceNumber == order.invoiceNumber,
+        orElse: () => Invoices(remainingAmount: 0),
+      );
+      remainingAmount = invoice?.remainingAmount?.toDouble() ?? 0.0;
+    }
+
     showDialog(
       context: context,
       builder: (context) {
@@ -277,6 +288,7 @@ class _OrderPlaceState extends State<OrderPlace> {
           companyName: order.customer!.companyName!,
           initialPartialDelivery: _isPartialEditDelivery,
           initialCurrency: _selectedCurrency!,
+          remainingAmount: remainingAmount, // Pass the remaining amount
           onPartialDeliveryChanged: (value) {
             setState(() {
               _isPartialEditDelivery = value;
