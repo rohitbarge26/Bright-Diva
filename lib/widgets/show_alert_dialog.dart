@@ -19,7 +19,7 @@ class ShowAlertDialog extends StatelessWidget {
     this.buttonText,
     this.navigationRough,
     this.isWithParam,
-    this.navigationIndex,
+    this.navigationIndex
   );
 
   @override

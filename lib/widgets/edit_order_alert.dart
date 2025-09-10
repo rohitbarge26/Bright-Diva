@@ -295,16 +295,6 @@ class _EditOrderDialogState extends State<EditOrderDialog> {
 
               const SizedBox(height: 16),
 
-              // Delivered Units
-              _buildFormField(
-                label: 'Delivered Units *',
-                controller: widget.deliveredUnitsController,
-                keyboardType: TextInputType.number,
-                onChanged: (value) => _calculateBalance(),
-              ),
-
-              const SizedBox(height: 16),
-
               // Delivered Value with currency prefix
               _buildFormField(
                 label: 'Delivered Value *',

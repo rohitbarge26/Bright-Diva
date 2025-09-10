@@ -17,6 +17,7 @@ import '../../../utils/prefs.dart';
 import '../../../utils/print_order.dart';
 import '../../../utils/response_status.dart';
 import '../../../utils/route.dart';
+import '../../../utils/validation.dart';
 import '../../../widgets/custom_text.dart';
 import '../../../widgets/edit_order_alert.dart';
 import '../../../widgets/error_dialog.dart';
@@ -154,6 +155,7 @@ class _OrderPlaceState extends State<OrderPlace> {
     print('_validateFields amount in HKD: $_amountInHKD');
     print(
         '_validateFields amountController: ${_deliveredValueController.text}');
+    print('Remaining Amount: $_selectedRemainingAmount');
 
     final enteredAmountHKD = _deliveredValueController.text;
 
@@ -177,11 +179,6 @@ class _OrderPlaceState extends State<OrderPlace> {
         });
         isValid = false;
       }
-      setState(() {
-        errorAmount = ''; // Clear error message if validation passes
-      });
-
-      isValid = true;
     } catch (e) {
       setState(() {
         print('catch');
@@ -197,6 +194,10 @@ class _OrderPlaceState extends State<OrderPlace> {
   void _submitForm() {
     if (!_validateFields()) {
       return; // Stop submission if validation fails
+    }else{
+      setState(() {
+        errorAmount = '';
+      });
     }
 
     if (_formOrderKey.currentState!.validate()) {
@@ -725,10 +726,14 @@ class _OrderPlaceState extends State<OrderPlace> {
                                   ),
                                   onChanged: (value) {
                                     setState(() {
-                                      // Clear error when user starts typing
-                                      if (value.isNotEmpty) {
-                                        // Clear any existing error
-                                      }
+                                      setState(() {
+                                        errorDeliveredBy =
+                                        Validator.stringValidate(value)
+                                            ? ''
+                                            : AppLocalizations.of(
+                                            context)!
+                                            .error_deliveredByRequired;
+                                      });
                                     });
                                   },
                                 ),

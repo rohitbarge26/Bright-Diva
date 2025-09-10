@@ -214,6 +214,7 @@ class _CashReceiptState extends State<CashReceipt> {
     try {
       final enteredAmount = double.parse(enteredAmountHKD);
       print('Entered Amount: $enteredAmount');
+      print('Remaining Amount: $_selectedRemainingAmount');
       // Validate against selected amount
       if (enteredAmount <= 0) {
         print('Please enter a valid amount');
@@ -225,15 +226,13 @@ class _CashReceiptState extends State<CashReceipt> {
       if (enteredAmount > _selectedRemainingAmount!) {
         print('Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD');
         setState(() {
+          print('setState ----> enteredAmount > _selectedRemainingAmount!');
           errorAmount = 'Amount cannot exceed ${_selectedRemainingAmount!.toStringAsFixed(2)} HKD';
         });
         isValid = false;
       }
-      setState(() {
-        errorAmount = ''; // Clear error message if validation passes
-      });
 
-      isValid = true;
+      print('isValid: $isValid');
     } catch (e) {
       setState(() {
         print('catch');
@@ -262,9 +261,10 @@ class _CashReceiptState extends State<CashReceipt> {
   void _onButtonPressed() {
     if (!_validateFields()) {
       print('_onButtonPressed not press');
+      print('errorAmount : $errorAmount');
       return; // Stop submission if validation fails
     }else{
-      print('_onButtonPressed');
+      print('_onButtonPressed press');
     }
 
     if (_formCashKey.currentState!.validate()) {
@@ -468,7 +468,8 @@ class _CashReceiptState extends State<CashReceipt> {
                   AppLocalizations.of(context)!.btnContinue,
                   ROUT_HOME,
                   false,
-                  0),
+                  0)
+              ,
             );
           } else {
             showDialog(

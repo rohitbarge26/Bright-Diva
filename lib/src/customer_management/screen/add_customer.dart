@@ -461,12 +461,26 @@ class _AddCustomerState extends State<AddCustomer> {
           } else if (state is CustomerEditLoadedState) {
             int? code = state.editCustomerResponse!.statusCode;
             if (code == SUCCESS) {
+              Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                     content:
                         Text(AppLocalizations.of(context)!.msgUpdateCustomer)),
               );
-            } else {}
+            } else {
+              showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (context) => ErrorAlertDialog(
+                      alertLogoPath: 'assets/icons/error_icon.svg',
+                      status: AppLocalizations.of(context)!.unableToProcess,
+                      statusInfo:
+                      AppLocalizations.of(context)!.somethingWentWrong,
+                      buttonText: AppLocalizations.of(context)!.btnOkay,
+                      onPress: () {
+                        Navigator.of(context).pop();
+                      }));
+            }
           }
         },
         child: Scaffold(
