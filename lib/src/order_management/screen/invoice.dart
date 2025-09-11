@@ -1459,6 +1459,9 @@ class _InvoiceState extends State<Invoice> {
         double amount = double.parse(invoice.amountInHkd!);
         String formattedAmount = NumberFormat('#,##0').format(amount.round());
 
+        final isCompleted =
+            invoice.remainingAmount != null && invoice.remainingAmount! <= 0;
+        Color color = isCompleted ? Colors.green : Colors.orange;
         return Container(
           margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
           decoration: BoxDecoration(
@@ -1601,35 +1604,58 @@ class _InvoiceState extends State<Invoice> {
 
                     // Action Buttons
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Print Button
-                        _buildActionButton(
-                          icon: Icons.print,
-                          color: Colors.green,
-                          tooltip: 'Print Invoice',
-                          onPressed: () => _printInvoice(invoice.id!),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: color.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color: color.withOpacity(0.3), width: 1),
+                          ),
+                          child: Text(
+                            isCompleted ? 'Completed' : 'In-completed',
+                            style: TextStyle(
+                              color: isCompleted ? Colors.green : Colors.orange,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            // Print Button
+                            _buildActionButton(
+                              icon: Icons.print,
+                              color: Colors.green,
+                              tooltip: 'Print Invoice',
+                              onPressed: () => _printInvoice(invoice.id!),
+                            ),
 
-                        if (userRole == 'Admin') ...[
-                          const SizedBox(width: 8),
-                          // Edit Button
-                          _buildActionButton(
-                            icon: Icons.edit,
-                            color: Colors.orange,
-                            tooltip: 'Edit Invoice',
-                            onPressed: () => _modifyOrder(invoice),
-                          ),
+                            if (userRole == 'Admin') ...[
+                              const SizedBox(width: 8),
+                              // Edit Button
+                              _buildActionButton(
+                                icon: Icons.edit,
+                                color: Colors.orange,
+                                tooltip: 'Edit Invoice',
+                                onPressed: () => _modifyOrder(invoice),
+                              ),
 
-                          const SizedBox(width: 8),
-                          // Delete Button
-                          _buildActionButton(
-                            icon: Icons.delete,
-                            color: Colors.red,
-                            tooltip: 'Delete Invoice',
-                            onPressed: () => _deleteInvoice(invoice.id!),
-                          ),
-                        ],
+                              const SizedBox(width: 8),
+                              // Delete Button
+                              _buildActionButton(
+                                icon: Icons.delete,
+                                color: Colors.red,
+                                tooltip: 'Delete Invoice',
+                                onPressed: () => _deleteInvoice(invoice.id!),
+                              ),
+                            ],
+                          ],
+                        ),
                       ],
                     ),
                   ],
