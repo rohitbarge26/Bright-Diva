@@ -1029,6 +1029,20 @@ class _CashReceiptState extends State<CashReceipt> {
         String formattedDate = DateFormat('dd MMM yyyy').format(dateTime);
         String formattedTime = DateFormat('hh:mm a').format(dateTime);
 
+        String currency = cashReceipt.currency!;
+        String getCurrencySymbol(String currencyCode) {
+          switch (currencyCode) {
+            case 'HKD':
+              return 'HK\$';
+            case 'MOP':
+              return 'MOP\$';
+            case 'CNY':
+              return '¥';
+            default:
+              return '\$'; // Fallback symbol
+          }
+        }
+
         return Container(
           margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
           decoration: BoxDecoration(
@@ -1075,7 +1089,7 @@ class _CashReceiptState extends State<CashReceipt> {
 
                         // Receipt Amount
                         Text(
-                          'HK\$${_formatAmount(cashReceipt.amount ?? '0')}',
+                          '${getCurrencySymbol(currency)}${_formatAmount(cashReceipt.amount ?? '0')}',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,

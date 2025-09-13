@@ -1071,7 +1071,7 @@ class _OrderPlaceState extends State<OrderPlace> {
                           child: _buildDetailColumn(
                             icon: Icons.account_box,
                             label: 'Delivered By',
-                            value: order.deliveredBy!,
+                            value: order.deliveredBy ?? "NA",
                           ),
                         ),
                       ],

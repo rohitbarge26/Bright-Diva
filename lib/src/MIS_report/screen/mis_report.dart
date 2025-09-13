@@ -14,6 +14,7 @@ import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../utils/media_storage_helper.dart';
 import '../../../utils/response_status.dart';
 import '../../../widgets/calendar_job_filter_dialog.dart';
 import '../../../widgets/custom_text.dart';
@@ -144,50 +145,62 @@ class _MisReportState extends State<MisReport> {
 
   Future<void> downloadAndSaveFile(String url) async {
     try {
-      // For iOS, we don't need storage permission for downloads directory
-      if (Platform.isAndroid) {
-        var status = await Permission.manageExternalStorage.request();
+      String fileName = "MIS_Report_$_selectedData.xlsx";
+
+      // For Android 10+, use MediaStore to save to Downloads folder
+      if (Platform.isAndroid && await DeviceInfoPlugin().androidInfo.then((info) => info.version.sdkInt >= 29)) {
+        // Use MediaStore API for Android 10+
+        final directory = await getExternalStorageDirectory();
+        final appDirectory = Directory("${directory?.path}/KFT/");
+
+        if (!await appDirectory.exists()) {
+          await appDirectory.create(recursive: true);
+        }
+
+        String filePath = '${appDirectory.path}/$fileName';
+        Dio dio = Dio();
+        await dio.download(url, filePath);
+
+        // Insert file into MediaStore to make it visible in gallery/file managers
+        await MediaStoreHelper.saveFileToDownloads(File(filePath), fileName);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Download Completed: $filePath")),
+        );
+      } else if (Platform.isAndroid) {
+        // For Android < 10, use traditional method (with storage permission)
+        var status = await Permission.storage.request();
         if (!status.isGranted) {
-          print('Permission :: ${status.isGranted}');
+          print('Storage permission denied');
           return;
         }
-      }
 
-      // Get the appropriate directory based on platform
-      Directory directory;
-      if (Platform.isAndroid) {
-        directory = (await getExternalStorageDirectory())!;
+        String downloadsPath = "/storage/emulated/0/Download/KFT/";
+        Directory appDirectory = Directory(downloadsPath);
+
+        if (!await appDirectory.exists()) {
+          await appDirectory.create(recursive: true);
+        }
+
+        String filePath = '$downloadsPath$fileName';
+        Dio dio = Dio();
+        await dio.download(url, filePath);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Download Completed: $filePath")),
+        );
       } else {
-        directory = await getApplicationDocumentsDirectory();
-      }
+        // iOS implementation
+        Directory directory = await getApplicationDocumentsDirectory();
+        String filePath = '${directory.path}/$fileName';
+        Dio dio = Dio();
+        await dio.download(url, filePath);
 
-      // Define the file path
-      String fileName = url.split('/').last;
-      String filePath = '${directory.path}/$fileName';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Download Completed: $filePath")),
+        );
 
-      // Download the file using Dio
-      Dio dio = Dio();
-      await dio.download(url, filePath);
-
-      // For iOS, we'll use the documents directory directly
-      String newPath;
-      if (Platform.isAndroid) {
-        newPath = "${await getDownloadPath()}MIS_Report_$_selectedData.xlsx";
-      } else {
-        newPath = '${directory.path}/MIS_Report_$_selectedData.xlsx';
-      }
-
-      File file = File(filePath);
-      await file.copy(newPath);
-
-      // Show download complete message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Download Completed: $newPath")),
-      );
-
-      // On iOS, we can offer to open the document in other apps
-      if (Platform.isIOS) {
-        await OpenFile.open(newPath);
+        await OpenFile.open(filePath);
       }
     } catch (e) {
       print("Error downloading file: $e");
@@ -213,7 +226,20 @@ class _MisReportState extends State<MisReport> {
             String url = state.misDataResponse!.url!;
             print("URL : $url");
             downloadAndSaveFile(url); // Call the download function
-          } else {
+          } else if(code == NOT_FOUND){
+            showDialog(
+                barrierDismissible: false,
+                context: context,
+                builder: (context) => ErrorAlertDialog(
+                    alertLogoPath: 'assets/icons/error_icon.svg',
+                    status: state.misDataResponse!.error!,
+                    statusInfo:
+                    state.misDataResponse!.message!,
+                    buttonText: AppLocalizations.of(context)!.btnOkay,
+                    onPress: () {
+                      Navigator.of(context).pop();
+                    }));
+          }else {
             showDialog(
                 barrierDismissible: false,
                 context: context,
